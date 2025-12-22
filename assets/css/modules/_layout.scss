@@ -1,0 +1,222 @@
+@use 'variables';
+
+// Body header (per-page header area inside .menupilot-body)
+.mp-body-header {
+	display: flex;
+	align-items: center;
+	padding: 24px;
+	border-bottom: 1px solid #e2e2e2;
+	gap: 16px;
+	background: #fff;
+	border-radius: 6px 6px 0 0;
+	
+	.mp-bh-left {
+		display: flex;
+		align-items: center;
+		
+		.dashicons {
+			color: #2271b1;
+		}
+	}
+	
+	.mp-bh-right {
+		h1 {
+			margin: 0 0 6px;
+			font-size: 24px;
+			font-weight: 600;
+			color: #1d2327;
+		}
+		
+		.mp-page-desc {
+			margin: 0;
+			color: #646970;
+			font-size: 14px;
+		}
+	}
+}
+
+// Two-column layout: vertical tabs + content
+.mp-2col {
+	display: grid;
+	grid-template-columns: 260px 1fr;
+	align-items: start;
+	transition: grid-template-columns 200ms ease-in-out;
+}
+
+.mp-vtabs {
+	border-right: 1px solid #e5e7eb;
+	height: 100%;
+	width: 260px;
+	overflow: hidden;
+	transition:
+		width 200ms ease-in-out,
+		padding 200ms ease-in-out,
+		border-color 200ms ease-in-out;
+}
+
+.mp-vtab {
+	display: block;
+	padding: 12px 20px 13px 12px;
+	background: transparent;
+	border-width: 1px 0;
+	border-style: solid;
+	border-bottom-color: #e7e7e7;
+	border-top: none;
+	color: #545473;
+	font-weight: 400;
+	text-decoration: none;
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	transition: all 150ms ease-in-out;
+	
+	&:hover {
+		box-shadow: inset 4px 0 0 0 #2271b1;
+		color: #2271b1;
+	}
+	
+	&.is-active {
+		box-shadow: inset 4px 0 0 0 #2271b1;
+		color: #23282d;
+		font-weight: 600;
+	}
+	
+	.mp-vtab-icon {
+		width: 18px;
+		height: 18px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 0.2em;
+		margin-left: 0.2em;
+		
+		svg {
+			width: 18px;
+			height: 18px;
+			display: block;
+		}
+	}
+	
+	.mp-vtab-text {
+		white-space: nowrap;
+		opacity: 1;
+		transition: opacity 150ms ease-in-out;
+	}
+}
+
+.mp-2col-content {
+	min-width: 0;
+}
+
+.mp-content-inner {
+	padding: 32px;
+	background: #f9f9f9;
+}
+
+// Collapsed state for vertical tabs
+.mp-2col.is-collapsed {
+	grid-template-columns: 56px 1fr;
+	
+	.mp-vtabs {
+		width: 56px;
+		padding-left: 0;
+		padding-right: 0;
+		text-align: center;
+	}
+	
+	.mp-vtab {
+		justify-content: center;
+		gap: 0;
+		padding-left: 6px;
+		padding-right: 6px;
+		
+		.mp-vtab-text {
+			opacity: 0;
+			width: 0;
+			height: 0;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+		
+		.mp-vtab-icon {
+			margin: 0 auto;
+		}
+	}
+}
+
+// Toolbars (header/footer) around settings
+.mp-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #fff;
+	border-bottom: 1px solid #e5e7eb;
+	padding: 12px 20px;
+	margin: 0;
+	
+	.wp-core-ui {
+		.button-primary {
+			color: #fff;
+			background: #2271b1;
+			border: 1px solid #2271b1;
+			
+			&:hover,
+			&:focus {
+				background: #135e96;
+				border-color: #135e96;
+			}
+		}
+	}
+}
+
+.mp-toolbar-footer {
+	margin: 0;
+	border-bottom: none;
+	border-top: 1px solid #e5e7eb;
+}
+
+.mp-collapse-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border: 1px solid #d9d7d8;
+	border-radius: 4px;
+	background: #fff;
+	color: #333;
+	cursor: pointer;
+	transition: background 150ms ease-in-out;
+	
+	&:hover {
+		background: rgba(0, 0, 0, 0.04);
+	}
+}
+
+// Collapse button icon states
+.mp-collapse-btn .mp-collapse-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+}
+
+.mp-2col.is-collapsed .mp-collapse-btn .icon-open {
+	display: none !important;
+}
+
+.mp-2col.is-collapsed .mp-collapse-btn .icon-close {
+	display: inline-flex !important;
+}
+
+.mp-2col:not(.is-collapsed) .mp-collapse-btn .icon-open {
+	display: inline-flex !important;
+}
+
+.mp-2col:not(.is-collapsed) .mp-collapse-btn .icon-close {
+	display: none !important;
+}
+
+
