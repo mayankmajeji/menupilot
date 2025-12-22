@@ -1,55 +1,123 @@
 === MenuPilot ===
-Contributors: (your wordpress.org username)
-Tags: wordpress, plugin
+Contributors: mayankmajeji
+Tags: menus, navigation, import export, migration
 Requires at least: 5.8
-Tested up to: 6.4
+Tested up to: 6.5
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.
+Safely import and export WordPress navigation menus with a preview-first workflow. Review, map, and import menus with full visibility and no silent changes.
 
 == Description ==
 
-Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.
+MenuPilot is a focused menu import and export plugin designed to help you move **one menu at a time** between WordPress sites with confidence.
 
-= Features =
+Unlike basic import tools, MenuPilot shows you exactly what will happen **before anything is imported**. You can review the menu structure, see which items match existing content, resolve missing items, and proceed only when everything is clear.
 
-* Feature 1
-* Feature 2
-* Feature 3
+This makes MenuPilot ideal for moving menus from **staging to production**, local development to live sites, or between similar environments — without overwriting existing menus or breaking links silently.
 
-= Requirements =
+### What MenuPilot Does
+- Exports a single navigation menu as a JSON file
+- Imports a menu as a **new menu** (no overwrite)
+- Provides a full **preview and mapping screen before import**
+- Intelligently matches menu items to existing content
+- Preserves menu hierarchy, order, and metadata
+- Replaces source site URLs with destination site URLs automatically
 
-* WordPress 5.8+
-* PHP 7.4+
+### What MenuPilot Does NOT Do (V1)
+MenuPilot v1 is intentionally limited to reduce risk during imports.
+
+It does **not**:
+- Sync or update existing menus
+- Merge or replace menus
+- Duplicate menus
+- Perform backups or restores
+- Support multisite
+- Support mega menu plugins
+- Run automated or scheduled imports
+- Provide WP-CLI commands
+
+These features may be considered in future versions, but are **not part of v1**.
+
+== Features ==
+
+* Export individual menus (JSON format)
+* Import one menu at a time as a new menu
+* Preview screen before import showing:
+  * Menu name
+  * Total menu items
+  * Source site URL
+  * Export timestamp
+  * Matched and unmatched items
+* Intelligent auto-matching of menu items using:
+  * Post type + slug
+  * Taxonomy + slug
+  * Normalized custom links
+* Manual mapping override per menu item
+* Clear warnings for:
+  * Missing pages, posts, or taxonomies
+  * Items converted to custom links
+  * Theme location availability
+* Automatic home URL replacement during import
+* Preserves:
+  * Menu hierarchy
+  * Menu order
+  * CSS classes
+  * Link attributes (target, rel)
+  * Descriptions
+* Visual import progress and clear success/error messages
+* Native WordPress admin UI (no custom frameworks)
+
+== Requirements ==
+
+* WordPress 5.8 or higher
+* PHP 7.4 or higher
+* Classic WordPress menu system
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/menupilot`, or install via WordPress plugins screen
-2. Activate the plugin through the 'Plugins' screen
-3. Go to Settings → MenuPilot to configure
+1. Upload the plugin files to `/wp-content/plugins/menupilot`, or install via the WordPress Plugins screen.
+2. Activate the plugin through the “Plugins” screen.
+3. Go to **Appearance → Menus** or **Tools → Menu Import/Export** to access MenuPilot.
 
 == Frequently Asked Questions ==
 
-= Question 1? =
+= Does MenuPilot overwrite existing menus? =
 
-Answer 1.
+No. MenuPilot always imports menus as new menus. Existing menus are never overwritten.
 
-= Question 2? =
+= Can I preview changes before importing? =
 
-Answer 2.
+Yes. MenuPilot shows a detailed preview screen before import, including matched and unmatched items. Nothing is imported until you confirm.
+
+= What happens if a menu item cannot be matched? =
+
+Unmatched items are clearly shown in the preview. You can manually map them to existing content or explicitly keep them as custom links.
+
+= Does MenuPilot support multisite? =
+
+No. Multisite support is intentionally not included in v1.
+
+= Does MenuPilot support XML imports or bulk exports? =
+
+No. MenuPilot v1 supports JSON format only and exports one menu at a time.
 
 == Screenshots ==
 
-1. Settings page
-2. Feature example
+1. Menu export screen
+2. Import preview and mapping screen
+3. Warning panel for missing or unmatched items
+4. Import progress and completion notice
 
 == Changelog ==
 
 = 1.0.0 =
 * Initial release
+* Menu export (JSON)
+* Preview-first menu import with intelligent matching
+* Manual mapping and clear import feedback
 
 == Upgrade Notice ==
 
