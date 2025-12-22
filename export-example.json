@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "plugin": {
+    "name": "MenuPilot",
+    "version": "1.0.0"
+  },
+  "export_context": {
+    "site_url": "https://source-site.com",
+    "wp_version": "6.5",
+    "theme": "twentytwentyfour",
+    "exported_at": "2025-01-01T10:30:00Z"
+  },
+  "menu": {
+    "id": 42,
+    "name": "Primary Menu",
+    "slug": "primary-menu",
+    "locations": ["primary"],
+    "items": [
+      {
+        "id": 101,
+        "parent_id": 0,
+        "order": 1,
+        "type": "post",
+        "object": "page",
+        "object_id": 12,
+        "slug": "about-us",
+        "title": "About Us",
+        "url": "https://source-site.com/about-us/",
+        "status": "publish",
+        "meta": {
+          "css_classes": ["menu-item", "highlight"],
+          "target": "",
+          "rel": "",
+          "description": "Learn more about our company"
+        }
+      },
+      {
+        "id": 102,
+        "parent_id": 101,
+        "order": 2,
+        "type": "post",
+        "object": "page",
+        "object_id": 34,
+        "slug": "our-team",
+        "title": "Our Team",
+        "url": "https://source-site.com/our-team/",
+        "status": "publish",
+        "meta": {
+          "css_classes": ["submenu-item"],
+          "target": "",
+          "rel": "",
+          "description": ""
+        }
+      },
+      {
+        "id": 103,
+        "parent_id": 0,
+        "order": 3,
+        "type": "post",
+        "object": "post",
+        "object_id": 78,
+        "slug": "latest-news",
+        "title": "Latest News",
+        "url": "https://source-site.com/latest-news/",
+        "status": "publish",
+        "meta": {
+          "css_classes": [],
+          "target": "",
+          "rel": "",
+          "description": ""
+        }
+      },
+      {
+        "id": 104,
+        "parent_id": 0,
+        "order": 4,
+        "type": "post",
+        "object": "product",
+        "object_id": 55,
+        "slug": "premium-course",
+        "title": "Premium Course",
+        "url": "https://source-site.com/product/premium-course/",
+        "status": "publish",
+        "meta": {
+          "css_classes": ["menu-item-product"],
+          "target": "",
+          "rel": "",
+          "description": "Our featured product"
+        }
+      },
+      {
+        "id": 105,
+        "parent_id": 0,
+        "order": 5,
+        "type": "taxonomy",
+        "object": "category",
+        "object_id": 9,
+        "slug": "resources",
+        "title": "Resources",
+        "url": "https://source-site.com/category/resources/",
+        "status": null,
+        "meta": {
+          "css_classes": [],
+          "target": "",
+          "rel": "",
+          "description": ""
+        }
+      },
+      {
+        "id": 106,
+        "parent_id": 0,
+        "order": 6,
+        "type": "custom",
+        "object": "custom",
+        "object_id": null,
+        "slug": null,
+        "title": "External Link",
+        "url": "https://example.com",
+        "status": null,
+        "meta": {
+          "css_classes": ["external-link"],
+          "target": "_blank",
+          "rel": "nofollow",
+          "description": "External resource"
+        }
+      }
+    ]
+  }
+}
