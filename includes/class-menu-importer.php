@@ -17,6 +17,20 @@ namespace MenuPilot;
 class Menu_Importer {
 
 	/**
+	 * Source site URL from import data
+	 *
+	 * @var string
+	 */
+	private string $source_url = '';
+
+	/**
+	 * Destination site URL
+	 *
+	 * @var string
+	 */
+	private string $destination_url = '';
+
+	/**
 	 * Import a menu from JSON data
 	 *
 	 * @param array<string,mixed> $import_data Import data array.
@@ -36,6 +50,12 @@ class Menu_Importer {
 		if ( empty($menu_name) ) {
 			return false;
 		}
+
+		// Get source and destination URLs for normalization
+		$this->source_url = isset($import_data['export_context']['site_url']) 
+			? trailingslashit($import_data['export_context']['site_url']) 
+			: '';
+		$this->destination_url = trailingslashit(get_site_url());
 
 		// Create new menu
 		$menu_id = wp_create_nav_menu($menu_name);
@@ -150,8 +170,6 @@ class Menu_Importer {
 			$type = 'custom';
 			$object = 'custom';
 			$object_id = 0;
-			// Normalize URL to destination site
-			$url = $this->normalize_url($url);
 		} else {
 			$object_id = $matched_object_id;
 		}
@@ -166,8 +184,10 @@ class Menu_Importer {
 			'menu-item-status' => 'publish',
 		);
 
-		// Add URL for custom links
+		// Add URL for custom links and normalize it
 		if ( $type === 'custom' ) {
+			// Normalize URL for both original custom links and converted items
+			$url = $this->normalize_url($url);
 			$item_data['menu-item-url'] = $url;
 		}
 
@@ -237,27 +257,29 @@ class Menu_Importer {
 	 * @return string Normalized URL.
 	 */
 	private function normalize_url( string $url ): string {
-		// Get current site URL
-		$current_site_url = get_site_url();
-		
 		// If URL is empty, return it as is
 		if ( empty($url) ) {
 			return $url;
 		}
 
-		// Parse URL
-		$parsed = wp_parse_url($url);
-		if ( ! $parsed || ! isset($parsed['host']) ) {
+		// If no source URL or URLs are the same, no normalization needed
+		if ( empty($this->source_url) || $this->source_url === $this->destination_url ) {
 			return $url;
 		}
 
-		// Get path
-		$path = isset($parsed['path']) ? $parsed['path'] : '/';
-		$query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
-		$fragment = isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '';
+		// Check if URL starts with source URL
+		if ( strpos($url, $this->source_url) === 0 ) {
+			// Replace source URL with destination URL
+			$url = str_replace($this->source_url, $this->destination_url, $url);
+		} else {
+			// Try without trailing slash
+			$source_no_slash = untrailingslashit($this->source_url);
+			if ( strpos($url, $source_no_slash) === 0 ) {
+				$url = str_replace($source_no_slash, untrailingslashit($this->destination_url), $url);
+			}
+		}
 
-		// Build new URL with current site
-		return $current_site_url . $path . $query . $fragment;
+		return $url;
 	}
 }
 
