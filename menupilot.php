@@ -1,13 +1,15 @@
 <?php
+
 /**
  * Plugin Name: MenuPilot
  * Plugin URI: https://mayankmajeji.com/menupilot
- * Description: Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.
+ * Description: MenuPilot makes it easy to move, duplicate, and back up WordPress menus between sites without breaking links or structure.
  * Version: 1.0.0
- * Requires at least: 5.8
- * Requires PHP: 7.4
  * Author: Mayank Majeji
  * Author URI: 
+ * Requires at least: 5.8
+ * Tested up to: 6.5
+ * Requires PHP: 7.4
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: menupilot
