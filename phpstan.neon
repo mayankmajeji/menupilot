@@ -1,0 +1,12 @@
+parameters:
+	level: 8
+	paths:
+		- includes
+	bootstrapFiles:
+		- tests/_support/_bootstrap.php
+	excludePaths:
+		- tests/_support/_generated
+	ignoreErrors:
+		# WordPress core functions
+		- '#Function (do_action|apply_filters|add_action|add_filter|wp_enqueue_|wp_localize_script|get_option|update_option|delete_option) invoked with#'
+		- '#Call to an undefined method#'

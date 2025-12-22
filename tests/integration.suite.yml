@@ -1,0 +1,20 @@
+actor: IntegrationTester
+modules:
+    enabled:
+        - \Helper\Integration
+        - WordPress:
+            depends: WPDb
+            wpRootFolder: '/tmp/wordpress'
+            plugins:
+                - 'menupilot/menupilot.php'
+            activatePlugins:
+                - 'menupilot/menupilot.php'
+        - WPDb:
+            dsn: 'mysql:host=127.0.0.1;dbname=test'
+            user: 'root'
+            password: 'root'
+            dump: 'tests/_data/dump.sql'
+            populate: true
+            cleanup: true
+            reconnect: true
+        - Asserts
