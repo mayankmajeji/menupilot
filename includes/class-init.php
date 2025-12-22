@@ -25,14 +25,22 @@ class Init {
 	private Settings $settings;
 
 	/**
+	 * AJAX handler instance
+	 *
+	 * @var \MenuPilot\Admin\Ajax_Handler|null
+	 */
+	private ?\MenuPilot\Admin\Ajax_Handler $ajax_handler = null;
+
+	/**
 	 * Plugin admin screen IDs
 	 *
 	 * @var array
 	 */
 	private const PLUGIN_SCREEN_IDS = array(
-		'settings_page_menupilot',
-		'toplevel_page_menupilot',
+		'toplevel_page_menupilot-settings',
 		'menupilot_page_menupilot-settings',
+		'menupilot_page_menupilot-tools',
+		'menupilot_page_menupilot-help',
 	);
 
 	/**
@@ -79,6 +87,12 @@ class Init {
 		// Initialize components
 		$this->settings = new Settings();
 
+		// Initialize AJAX handler
+		if ( is_admin() ) {
+			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-ajax-handler.php';
+			$this->ajax_handler = new \MenuPilot\Admin\Ajax_Handler();
+		}
+
 		// Initialize integrations
 		$this->init_integrations();
 
@@ -104,7 +118,7 @@ class Init {
 	private function init_hooks(): void {
 		// Admin hooks
 		if ( is_admin() && ! self::$admin_hooks_registered ) {
-			add_action('admin_menu', array( $this->settings, 'add_admin_menu' ));
+			add_action('admin_menu', array( $this, 'add_admin_menu' ));
 			add_action('admin_init', array( $this->settings, 'register_settings' ));
 			add_action('admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ));
 			add_filter('admin_body_class', array( $this, 'add_admin_body_class' ));
@@ -150,8 +164,17 @@ class Init {
 			true
 		);
 
+		// Enqueue admin pages script
+		wp_enqueue_script(
+			'menupilot-admin-pages',
+			MENUPILOT_PLUGIN_URL . 'assets/js/admin-pages.js',
+			array( 'jquery', 'menupilot-admin' ),
+			MENUPILOT_VERSION,
+			true
+		);
+
 		wp_localize_script(
-			'menupilot-admin',
+			'menupilot-admin-pages',
 			'menupilot',
 			array(
 				'ajaxurl' => admin_url('admin-ajax.php'),
@@ -265,6 +288,87 @@ class Init {
 		 * @since 1.0.0
 		 */
 		do_action('menupilot_deactivate');
+	}
+
+	/**
+	 * Add admin menu pages
+	 *
+	 * @return void
+	 */
+	public function add_admin_menu(): void {
+		// Main menu page (Settings)
+		add_menu_page(
+			__('MenuPilot', 'menupilot'),
+			__('MenuPilot', 'menupilot'),
+			'manage_options',
+			'menupilot-settings',
+			array( $this, 'render_settings_page' ),
+			'dashicons-menu-alt',
+			65
+		);
+
+		// Settings submenu (duplicate of main page for consistency)
+		add_submenu_page(
+			'menupilot-settings',
+			__('Settings', 'menupilot'),
+			__('Settings', 'menupilot'),
+			'manage_options',
+			'menupilot-settings',
+			array( $this, 'render_settings_page' )
+		);
+
+		// Tools submenu
+		add_submenu_page(
+			'menupilot-settings',
+			__('Tools', 'menupilot'),
+			__('Tools', 'menupilot'),
+			'manage_options',
+			'menupilot-tools',
+			array( $this, 'render_tools_page' )
+		);
+
+		// Help submenu
+		add_submenu_page(
+			'menupilot-settings',
+			__('Help', 'menupilot'),
+			__('Help', 'menupilot'),
+			'manage_options',
+			'menupilot-help',
+			array( $this, 'render_help_page' )
+		);
+	}
+
+	/**
+	 * Render settings page
+	 *
+	 * @return void
+	 */
+	public function render_settings_page(): void {
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-settings-page.php';
+		$settings_page = new \MenuPilot\Admin\Settings_Page();
+		$settings_page->render();
+	}
+
+	/**
+	 * Render tools page
+	 *
+	 * @return void
+	 */
+	public function render_tools_page(): void {
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-tools-page.php';
+		$tools_page = new \MenuPilot\Admin\Tools_Page();
+		$tools_page->render();
+	}
+
+	/**
+	 * Render help page
+	 *
+	 * @return void
+	 */
+	public function render_help_page(): void {
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-help-page.php';
+		$help_page = new \MenuPilot\Admin\Help_Page();
+		$help_page->render();
 	}
 
 	/**
