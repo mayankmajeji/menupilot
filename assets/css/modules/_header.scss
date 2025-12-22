@@ -1,0 +1,79 @@
+// MenuPilot header styles
+.menupilot-header {
+	padding: 12px 22px;
+	border-bottom: 1px solid #e5e7eb;
+	background: #fff;
+	margin-bottom: 12px;
+	
+	.mp-header-inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+	}
+	
+	.mp-left {
+		display: flex;
+		align-items: center;
+		
+		.mp-logo {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			color: #23282d;
+			text-decoration: none;
+			
+			.dashicons {
+				color: #2271b1;
+			}
+		}
+	}
+	
+	.mp-brand {
+		font-weight: 700;
+		font-size: 18px;
+		color: #23282d;
+	}
+	
+	.mp-nav {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+	}
+	
+	.mp-nav-item {
+		text-decoration: none;
+		color: #50575e;
+		padding: 8px 14px;
+		border-radius: 4px;
+		font-weight: 500;
+		
+		&:hover {
+			background: rgba(0, 0, 0, 0.04);
+			color: #2271b1;
+		}
+		
+		&.is-active {
+			color: #2271b1;
+			background: rgba(34, 113, 177, 0.1);
+			font-weight: 600;
+		}
+	}
+	
+	.mp-version {
+		color: #787c82;
+		font-size: 12px;
+		padding: 4px 8px;
+		background: #f0f0f1;
+		border-radius: 4px;
+	}
+}
+
+// Body container after header
+.menupilot-body {
+	margin: 32px 22px;
+	border: 1px solid #e2e2e2;
+	border-radius: 6px;
+	background: #f9f9f9;
+}
+

@@ -1,0 +1,103 @@
+// Form styles for MenuPilot
+.mp-upload-area {
+	border: 2px dashed #d9d7d8;
+	border-radius: 8px;
+	padding: 40px;
+	text-align: center;
+	transition: all 200ms ease-in-out;
+	cursor: pointer;
+	
+	&:hover {
+		border-color: #2271b1;
+		background: rgba(34, 113, 177, 0.02);
+	}
+	
+	input[type="file"] {
+		display: none;
+	}
+	
+	.mp-upload-label {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+		cursor: pointer;
+		
+		.dashicons {
+			color: #2271b1;
+		}
+		
+		.mp-upload-text {
+			strong {
+				font-size: 16px;
+				color: #1d2327;
+			}
+			
+			.description {
+				font-size: 13px;
+				color: #646970;
+			}
+		}
+	}
+	
+	&.has-file {
+		border-color: #46b450;
+		background: rgba(70, 180, 80, 0.05);
+	}
+}
+
+// Table styles
+.menupilot-page {
+	.widefat {
+		margin-top: 20px;
+		border-radius: 6px;
+		overflow: hidden;
+		
+		thead {
+			background: #f9f9f9;
+			
+			th {
+				font-weight: 600;
+				color: #23282d;
+				padding: 12px;
+			}
+		}
+		
+		tbody {
+			tr {
+				&:hover {
+					background: #f9f9f9;
+				}
+			}
+			
+			td {
+				padding: 12px;
+				vertical-align: middle;
+			}
+		}
+		
+		.check-column {
+			width: 40px;
+			text-align: center;
+		}
+	}
+	
+	// File info display
+	#mp-file-info {
+		background: #f0f6fc;
+		border: 1px solid #2271b1;
+		border-radius: 4px;
+		padding: 12px;
+		text-align: left;
+		
+		strong {
+			color: #1d2327;
+		}
+		
+		#mp-file-name {
+			color: #2271b1;
+			font-weight: 500;
+		}
+	}
+}
+

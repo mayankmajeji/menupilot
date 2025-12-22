@@ -4,29 +4,36 @@
  * @package MenuPilot
  */
 
-@use 'modules/variables';
-@use 'modules/mixins';
-@use 'modules/base';
+@use "modules/variables";
+@use "modules/mixins";
+@use "modules/base";
+@use "modules/header";
+@use "modules/layout";
+@use "modules/card";
+@use "modules/forms";
+@use "modules/help";
 
-.menupilot-admin {
-	.wrap {
-		max-width: 1200px;
-		margin: 20px auto;
-		padding: 0 20px;
-	}
+// Global admin page styles
+.menupilot-page {
+  background: #f0f0f1;
+  margin: -20px -20px 0 -22px;
+  padding: 0;
 
-	h1 {
-		font-size: 2em;
-		margin-bottom: 1em;
-	}
+  // Override WordPress admin notice positioning
+  .notice {
+    margin: 20px 22px;
+  }
+}
 
-	.form-table {
-		th {
-			padding: 20px 10px 20px 0;
-		}
+// Ensure primary buttons use WordPress blue
+.wp-core-ui .menupilot-page .button.button-primary {
+  color: #fff !important;
+  background: #2271b1 !important;
+  border-color: #2271b1 !important;
 
-		td {
-			padding: 15px 10px;
-		}
-	}
+  &:hover,
+  &:focus {
+    background: #135e96 !important;
+    border-color: #135e96 !important;
+  }
 }
