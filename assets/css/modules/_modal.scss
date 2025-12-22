@@ -1,0 +1,150 @@
+// Modal Styles
+.mp-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100000;
+  align-items: center;
+  justify-content: center;
+
+  &.is-active {
+    display: flex;
+  }
+}
+
+.mp-modal {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: mp-modal-slide-in 0.3s ease-out;
+}
+
+@keyframes mp-modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mp-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #23282d;
+  }
+}
+
+.mp-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #666;
+  font-size: 24px;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+    color: #000;
+  }
+
+  &:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+  }
+}
+
+.mp-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+
+  .mp-card {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    table {
+      background: #fff;
+    }
+  }
+
+  .form-table {
+    th {
+      padding-left: 0;
+    }
+  }
+}
+
+.mp-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  background: #f9f9f9;
+
+  .spinner {
+    float: none;
+    margin: 0;
+  }
+}
+
+// Responsive modal
+@media screen and (max-width: 782px) {
+  .mp-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .mp-modal-header,
+  .mp-modal-body,
+  .mp-modal-footer {
+    padding: 16px;
+  }
+}
+

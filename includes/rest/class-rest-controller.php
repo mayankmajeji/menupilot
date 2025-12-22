@@ -1,0 +1,277 @@
+<?php
+
+/**
+ * REST API Controller
+ *
+ * @package MenuPilot
+ */
+
+declare(strict_types=1);
+
+namespace MenuPilot\Rest;
+
+use MenuPilot\Menu_Exporter;
+use MenuPilot\Menu_Importer;
+use WP_REST_Controller;
+use WP_REST_Server;
+use WP_Error;
+
+/**
+ * Class REST_Controller
+ *
+ * Handles REST API endpoints for menu import/export
+ */
+class REST_Controller extends WP_REST_Controller
+{
+
+	/**
+	 * Namespace
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'menupilot/v1';
+
+	/**
+	 * Menu exporter instance
+	 *
+	 * @var Menu_Exporter
+	 */
+	private Menu_Exporter $exporter;
+
+	/**
+	 * Menu importer instance
+	 *
+	 * @var Menu_Importer
+	 */
+	private Menu_Importer $importer;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
+		$this->exporter = new Menu_Exporter();
+		$this->importer = new Menu_Importer();
+
+		// Block namespace index for non-admins
+		add_filter('rest_endpoints', array($this, 'restrict_namespace_index'));
+	}
+
+	/**
+	 * Register REST API routes
+	 *
+	 * @return void
+	 */
+	public function register_routes(): void
+	{
+		// Export menu endpoint
+		register_rest_route(
+			$this->namespace,
+			'/menus/export',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array($this, 'export_menu'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
+				'args'                => array(
+					'menu_id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'validate_callback' => function ($param) {
+							return is_numeric($param) && $param > 0;
+						},
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		// Import menu endpoint
+		register_rest_route(
+			$this->namespace,
+			'/menus/import',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array($this, 'import_menu'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
+				'args'                => array(
+					'menu_name' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'menu_data' => array(
+						'required' => true,
+						'type'     => 'object',
+					),
+					'location'  => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'default'           => '',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Restrict namespace index to admins only
+	 *
+	 * @param array $endpoints Registered endpoints.
+	 * @return array
+	 */
+	public function restrict_namespace_index($endpoints)
+	{
+		// Remove namespace index for non-admins
+		if (! current_user_can('manage_options')) {
+			if (isset($endpoints['/menupilot/v1'])) {
+				unset($endpoints['/menupilot/v1']);
+			}
+		}
+		return $endpoints;
+	}
+
+	/**
+	 * Check if user has admin permissions
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function check_admin_permissions()
+	{
+		// Check if user is logged in
+		if (! is_user_logged_in()) {
+			return new WP_Error(
+				'rest_unauthorized',
+				__('Authentication required. Please log in to access this endpoint.', 'menupilot'),
+				array('status' => 401)
+			);
+		}
+
+		// Check if user has admin capabilities
+		if (! current_user_can('manage_options')) {
+			return new WP_Error(
+				'rest_forbidden',
+				__('Access denied. Administrator privileges required.', 'menupilot'),
+				array('status' => 403)
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Export menu endpoint handler
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function export_menu(\WP_REST_Request $request)
+	{
+		$menu_id = $request->get_param('menu_id');
+
+		// Verify menu exists
+		$menu = wp_get_nav_menu_object($menu_id);
+		if (! $menu) {
+			return new WP_Error(
+				'menu_not_found',
+				__('Menu not found.', 'menupilot'),
+				array('status' => 404)
+			);
+		}
+
+		// Export menu
+		$export_data = $this->exporter->export($menu_id);
+		if (! $export_data) {
+			return new WP_Error(
+				'export_failed',
+				__('Failed to export menu. The menu may be empty or corrupted.', 'menupilot'),
+				array('status' => 500)
+			);
+		}
+
+		// Generate filename
+		$filename = $this->exporter->generate_filename($menu_id);
+
+		return rest_ensure_response(array(
+			'success'  => true,
+			'data'     => $export_data,
+			'filename' => $filename,
+			'message'  => sprintf(
+				/* translators: %s: menu name */
+				__('Menu "%s" exported successfully.', 'menupilot'),
+				$menu->name
+			),
+		));
+	}
+
+	/**
+	 * Import menu endpoint handler
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function import_menu(\WP_REST_Request $request)
+	{
+		$menu_name = $request->get_param('menu_name');
+		$menu_data = $request->get_param('menu_data');
+		$location  = $request->get_param('location');
+
+		// Validate menu data
+		if (! is_array($menu_data) || ! isset($menu_data['menu'])) {
+			return new WP_Error(
+				'invalid_data',
+				__('Invalid menu data format.', 'menupilot'),
+				array('status' => 400)
+			);
+		}
+
+		// Check if menu with same name already exists
+		$existing_menu = wp_get_nav_menu_object($menu_name);
+		if ($existing_menu) {
+			return new WP_Error(
+				'menu_exists',
+				sprintf(
+					/* translators: %s: menu name */
+					__('A menu with the name "%s" already exists. Please choose a different name.', 'menupilot'),
+					$menu_name
+				),
+				array('status' => 409)
+			);
+		}
+
+		// Import menu
+		$menu_id = $this->importer->import($menu_data, $menu_name, $location);
+
+		if (! $menu_id) {
+			return new WP_Error(
+				'import_failed',
+				__('Failed to import menu. Please check the menu data and try again.', 'menupilot'),
+				array('status' => 500)
+			);
+		}
+
+		// Build success message
+		$message = sprintf(
+			/* translators: %s: menu name */
+			__('Menu "%s" imported successfully!', 'menupilot'),
+			$menu_name
+		);
+
+		if (! empty($location)) {
+			$registered_locations = get_registered_nav_menus();
+			$location_name = isset($registered_locations[$location]) ? $registered_locations[$location] : $location;
+			$message .= ' ' . sprintf(
+				/* translators: %s: theme location name */
+				__('It has been assigned to the "%s" location.', 'menupilot'),
+				$location_name
+			);
+		}
+
+		return rest_ensure_response(array(
+			'success'  => true,
+			'menu_id'  => $menu_id,
+			'message'  => $message,
+			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
+		));
+	}
+}
