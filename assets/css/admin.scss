@@ -1,0 +1,32 @@
+/**
+ * Admin Styles
+ *
+ * @package MenuPilot
+ */
+
+@use 'modules/variables';
+@use 'modules/mixins';
+@use 'modules/base';
+
+.menupilot-admin {
+	.wrap {
+		max-width: 1200px;
+		margin: 20px auto;
+		padding: 0 20px;
+	}
+
+	h1 {
+		font-size: 2em;
+		margin-bottom: 1em;
+	}
+
+	.form-table {
+		th {
+			padding: 20px 10px 20px 0;
+		}
+
+		td {
+			padding: 15px 10px;
+		}
+	}
+}

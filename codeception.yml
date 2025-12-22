@@ -1,0 +1,22 @@
+namespace:
+    - MenuPilot
+
+paths:
+    tests: tests
+    output: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+
+actor_suffix: Tester
+
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+
+params:
+    - tests/_envs/local.yml
+
+settings:
+    shuffle: false
+    lint: true

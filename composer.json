@@ -1,0 +1,59 @@
+{
+	"name": "MenuPilot",
+	"description": "Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.",
+	"license": "GPL-2.0-or-later",
+	"type": "wordpress-plugin",
+	"authors": [
+		{
+			"name": "Mayank Majeji",
+			"homepage": ""
+		}
+	],
+	"homepage": "https://mayankmajeji.com/menupilot",
+	"support": {
+		"issues": "https://mayankmajeji.com/menupilot/issues",
+		"source": "https://mayankmajeji.com/menupilot"
+	},
+	"require": {
+		"php": ">=7.4.0",
+		"composer/installers": "^2.0"
+	},
+	"require-dev": {
+		"codeception/module-asserts": "^3.0",
+		"codeception/module-db": "^3.0",
+		"codeception/module-webdriver": "^3.0",
+		"codeception/util-universalframework": "^1.0",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"phpstan/phpstan": "^1.10",
+		"squizlabs/php_codesniffer": "^3.7",
+		"wp-coding-standards/wpcs": "^3.0"
+	},
+	"config": {
+		"sort-packages": true,
+		"allow-plugins": {
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"format": "phpcbf --standard=phpcs.xml.dist .",
+		"lint": "phpcs -d memory_limit=512M -nps --colors --report-code --report-summary --report-width=80 --basepath=. .",
+		"test": [
+			"@composer validate --strict --no-check-lock",
+			"@test:phpstan",
+			"@test:phpcs"
+		],
+		"test:phpcs": [
+			"phpcs -d memory_limit=512M -nps --colors --report-code --report-summary --report-width=80 --basepath=. ."
+		],
+		"test:phpstan": [
+			"phpstan analyze -v --memory-limit=1024M includes"
+		]
+	},
+	"autoload": {
+		"psr-4": {
+			"MenuPilot\\": "includes/"
+		}
+	}
+}
