@@ -1,0 +1,9 @@
+actor: AcceptanceTester
+modules:
+    enabled:
+        - WebDriver:
+            url: 'http://localhost:8080'
+            browser: chrome
+            window_size: 1920x1080
+        - \Helper\Acceptance
+    step_decorators: ~
