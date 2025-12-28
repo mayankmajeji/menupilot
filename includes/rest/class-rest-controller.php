@@ -53,6 +53,9 @@ class REST_Controller extends WP_REST_Controller
 		$this->exporter = new Menu_Exporter();
 		$this->importer = new Menu_Importer();
 
+		// Register REST routes
+		add_action('rest_api_init', array($this, 'register_routes'));
+
 		// Block namespace index for non-admins
 		add_filter('rest_endpoints', array($this, 'restrict_namespace_index'));
 	}
@@ -110,6 +113,17 @@ class REST_Controller extends WP_REST_Controller
 						'default'           => '',
 					),
 				),
+			)
+		);
+
+		// Mapping options endpoint
+		register_rest_route(
+			$this->namespace,
+			'/menus/mapping-options',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array($this, 'get_mapping_options'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
 			)
 		);
 	}
@@ -272,6 +286,73 @@ class REST_Controller extends WP_REST_Controller
 			'menu_id'  => $menu_id,
 			'message'  => $message,
 			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
+		));
+	}
+
+	/**
+	 * Get available content for mapping
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_mapping_options( \WP_REST_Request $request ) {
+		$options = array(
+			'posts' => array(),
+			'pages' => array(),
+			'taxonomies' => array(),
+		);
+
+		// Get all posts
+		$posts = get_posts(array(
+			'post_type' => 'post',
+			'numberposts' => -1,
+			'post_status' => 'publish',
+			'orderby' => 'title',
+			'order' => 'ASC',
+		));
+
+		foreach ( $posts as $post ) {
+			$options['posts'][] = array(
+				'id' => $post->ID,
+				'title' => $post->post_title,
+				'slug' => $post->post_name,
+			);
+		}
+
+		// Get all pages
+		$pages = get_posts(array(
+			'post_type' => 'page',
+			'numberposts' => -1,
+			'post_status' => 'publish',
+			'orderby' => 'title',
+			'order' => 'ASC',
+		));
+
+		foreach ( $pages as $page ) {
+			$options['pages'][] = array(
+				'id' => $page->ID,
+				'title' => $page->post_title,
+				'slug' => $page->post_name,
+			);
+		}
+
+		// Get all categories
+		$categories = get_categories(array(
+			'hide_empty' => false,
+		));
+
+		foreach ( $categories as $cat ) {
+			$options['taxonomies'][] = array(
+				'id' => $cat->term_id,
+				'title' => $cat->name,
+				'slug' => $cat->slug,
+				'taxonomy' => 'category',
+			);
+		}
+
+		return rest_ensure_response(array(
+			'success' => true,
+			'options' => $options,
 		));
 	}
 }

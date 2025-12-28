@@ -157,21 +157,44 @@ class Menu_Importer {
 		$url = isset($item['url']) ? $item['url'] : '';
 		$slug = isset($item['slug']) ? $item['slug'] : '';
 
-		// Try to find matching object
-		$matched_object_id = 0;
-		if ( $type === 'post_type' && ! empty($object) && ! empty($slug) ) {
-			$matched_object_id = $this->find_post_by_slug($slug, $object);
-		} elseif ( $type === 'taxonomy' && ! empty($object) && ! empty($slug) ) {
-			$matched_object_id = $this->find_term_by_slug($slug, $object);
-		}
+		// Check if user provided custom mapping
+		if ( isset($item['custom_mapping']) && is_array($item['custom_mapping']) ) {
+			$custom_type = $item['custom_mapping']['type'];
+			$custom_id = (int) $item['custom_mapping']['id'];
 
-		// If no match found, convert to custom link
-		if ( $matched_object_id === 0 && $type !== 'custom' ) {
-			$type = 'custom';
-			$object = 'custom';
-			$object_id = 0;
+			if ( $custom_type === 'custom' || $custom_id === 0 ) {
+				// User wants to keep as custom link
+				$type = 'custom';
+				$object = 'custom';
+				$object_id = 0;
+			} elseif ( $custom_type === 'post' || $custom_type === 'page' ) {
+				// User mapped to a specific post/page
+				$type = 'post_type';
+				$object = $custom_type;
+				$object_id = $custom_id;
+			} elseif ( $custom_type === 'category' ) {
+				// User mapped to a category
+				$type = 'taxonomy';
+				$object = 'category';
+				$object_id = $custom_id;
+			}
 		} else {
-			$object_id = $matched_object_id;
+			// Try to find matching object (auto-matching)
+			$matched_object_id = 0;
+			if ( $type === 'post_type' && ! empty($object) && ! empty($slug) ) {
+				$matched_object_id = $this->find_post_by_slug($slug, $object);
+			} elseif ( $type === 'taxonomy' && ! empty($object) && ! empty($slug) ) {
+				$matched_object_id = $this->find_term_by_slug($slug, $object);
+			}
+
+			// If no match found, convert to custom link
+			if ( $matched_object_id === 0 && $type !== 'custom' ) {
+				$type = 'custom';
+				$object = 'custom';
+				$object_id = 0;
+			} else {
+				$object_id = $matched_object_id;
+			}
 		}
 
 		// Build menu item data

@@ -143,7 +143,7 @@ jQuery(document).ready(function ($) {
     $spinner.addClass("is-active");
     $result.html("");
 
-    // Read file and generate preview client-side
+    // Read file and fetch mapping options
     const reader = new FileReader();
     reader.onload = function (event) {
       try {
@@ -155,17 +155,40 @@ jQuery(document).ready(function ($) {
           throw new Error("Invalid menu data structure");
         }
 
-        // Generate preview HTML client-side
-        const previewHtml = generateImportPreview(importData);
-
-        // Show preview in modal
-        showImportModal(previewHtml, importData);
-        $result.html("");
+        // Fetch mapping options from REST API
+        $.ajax({
+          url: menupilot.restUrl + "/menus/mapping-options",
+          type: "GET",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-WP-Nonce", menupilot.nonce);
+          },
+          success(mappingResponse) {
+            if (mappingResponse.success) {
+              // Generate preview HTML with mapping options
+              const previewHtml = generateImportPreviewWithMapping(
+                importData,
+                mappingResponse.options
+              );
+              showImportModal(previewHtml, importData);
+              $result.html("");
+            } else {
+              throw new Error("Failed to fetch mapping options");
+            }
+          },
+          error() {
+            $result.html(
+              '<div class="notice notice-error"><p>Failed to fetch mapping options.</p></div>'
+            );
+          },
+          complete() {
+            $spinner.removeClass("is-active");
+            $button.prop("disabled", false);
+          },
+        });
       } catch (error) {
         $result.html(
           '<div class="notice notice-error"><p>Invalid JSON file. Please check the file format.</p></div>'
         );
-      } finally {
         $spinner.removeClass("is-active");
         $button.prop("disabled", false);
       }
@@ -182,7 +205,222 @@ jQuery(document).ready(function ($) {
     reader.readAsText(fileInput.files[0]);
   });
 
-  // Generate import preview HTML client-side
+  // Generate import preview HTML with manual mapping
+  function generateImportPreviewWithMapping(importData, mappingOptions) {
+    const menu = importData.menu || {};
+    const context = importData.export_context || {};
+
+    const menuName = menu.name || "Untitled Menu";
+    const menuSlug = menu.slug || "";
+    const items = menu.items || [];
+    const locations = menu.locations || [];
+
+    const sourceUrl = context.site_url || "";
+    const exportedAt = context.exported_at || "";
+    const exportedBy = context.exported_by || "";
+    const registeredLocations = menupilot.registeredLocations || {};
+    const sameSize = sourceUrl === menupilot.siteUrl;
+
+    // Calculate matched items
+    let matchedCount = 0;
+    items.forEach(function (item) {
+      if (item.type === "post_type" && item.slug) {
+        // Check if we can find this in mapping options
+        const pages = mappingOptions.pages || [];
+        const posts = mappingOptions.posts || [];
+        const found = pages.some((p) => p.slug === item.slug) || 
+                      posts.some((p) => p.slug === item.slug);
+        if (found) matchedCount++;
+      } else if (item.type === "taxonomy" && item.slug) {
+        const taxonomies = mappingOptions.taxonomies || [];
+        const found = taxonomies.some((t) => t.slug === item.slug);
+        if (found) matchedCount++;
+      }
+    });
+
+    let html = '<div class="notice notice-info" style="margin: 0 0 20px 0;">';
+    html += "<p><strong>Review the import details below before proceeding.</strong> The menu will be created as a new menu.</p>";
+    html += "</div>";
+
+    html += '<div class="mp-card">';
+    html += "<h3>Import Preview</h3>";
+    html += '<table class="widefat"><tbody>';
+    html += "<tr><th>Menu Name:</th><td><strong>" + escapeHtml(menuName) + "</strong></td></tr>";
+    html += "<tr><th>Total Items:</th><td>" + items.length + "</td></tr>";
+
+    if (sourceUrl) {
+      html += "<tr><th>Exported From:</th><td><code>" + escapeHtml(sourceUrl) + "</code>";
+      if (sameSize) {
+        html += ' <span class="dashicons dashicons-yes-alt" style="color:#46b450;"></span> <em>(Same site)</em>';
+      }
+      html += "</td></tr>";
+    }
+
+    if (exportedAt) {
+      const date = new Date(exportedAt);
+      html += "<tr><th>Exported At:</th><td>" + date.toLocaleString() + "</td></tr>";
+    }
+
+    html += "<tr><th>Items Matched:</th><td>" + matchedCount + " / " + items.length + "</td></tr>";
+
+    html += "</tbody></table></div>";
+
+    // Menu Items Mapping Section
+    html += '<div class="mp-card" style="margin-top:20px;">';
+    html += "<h3>Menu Items Mapping</h3>";
+    html += '<p style="color:#666;">Review and adjust how each menu item will be imported. You can change the mapping or keep items as custom links.</p>';
+    
+    html += '<table class="widefat striped"><thead><tr>';
+    html += "<th>Title</th><th>Type</th><th>Auto Status</th><th>Map To</th>";
+    html += "</tr></thead><tbody>";
+
+    items.forEach(function (item, index) {
+      const indent = item.parent_id > 0 ? "— " : "";
+      const itemType = getItemTypeLabel(item);
+      const autoStatus = getAutoMatchStatus(item, mappingOptions);
+      
+      html += "<tr>";
+      html += "<td>" + escapeHtml(indent + item.title) + "</td>";
+      html += "<td>" + itemType + "</td>";
+      html += "<td>" + autoStatus.html + "</td>";
+      html += "<td>" + generateMappingDropdown(item, index, mappingOptions, autoStatus.matchedId) + "</td>";
+      html += "</tr>";
+    });
+
+    html += "</tbody></table></div>";
+
+    // Import Configuration
+    html += '<div class="mp-card" style="margin-top:20px;">';
+    html += "<h3>Import Configuration</h3>";
+    html += '<div id="mp-import-execute-form">';
+    html += '<table class="form-table"><tbody>';
+    html += '<tr><th scope="row"><label for="mp-import-menu-name">Menu Name:</label></th>';
+    html += '<td><input type="text" id="mp-import-menu-name" name="menu_name" value="' + escapeHtml(menuName) + '" class="regular-text" required />';
+    html += '<p class="description">Enter a name for the imported menu.</p></td></tr>';
+    html += '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
+    html += '<td><select id="mp-import-location" name="location"><option value="">— Do not assign —</option>';
+
+    for (const [locationId, locationName] of Object.entries(registeredLocations)) {
+      html += '<option value="' + escapeHtml(locationId) + '">' + escapeHtml(locationName) + "</option>";
+    }
+
+    html += "</select>";
+    html += '<p class="description">Optionally assign this menu to a theme location.</p></td></tr>';
+    html += "</tbody></table>";
+    html += '<input type="hidden" id="mp-import-data" name="import_data" value="" />';
+    html += "</div></div>";
+
+    return html;
+  }
+
+  // Helper: Get item type label
+  function getItemTypeLabel(item) {
+    if (item.type === "custom") return "Custom Link";
+    if (item.type === "post_type") {
+      if (item.object === "page") return "Page";
+      if (item.object === "post") return "Post";
+      return item.object;
+    }
+    if (item.type === "taxonomy") {
+      if (item.object === "category") return "Category";
+      return item.object;
+    }
+    return item.type;
+  }
+
+  // Helper: Get auto-match status
+  function getAutoMatchStatus(item, mappingOptions) {
+    if (item.type === "custom") {
+      return {
+        html: '<span class="dashicons dashicons-admin-links" style="color:#82878c;"></span> <strong>Custom Link</strong><br><small style="color:#666;">Custom link - will be imported as-is</small>',
+        matchedId: null,
+      };
+    }
+
+    if (item.type === "post_type" && item.slug) {
+      const pages = mappingOptions.pages || [];
+      const posts = mappingOptions.posts || [];
+      const allPosts = item.object === "page" ? pages : posts;
+      
+      const matched = allPosts.find((p) => p.slug === item.slug);
+      if (matched) {
+        return {
+          html: '<span class="dashicons dashicons-yes-alt" style="color:#46b450;"></span> <strong>Matched</strong><br><small style="color:#666;">Matched: ' + escapeHtml(matched.title) + " (ID: " + matched.id + ")</small>",
+          matchedId: matched.id,
+        };
+      }
+    }
+
+    if (item.type === "taxonomy" && item.slug) {
+      const taxonomies = mappingOptions.taxonomies || [];
+      const matched = taxonomies.find((t) => t.slug === item.slug);
+      if (matched) {
+        return {
+          html: '<span class="dashicons dashicons-yes-alt" style="color:#46b450;"></span> <strong>Matched</strong><br><small style="color:#666;">Matched: ' + escapeHtml(matched.title) + " (ID: " + matched.id + ")</small>",
+          matchedId: matched.id,
+        };
+      }
+    }
+
+    return {
+      html: '<span class="dashicons dashicons-warning" style="color:#f0b849;"></span> <strong>Not Found</strong><br><small style="color:#666;">Will be converted to custom link</small>',
+      matchedId: null,
+    };
+  }
+
+  // Helper: Generate mapping dropdown
+  function generateMappingDropdown(item, index, mappingOptions, matchedId) {
+    let html = '<select class="mp-mapping-select" data-item-index="' + index + '" style="width:100%;">';
+    
+    // Keep as Custom Link option
+    const isCustomSelected = item.type === "custom" || !matchedId;
+    html += '<option value="custom:0"' + (isCustomSelected ? " selected" : "") + ">Keep as Custom Link</option>";
+
+    // Add Posts optgroup
+    const posts = mappingOptions.posts || [];
+    if (posts.length > 0) {
+      html += '<optgroup label="Posts">';
+      posts.forEach(function (post) {
+        const selected = matchedId === post.id && item.object === "post" ? " selected" : "";
+        html += '<option value="post:' + post.id + '"' + selected + ">" + escapeHtml(post.title) + " (ID: " + post.id + ")</option>";
+      });
+      html += "</optgroup>";
+    }
+
+    // Add Pages optgroup
+    const pages = mappingOptions.pages || [];
+    if (pages.length > 0) {
+      html += '<optgroup label="Pages">';
+      pages.forEach(function (page) {
+        const selected = matchedId === page.id && item.object === "page" ? " selected" : "";
+        html += '<option value="page:' + page.id + '"' + selected + ">" + escapeHtml(page.title) + " (ID: " + page.id + ")</option>";
+      });
+      html += "</optgroup>";
+    }
+
+    // Add Categories optgroup
+    const taxonomies = mappingOptions.taxonomies || [];
+    if (taxonomies.length > 0) {
+      html += '<optgroup label="Categories">';
+      taxonomies.forEach(function (tax) {
+        const selected = matchedId === tax.id && item.object === "category" ? " selected" : "";
+        html += '<option value="category:' + tax.id + '"' + selected + ">" + escapeHtml(tax.title) + " (ID: " + tax.id + ")</option>";
+      });
+      html += "</optgroup>";
+    }
+
+    html += "</select>";
+    
+    if (matchedId) {
+      html += '<br><small style="color:#46b450;"><span class="dashicons dashicons-yes-alt"></span> Auto-matched - you can change this if needed</small>';
+    } else {
+      html += '<br><small style="color:#666;font-style:italic;">Originally a custom link - you can map it to content if needed</small>';
+    }
+
+    return html;
+  }
+
+  // Generate import preview HTML client-side (old function - keeping for backward compatibility)
   function generateImportPreview(importData) {
     const menu = importData.menu || {};
     const context = importData.export_context || {};
@@ -411,6 +649,18 @@ jQuery(document).ready(function ($) {
       return false;
     }
 
+    // Collect custom mappings from dropdowns
+    const customMappings = {};
+    $(".mp-mapping-select").each(function () {
+      const itemIndex = $(this).data("item-index");
+      const mappingValue = $(this).val();
+      if (mappingValue && mappingValue !== "custom:0") {
+        customMappings[itemIndex] = mappingValue;
+      }
+    });
+
+    console.log("Custom mappings:", customMappings);
+
     // Show spinner
     $button.prop("disabled", true);
     $("#mp-modal-cancel").prop("disabled", true);
@@ -421,6 +671,19 @@ jQuery(document).ready(function ($) {
     let menuData;
     try {
       menuData = JSON.parse(importData);
+      
+      // Apply custom mappings to menu items
+      if (menuData.menu && menuData.menu.items) {
+        menuData.menu.items.forEach(function(item, index) {
+          if (customMappings[index]) {
+            const [type, id] = customMappings[index].split(":");
+            item.custom_mapping = {
+              type: type,
+              id: parseInt(id)
+            };
+          }
+        });
+      }
     } catch (error) {
       alert("Invalid import data. Please try uploading the file again.");
       closeImportModal();
