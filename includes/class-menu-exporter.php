@@ -68,18 +68,21 @@ class Menu_Exporter {
 	/**
 	 * Get export context information
 	 *
-	 * @return array<string,string>
+	 * @return array<string,mixed>
 	 */
 	private function get_export_context(): array {
 		global $wp_version;
 
 		$theme = wp_get_theme();
+		$current_user = wp_get_current_user();
 
 		return array(
-			'site_url'   => get_site_url(),
-			'wp_version' => $wp_version,
-			'theme'      => $theme->get_stylesheet(),
+			'site_url'    => get_site_url(),
+			'wp_version'  => $wp_version,
+			'theme'       => $theme->get_stylesheet(),
 			'exported_at' => current_time('c'),
+			'exported_by' => $current_user->user_login,
+			'exported_by_id' => $current_user->ID,
 		);
 	}
 
@@ -152,17 +155,35 @@ class Menu_Exporter {
 		// Get slug for the referenced object
 		$slug = $this->get_object_slug($type, $object, $object_id);
 
-		// Get post status if applicable
+		// Get post status and object metadata if applicable
 		$status = '';
+		$object_meta = array();
+		
 		if ( in_array($type, array( 'post_type', 'post' ), true) && $object_id > 0 ) {
 			$post = get_post($object_id);
-			$status = $post ? $post->post_status : '';
+			if ( $post ) {
+				$status = $post->post_status;
+				$object_meta = array(
+					'post_type'  => $post->post_type,
+					'post_name'  => $post->post_name,
+					'post_title' => $post->post_title,
+					'post_date'  => $post->post_date,
+				);
+			}
 		} elseif ( $type === 'taxonomy' && $object_id > 0 ) {
 			$term = get_term($object_id, $object);
-			$status = $term && ! is_wp_error($term) ? 'publish' : '';
+			if ( $term && ! is_wp_error($term) ) {
+				$status = 'publish';
+				$object_meta = array(
+					'taxonomy' => $term->taxonomy,
+					'term_id'  => $term->term_id,
+					'name'     => $term->name,
+					'count'    => $term->count,
+				);
+			}
 		}
 
-		return array(
+		$item_data = array(
 			'id'        => $item->ID,
 			'parent_id' => (int) $item->menu_item_parent,
 			'order'     => (int) $item->menu_order,
@@ -180,6 +201,13 @@ class Menu_Exporter {
 				'description' => $description,
 			),
 		);
+
+		// Add object metadata if available
+		if ( ! empty($object_meta) ) {
+			$item_data['object_meta'] = $object_meta;
+		}
+
+		return $item_data;
 	}
 
 	/**
