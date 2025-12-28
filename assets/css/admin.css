@@ -524,6 +524,30 @@
 .mp-modal-body .form-table th {
   padding-left: 0;
 }
+.mp-modal-body .mp-mapping-table .mp-remove-item,
+.mp-modal-body .mp-mapping-table .mp-undo-remove {
+  transition: all 0.2s ease;
+}
+.mp-modal-body .mp-mapping-table .mp-remove-item:hover,
+.mp-modal-body .mp-mapping-table .mp-undo-remove:hover {
+  transform: scale(1.2);
+  opacity: 0.8;
+}
+.mp-modal-body .mp-mapping-table .mp-remove-item:focus,
+.mp-modal-body .mp-mapping-table .mp-undo-remove:focus {
+  outline: 2px solid #2271b1;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.mp-modal-body .mp-mapping-table .mp-remove-item:hover {
+  color: #d63638 !important;
+}
+.mp-modal-body .mp-mapping-table .mp-undo-remove:hover {
+  color: #00a32a !important;
+}
+.mp-modal-body .mp-mapping-table .mp-item-removed {
+  background-color: #fee !important;
+}
 
 .mp-modal-footer {
   padding: 16px 24px;
@@ -549,6 +573,89 @@
   .mp-modal-body,
   .mp-modal-footer {
     padding: 16px;
+  }
+}
+.mp-confirm-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100001;
+  align-items: center;
+  justify-content: center;
+}
+.mp-confirm-overlay.is-active {
+  display: flex;
+}
+
+.mp-confirm-dialog {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+  max-width: 450px;
+  width: 90%;
+  animation: mp-confirm-pop-in 0.2s ease-out;
+}
+
+@keyframes mp-confirm-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.mp-confirm-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #ddd;
+}
+.mp-confirm-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #23282d;
+}
+
+.mp-confirm-body {
+  padding: 20px;
+}
+.mp-confirm-body .mp-confirm-message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #3c434a;
+}
+.mp-confirm-body .mp-confirm-message strong {
+  color: #b32d2e;
+}
+
+.mp-confirm-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  background: #f9f9f9;
+}
+.mp-confirm-footer .button {
+  margin: 0;
+}
+
+@media screen and (max-width: 782px) {
+  .mp-confirm-dialog {
+    width: 95%;
+    max-width: 340px;
+  }
+  .mp-confirm-header,
+  .mp-confirm-body,
+  .mp-confirm-footer {
+    padding: 14px 16px;
   }
 }
 .menupilot-page--help .mp-support-cards {
