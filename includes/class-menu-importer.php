@@ -39,6 +39,12 @@ class Menu_Importer {
 	 * @return int|false Menu term ID on success, false on failure.
 	 */
 	public function import( array $import_data, string $menu_name, string $location = '' ) {
+		// Allow plugins to modify or block import
+		$pre_import = apply_filters('menupilot_pre_import', null, $import_data, $menu_name, $location);
+		if ( $pre_import !== null ) {
+			return $pre_import;
+		}
+
 		// Validate import data
 		if ( ! isset($import_data['menu']) || ! is_array($import_data['menu']) ) {
 			return false;
@@ -56,6 +62,13 @@ class Menu_Importer {
 			? trailingslashit($import_data['export_context']['site_url']) 
 			: '';
 		$this->destination_url = trailingslashit(get_site_url());
+
+		// Allow plugins to modify import data before processing
+		$import_data = apply_filters('menupilot_import_data', $import_data);
+		$menu_name = apply_filters('menupilot_import_menu_name', $menu_name, $import_data);
+
+		// Fire action before import starts
+		do_action('menupilot_before_import', $import_data, $menu_name, $location);
 
 		// Create new menu
 		$menu_id = wp_create_nav_menu($menu_name);
@@ -76,6 +89,9 @@ class Menu_Importer {
 			$locations[ $location ] = $menu_id;
 			set_theme_mod('nav_menu_locations', $locations);
 		}
+
+		// Fire action after import completes
+		do_action('menupilot_after_import', $menu_id, $import_data, $item_map);
 
 		return $menu_id;
 	}
@@ -233,12 +249,21 @@ class Menu_Importer {
 			$item_data['menu-item-description'] = $meta['description'];
 		}
 
+		// Allow plugins to modify item data before creation
+		$item_data = apply_filters('menupilot_import_menu_item_data', $item_data, $item, $menu_id);
+
+		// Fire action before item creation
+		do_action('menupilot_before_import_item', $item, $menu_id, $parent_id);
+
 		// Create the menu item
 		$new_item_id = wp_update_nav_menu_item($menu_id, 0, $item_data);
 
 		if ( is_wp_error($new_item_id) ) {
 			return false;
 		}
+
+		// Fire action after item creation
+		do_action('menupilot_after_import_item', $new_item_id, $item, $menu_id);
 
 		return $new_item_id;
 	}
