@@ -1,6 +1,6 @@
 # WordPress.org Submission Checklist
 
-This checklist helps ensure your plugin is ready for submission to the WordPress.org plugin directory.
+This checklist helps ensure MenuPilot is ready for submission to the WordPress.org plugin directory.
 
 ## Pre-Submission Checklist
 
@@ -66,13 +66,18 @@ This checklist helps ensure your plugin is ready for submission to the WordPress
 ### Testing
 
 - [ ] Tested on multiple PHP versions (7.4, 8.0, 8.1, 8.2)
-- [ ] Tested on multiple WordPress versions
-- [ ] Unit tests passing
-- [ ] Integration tests passing
+- [ ] Tested on multiple WordPress versions (5.8, 6.0, 6.1, 6.2+)
 - [ ] Manual testing completed
-- [ ] Tested with common themes
-- [ ] Tested with common plugins
-- [ ] Performance tested
+  - [ ] Export menu functionality
+  - [ ] Import menu functionality
+  - [ ] Preview and manual mapping
+  - [ ] Remove items from import
+  - [ ] URL normalization
+- [ ] Tested with common themes (Twenty Twenty-Four, GeneratePress, etc.)
+- [ ] Tested with common plugins (WooCommerce, etc.)
+- [ ] Performance tested (large menus with 100+ items)
+- [ ] REST API endpoints tested
+- [ ] Security tested (authentication, authorization, nonces)
 
 ### Legal & Licensing
 
@@ -87,9 +92,9 @@ This checklist helps ensure your plugin is ready for submission to the WordPress
 Your `readme.txt` must include:
 
 ```
-=== Plugin Name ===
-Contributors: username
-Tags: tag1, tag2
+=== MenuPilot ===
+Contributors: your-username
+Tags: menu, import, export, navigation, backup, migration
 Requires at least: 5.8
 Tested up to: 6.4
 Requires PHP: 7.4
@@ -97,42 +102,64 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Short description
+Safely import and export WordPress menus between sites with preview, intelligent matching, and zero surprises.
 
 == Description ==
-Long description
+MenuPilot allows you to safely import and export WordPress menus between sites with preview, intelligent matching, and zero surprises.
 
 == Installation ==
-Installation steps
+1. Upload the plugin files to the `/wp-content/plugins/menupilot` directory
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Navigate to MenuPilot → Settings to start exporting/importing menus
 
 == Frequently Asked Questions ==
-FAQs
+= How do I export a menu? =
+Go to MenuPilot → Settings → Export Menu tab, select a menu, and click "Export Menu".
+
+= How do I import a menu? =
+Go to MenuPilot → Settings → Import Menu tab, upload a JSON file, preview the import, and click "Import Menu".
+
+= Can I preview before importing? =
+Yes! MenuPilot shows a detailed preview with auto-matching status and allows manual mapping before import.
+
+= Does it work with custom post types? =
+Yes, MenuPilot supports Pages, Posts, Custom Post Types, Taxonomies, and Custom Links.
 
 == Screenshots ==
-1. Screenshot description
+1. Export menu interface
+2. Import preview with manual mapping
+3. Menu items mapping table
 
 == Changelog ==
-Version history
+= 1.0.0 =
+* Initial release
+* Menu export to JSON
+* Menu import with preview
+* Intelligent auto-matching
+* Manual mapping override
+* URL normalization
+* Remove items from import
 
 == Upgrade Notice ==
-Upgrade notes
+= 1.0.0 =
+Initial release of MenuPilot.
 ```
 
 ## Plugin Header Requirements
 
 ```php
 /**
- * Plugin Name: Plugin Name
- * Plugin URI: https://example.com/plugin
- * Description: Description
+ * Plugin Name: MenuPilot
+ * Plugin URI: https://menupilot.com
+ * Description: Safely import and export WordPress menus between sites with preview, intelligent matching, and zero surprises.
  * Version: 1.0.0
  * Requires at least: 5.8
  * Requires PHP: 7.4
- * Author: Author Name
- * Author URI: https://example.com
+ * Author: Your Name
+ * Author URI: https://yourwebsite.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: plugin-slug
+ * Text Domain: menupilot
  * Domain Path: /i18n/languages
  */
 ```
