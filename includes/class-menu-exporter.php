@@ -30,6 +30,12 @@ class Menu_Exporter {
 	 * @return array<string,mixed>|false Export data array or false on failure.
 	 */
 	public function export( int $menu_id ) {
+		// Allow plugins to modify or block export
+		$pre_export = apply_filters('menupilot_pre_export', null, $menu_id);
+		if ( $pre_export !== null ) {
+			return $pre_export;
+		}
+
 		// Get menu object
 		$menu = wp_get_nav_menu_object($menu_id);
 		if ( ! $menu ) {
@@ -48,7 +54,14 @@ class Menu_Exporter {
 			'plugin'         => $this->get_plugin_info(),
 			'export_context' => $this->get_export_context(),
 			'menu'           => $this->build_menu_data($menu, $menu_items),
+			'extensions'     => array(), // For Pro/third-party extensions
 		);
+
+		// Allow plugins to add custom data
+		$export_data = apply_filters('menupilot_export_data', $export_data, $menu, $menu_items);
+
+		// Fire action after export is complete
+		do_action('menupilot_export_complete', $export_data, $menu_id);
 
 		return $export_data;
 	}
@@ -59,10 +72,12 @@ class Menu_Exporter {
 	 * @return array<string,string>
 	 */
 	private function get_plugin_info(): array {
-		return array(
+		$plugin_info = array(
 			'name'    => 'MenuPilot',
 			'version' => MENUPILOT_VERSION,
 		);
+
+		return apply_filters('menupilot_export_plugin_info', $plugin_info);
 	}
 
 	/**
@@ -76,7 +91,7 @@ class Menu_Exporter {
 		$theme = wp_get_theme();
 		$current_user = wp_get_current_user();
 
-		return array(
+		$context = array(
 			'site_url'    => get_site_url(),
 			'wp_version'  => $wp_version,
 			'theme'       => $theme->get_stylesheet(),
@@ -84,6 +99,8 @@ class Menu_Exporter {
 			'exported_by' => $current_user->user_login,
 			'exported_by_id' => $current_user->ID,
 		);
+
+		return apply_filters('menupilot_export_context', $context);
 	}
 
 	/**
@@ -207,7 +224,8 @@ class Menu_Exporter {
 			$item_data['object_meta'] = $object_meta;
 		}
 
-		return $item_data;
+		// Allow plugins to modify item data
+		return apply_filters('menupilot_export_menu_item', $item_data, $item);
 	}
 
 	/**

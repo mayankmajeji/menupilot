@@ -98,6 +98,9 @@ class Init
 		// Initialize components
 		$this->settings = new Settings();
 
+		// Initialize Column Manager
+		Column_Manager::init_default_columns();
+
 		// Initialize AJAX handler (for settings export only)
 		if (is_admin()) {
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-ajax-handler.php';
@@ -199,6 +202,7 @@ class Init
 				'nonce' => wp_create_nonce('wp_rest'),
 				'siteUrl' => get_site_url(),
 				'registeredLocations' => get_registered_nav_menus(),
+				'previewColumns' => Column_Manager::get_columns_for_js(),
 			)
 		);
 	}
