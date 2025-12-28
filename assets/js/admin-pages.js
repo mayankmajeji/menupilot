@@ -268,10 +268,10 @@ jQuery(document).ready(function ($) {
     // Menu Items Mapping Section
     html += '<div class="mp-card" style="margin-top:20px;">';
     html += "<h3>Menu Items Mapping</h3>";
-    html += '<p style="color:#666;">Review and adjust how each menu item will be imported. You can change the mapping or keep items as custom links.</p>';
+    html += '<p style="color:#666;">Review and adjust how each menu item will be imported. You can change the mapping, keep items as custom links, or remove items you don\'t want to import.</p>';
     
-    html += '<table class="widefat striped"><thead><tr>';
-    html += "<th>Title</th><th>Type</th><th>Auto Status</th><th>Map To</th>";
+    html += '<table class="widefat striped mp-mapping-table"><thead><tr>';
+    html += "<th style='width: 30%;'>Title</th><th style='width: 15%;'>Type</th><th style='width: 25%;'>Auto Status</th><th style='width: 25%;'>Map To</th><th style='width: 5%; text-align: center;'>Remove</th>";
     html += "</tr></thead><tbody>";
 
     items.forEach(function (item, index) {
@@ -279,11 +279,12 @@ jQuery(document).ready(function ($) {
       const itemType = getItemTypeLabel(item);
       const autoStatus = getAutoMatchStatus(item, mappingOptions);
       
-      html += "<tr>";
+      html += "<tr class='mp-mapping-row' data-item-index='" + index + "'>";
       html += "<td>" + escapeHtml(indent + item.title) + "</td>";
       html += "<td>" + itemType + "</td>";
       html += "<td>" + autoStatus.html + "</td>";
       html += "<td>" + generateMappingDropdown(item, index, mappingOptions, autoStatus.matchedId) + "</td>";
+      html += "<td style='text-align: center;'><button type='button' class='mp-remove-item' data-item-index='" + index + "' title='Remove this item from import' style='color: #b32d2e; cursor: pointer; border: none; background: transparent; padding: 4px 8px;'><span class='dashicons dashicons-trash'></span></button></td>";
       html += "</tr>";
     });
 
@@ -620,6 +621,131 @@ jQuery(document).ready(function ($) {
     }
   });
 
+  // Show remove confirmation modal
+  function showRemoveConfirmModal(itemTitle, onConfirm) {
+    // Create modal HTML if it doesn't exist
+    if ($("#mp-confirm-modal").length === 0) {
+      const modalHtml = `
+        <div id="mp-confirm-modal" class="mp-confirm-overlay">
+          <div class="mp-confirm-dialog">
+            <div class="mp-confirm-header">
+              <h3>Confirm Removal</h3>
+            </div>
+            <div class="mp-confirm-body">
+              <p class="mp-confirm-message"></p>
+            </div>
+            <div class="mp-confirm-footer">
+              <button type="button" class="button" id="mp-confirm-cancel">Cancel</button>
+              <button type="button" class="button button-primary" id="mp-confirm-yes">Remove</button>
+            </div>
+          </div>
+        </div>
+      `;
+      $("body").append(modalHtml);
+    }
+
+    // Store the callback
+    $("#mp-confirm-modal").data("onConfirm", onConfirm);
+
+    // Set the message
+    $("#mp-confirm-modal .mp-confirm-message").html(
+      'Are you sure you want to remove <strong>"' + escapeHtml(itemTitle) + '"</strong> from the import?'
+    );
+
+    // Show modal
+    $("#mp-confirm-modal").addClass("is-active");
+  }
+
+  // Close remove confirmation modal
+  function closeRemoveConfirmModal() {
+    $("#mp-confirm-modal").removeClass("is-active");
+    $("#mp-confirm-modal").removeData("onConfirm");
+  }
+
+  // Confirm removal
+  $(document).on("click", "#mp-confirm-yes", function () {
+    const onConfirm = $("#mp-confirm-modal").data("onConfirm");
+    if (typeof onConfirm === "function") {
+      onConfirm();
+    }
+    closeRemoveConfirmModal();
+  });
+
+  // Cancel removal
+  $(document).on("click", "#mp-confirm-cancel", function () {
+    closeRemoveConfirmModal();
+  });
+
+  // Close on overlay click
+  $(document).on("click", "#mp-confirm-modal", function (e) {
+    if (e.target === this) {
+      closeRemoveConfirmModal();
+    }
+  });
+
+  // Close on Escape key
+  $(document).on("keydown", function (e) {
+    if (e.key === "Escape" && $("#mp-confirm-modal").hasClass("is-active")) {
+      closeRemoveConfirmModal();
+    }
+  });
+
+  // Import Modal - Handle item removal
+  $(document).on("click", ".mp-remove-item", function (e) {
+    e.preventDefault();
+    const $button = $(this);
+    const $row = $button.closest(".mp-mapping-row");
+    const itemIndex = $button.data("item-index");
+    const itemTitle = $row.find("td:first").text().trim();
+
+    // Show confirmation modal
+    showRemoveConfirmModal(itemTitle, function() {
+      // User confirmed - proceed with removal
+      $row.addClass("mp-item-removed");
+      $row.css({
+        opacity: "0.4",
+        textDecoration: "line-through",
+        backgroundColor: "#fee"
+      });
+      
+      // Replace remove button with undo option
+      $button.replaceWith(
+        '<button type="button" class="mp-undo-remove" data-item-index="' + 
+        itemIndex + 
+        '" title="Undo removal" style="color: #46b450; cursor: pointer; border: none; background: transparent; padding: 4px 8px;"><span class="dashicons dashicons-undo"></span></button>'
+      );
+      
+      // Mark row as removed (will be filtered out during import)
+      $row.attr("data-removed", "true");
+    });
+  });
+
+  // Import Modal - Handle undo removal
+  $(document).on("click", ".mp-undo-remove", function (e) {
+    e.preventDefault();
+    const $button = $(this);
+    const $row = $button.closest(".mp-mapping-row");
+    const itemIndex = $button.data("item-index");
+
+    // Restore visual appearance
+    $row.removeClass("mp-item-removed");
+    $row.css({
+      opacity: "1",
+      textDecoration: "none",
+      backgroundColor: ""
+    });
+    
+    // Replace undo button with remove button
+    $button.replaceWith(
+      '<button type="button" class="mp-remove-item" data-item-index="' + 
+      itemIndex + 
+      '" title="Remove this item from import" style="color: #b32d2e; cursor: pointer; border: none; background: transparent; padding: 4px 8px;"><span class="dashicons dashicons-trash"></span></button>'
+    );
+    
+    // Remove the removed marker
+    $row.removeAttr("data-removed");
+  });
+
   // Import Modal - Handle import execution
   $(document).on("click", "#mp-modal-import", function (e) {
     e.preventDefault();
@@ -651,15 +777,28 @@ jQuery(document).ready(function ($) {
 
     // Collect custom mappings from dropdowns
     const customMappings = {};
-    $(".mp-mapping-select").each(function () {
-      const itemIndex = $(this).data("item-index");
-      const mappingValue = $(this).val();
+    const removedItems = [];
+    
+    $(".mp-mapping-row").each(function () {
+      const $row = $(this);
+      const itemIndex = $row.data("item-index");
+      
+      // Check if item is marked for removal
+      if ($row.attr("data-removed") === "true") {
+        removedItems.push(itemIndex);
+        return; // Skip this item
+      }
+      
+      // Collect mapping for non-removed items
+      const $select = $row.find(".mp-mapping-select");
+      const mappingValue = $select.val();
       if (mappingValue && mappingValue !== "custom:0") {
         customMappings[itemIndex] = mappingValue;
       }
     });
 
     console.log("Custom mappings:", customMappings);
+    console.log("Removed items:", removedItems);
 
     // Show spinner
     $button.prop("disabled", true);
@@ -672,15 +811,37 @@ jQuery(document).ready(function ($) {
     try {
       menuData = JSON.parse(importData);
       
-      // Apply custom mappings to menu items
+      // Apply custom mappings and remove excluded items from menu items
       if (menuData.menu && menuData.menu.items) {
-        menuData.menu.items.forEach(function(item, index) {
-          if (customMappings[index]) {
-            const [type, id] = customMappings[index].split(":");
+        // Filter out removed items
+        const originalItems = menuData.menu.items;
+        menuData.menu.items = originalItems.filter(function(item, index) {
+          return removedItems.indexOf(index) === -1;
+        });
+        
+        // Apply custom mappings to remaining items (adjust indices)
+        menuData.menu.items.forEach(function(item, newIndex) {
+          // Find original index
+          const originalIndex = originalItems.indexOf(item);
+          
+          if (customMappings[originalIndex]) {
+            const [type, id] = customMappings[originalIndex].split(":");
             item.custom_mapping = {
               type: type,
               id: parseInt(id)
             };
+          }
+        });
+        
+        // Update parent_id references for remaining items
+        // If parent was removed, make child a top-level item
+        const removedIds = removedItems.map(function(idx) {
+          return originalItems[idx] ? originalItems[idx].id : null;
+        }).filter(Boolean);
+        
+        menuData.menu.items.forEach(function(item) {
+          if (item.parent_id && removedIds.indexOf(item.parent_id) !== -1) {
+            item.parent_id = 0; // Make it a top-level item
           }
         });
       }
