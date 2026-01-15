@@ -28,20 +28,6 @@ Future plans and feature ideas for MenuPilot.
 - Default behaviors configuration
 - **Status:** Planned
 
-#### Export History
-
-- Log all exports
-- View export history
-- Re-download previous exports
-- **Status:** Planned
-
-#### Bulk Export
-
-- Export multiple menus at once
-- Select menus from list
-- Download as ZIP file
-- **Status:** Under Consideration
-
 ---
 
 ## Version 1.2.0 (Free) - Q2 2026
@@ -115,6 +101,24 @@ Future plans and feature ideas for MenuPilot.
 - Export via command line
 - Import via command line
 - Bulk operations
+- **Status:** Planned for Pro
+
+#### Bulk Export
+
+- Export multiple menus at once
+- Select menus from list
+- Download as ZIP file
+- Batch operations
+- **Status:** Planned for Pro
+
+#### Export & Import History
+
+- Log all exports and imports
+- View complete history with timestamps
+- Re-download previous exports
+- View import details and mappings
+- Filter and search history
+- Export history to CSV
 - **Status:** Planned for Pro
 
 ---
