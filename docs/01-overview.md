@@ -152,6 +152,8 @@ MenuPilot V1 focuses on **safe import/export**. These features are planned for f
 - ❌ Menu duplication
 - ❌ Merge/replace existing menus
 - ❌ Scheduled backups
+- ❌ Bulk Export (Pro feature)
+- ❌ Export/Import History (Pro feature)
 - ❌ WP-CLI commands
 - ❌ Mega menu support
 - ❌ Multisite sync

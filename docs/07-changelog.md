@@ -102,8 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned for 1.1.0
 - Quick export metabox on individual menu pages
 - Export/import settings UI
-- Bulk export (multiple menus)
-- Export history/logging
 
 ### Planned for 2.0.0 (Pro)
 - Automatic backups on menu save
@@ -112,6 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Merge/replace existing menus
 - Scheduled backups
 - WP-CLI commands
+- Bulk Export (export multiple menus at once, download as ZIP)
+- Export & Import History (log all exports/imports, view history, re-download exports)
 - Mega menu support
 - Conditional visibility
 - SEO metadata per item
