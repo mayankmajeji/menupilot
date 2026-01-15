@@ -42,6 +42,7 @@ Complete guide to using MenuPilot for menu import and export.
 ### Export File Contents
 
 The exported JSON file contains:
+
 - Menu name and slug
 - All menu items with hierarchy
 - Item types (Page, Post, Custom Link, etc.)
@@ -70,6 +71,7 @@ The exported JSON file contains:
 The preview modal shows:
 
 #### Menu Details
+
 - Menu name (editable)
 - Total items
 - Source site URL
@@ -77,6 +79,7 @@ The preview modal shows:
 - Export timestamp
 
 #### Menu Items Table
+
 - **Title:** Menu item name with hierarchy
 - **Type:** Page, Post, Custom Link, etc.
 - **Auto Status:** Matched, Not Found, or Custom Link
@@ -111,6 +114,7 @@ See [Removing Items](#removing-items) section below.
 ### Menu Details Section
 
 Shows high-level information:
+
 - **Menu Name:** What the menu will be called
 - **Total Items:** Number of items in menu
 - **Exported From:** Source site URL
@@ -122,42 +126,51 @@ Shows high-level information:
 Each row represents one menu item:
 
 #### Column 1: Title
+
 - Menu item title
 - Indented with "—" for child items
 - Shows hierarchy structure
 
 #### Column 2: Type
+
 - **Page:** WordPress page
 - **Post:** WordPress post
 - **Category:** Taxonomy term
 - **Custom Link:** External or custom URL
 
 #### Column 3: Auto Status
+
 Shows matching status:
 
 **✅ Matched**
+
 - Green checkmark icon
 - Shows matched item name and ID
 - Example: "Matched: Sample Page (ID: 2)"
 
 **⚠️ Not Found**
+
 - Warning icon
 - Will be converted to custom link
 - Example: "Will be converted to custom link"
 
 **🔗 Custom Link**
+
 - Link icon
 - Will be imported as-is
 - Example: "Custom link - will be imported as-is"
 
 #### Column 4: Map To
+
 Dropdown to manually change mapping:
+
 - **Keep as Custom Link:** Default for unmatched items
 - **Posts:** List of all posts
 - **Pages:** List of all pages
 - **Categories:** List of all categories
 
 #### Column 5: Remove
+
 - Trash icon button
 - Click to remove item from import
 - Can undo removal
@@ -165,6 +178,7 @@ Dropdown to manually change mapping:
 ### Warning Messages
 
 Preview may show warnings:
+
 - ⚠️ Missing pages/posts/taxonomies
 - ⚠️ Items that will be converted to custom links
 - ⚠️ Theme location availability
@@ -176,6 +190,7 @@ Preview may show warnings:
 ### When to Use Manual Mapping
 
 Use manual mapping when:
+
 - Auto-match found wrong item
 - Want to map to different content
 - Source content doesn't exist on destination
@@ -193,14 +208,17 @@ Use manual mapping when:
 ### Mapping Examples
 
 #### Example 1: Wrong Auto-Match
+
 - Auto-match: "About Us" → Matched to wrong page
 - Solution: Use dropdown to select correct "About Us" page
 
 #### Example 2: Missing Page
+
 - Status: "Not Found" (page doesn't exist)
 - Solution: Map to similar page or keep as custom link
 
 #### Example 3: Change Type
+
 - Original: Page
 - Need: Custom Link with different URL
 - Solution: Select "Keep as Custom Link" then edit URL after import
@@ -263,11 +281,13 @@ Automatic replacement of source site URLs with destination site URLs.
 **Destination Site:** `https://example.com`
 
 **Before:**
+
 ```
 https://staging.example.com/about-us/
 ```
 
 **After:**
+
 ```
 https://example.com/about-us/
 ```
@@ -410,4 +430,3 @@ https://example.com/about-us/
 ---
 
 **Next:** [Developer Guide](./05-developer-guide.md)
-
