@@ -339,7 +339,7 @@ class Init
 			65
 		);
 
-		// Settings submenu (duplicate of main page for consistency)
+		// Settings submenu (1) - duplicate of main page for consistency
 		add_submenu_page(
 			'menupilot-settings',
 			__('Settings', 'menupilot'),
@@ -349,17 +349,7 @@ class Init
 			array($this, 'render_settings_page')
 		);
 
-		// Export Menu submenu
-		add_submenu_page(
-			'menupilot-settings',
-			__('Export Menu', 'menupilot'),
-			__('Export Menu', 'menupilot'),
-			'manage_options',
-			'menupilot-export',
-			array($this, 'render_export_page')
-		);
-
-		// Import Menu submenu
+		// Import Menu submenu (2)
 		add_submenu_page(
 			'menupilot-settings',
 			__('Import Menu', 'menupilot'),
@@ -369,7 +359,17 @@ class Init
 			array($this, 'render_import_page')
 		);
 
-		// Tools submenu
+		// Export Menu submenu (3)
+		add_submenu_page(
+			'menupilot-settings',
+			__('Export Menu', 'menupilot'),
+			__('Export Menu', 'menupilot'),
+			'manage_options',
+			'menupilot-export',
+			array($this, 'render_export_page')
+		);
+
+		// Tools submenu (4)
 		add_submenu_page(
 			'menupilot-settings',
 			__('Tools', 'menupilot'),
@@ -379,7 +379,7 @@ class Init
 			array($this, 'render_tools_page')
 		);
 
-		// Help submenu
+		// Help submenu (5)
 		add_submenu_page(
 			'menupilot-settings',
 			__('Help', 'menupilot'),

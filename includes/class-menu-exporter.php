@@ -286,8 +286,33 @@ class Menu_Exporter {
 			return 'menu-export-' . gmdate('Y-m-d-His') . '.json';
 		}
 
-		$slug = sanitize_file_name($menu->slug);
-		return sprintf('menu-%s-%s.json', $slug, gmdate('Y-m-d-His'));
+		// Get filename pattern from settings
+		$settings = new Settings();
+		$pattern = $settings->get_option('export_filename_pattern', 'menu-{slug}-{date}-{time}');
+		
+		// Replace placeholders
+		$date = gmdate('Y-m-d');
+		$time = gmdate('His');
+		$site_name = sanitize_file_name(get_bloginfo('name'));
+		
+		$filename = str_replace(
+			array('{name}', '{slug}', '{date}', '{time}', '{site-name}'),
+			array(
+				sanitize_file_name($menu->name),
+				sanitize_file_name($menu->slug),
+				$date,
+				$time,
+				$site_name
+			),
+			$pattern
+		);
+		
+		// Ensure .json extension
+		if ( ! str_ends_with($filename, '.json') ) {
+			$filename .= '.json';
+		}
+		
+		return $filename;
 	}
 
 	/**

@@ -27,10 +27,14 @@ class Settings {
 	 * @var array<string, mixed>
 	 */
 	private array $defaults = array(
-		// Add your default settings here
-		// Example:
-		// 'api_key' => '',
-		// 'enable_feature' => false,
+		// Import Settings
+		'enable_url_normalization' => true,
+		'unmatched_items_behavior' => 'convert_to_custom_link',
+		'default_menu_name_pattern' => '{original_name}',
+		'default_menu_name_pattern_custom' => '',
+		// Export Settings
+		'export_filename_pattern' => 'menu-{slug}-{date}-{time}',
+		'export_filename_pattern_custom' => '',
 	);
 
 	/**
@@ -122,6 +126,26 @@ class Settings {
 			$input = array();
 		}
 
+		// Handle custom menu name pattern
+		if ( isset($input['default_menu_name_pattern']) && $input['default_menu_name_pattern'] === 'custom' ) {
+			if ( isset($input['default_menu_name_pattern_custom']) && ! empty($input['default_menu_name_pattern_custom']) ) {
+				$input['default_menu_name_pattern'] = sanitize_text_field($input['default_menu_name_pattern_custom']);
+			} else {
+				// If custom is selected but no value, fall back to default
+				$input['default_menu_name_pattern'] = '{original_name}';
+			}
+		}
+
+		// Handle custom export filename pattern
+		if ( isset($input['export_filename_pattern']) && $input['export_filename_pattern'] === 'custom' ) {
+			if ( isset($input['export_filename_pattern_custom']) && ! empty($input['export_filename_pattern_custom']) ) {
+				$input['export_filename_pattern'] = sanitize_text_field($input['export_filename_pattern_custom']);
+			} else {
+				// If custom is selected but no value, fall back to default
+				$input['export_filename_pattern'] = 'menu-{slug}-{date}-{time}';
+			}
+		}
+
 		$sanitized = array();
 		$fields_structure = $this->get_fields_structure();
 
@@ -172,6 +196,14 @@ class Settings {
 					}
 				}
 			}
+		}
+
+		// Save custom pattern values separately for display purposes
+		if ( isset($input['default_menu_name_pattern_custom']) ) {
+			$sanitized['default_menu_name_pattern_custom'] = sanitize_text_field($input['default_menu_name_pattern_custom']);
+		}
+		if ( isset($input['export_filename_pattern_custom']) ) {
+			$sanitized['export_filename_pattern_custom'] = sanitize_text_field($input['export_filename_pattern_custom']);
 		}
 
 		add_settings_error(

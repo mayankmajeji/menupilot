@@ -1,103 +1,408 @@
 // Form styles for MenuPilot
 .mp-upload-area {
-	border: 2px dashed #d9d7d8;
-	border-radius: 8px;
-	padding: 40px;
-	text-align: center;
-	transition: all 200ms ease-in-out;
-	cursor: pointer;
-	
-	&:hover {
-		border-color: #2271b1;
-		background: rgba(34, 113, 177, 0.02);
-	}
-	
-	input[type="file"] {
-		display: none;
-	}
-	
-	.mp-upload-label {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 16px;
-		cursor: pointer;
-		
-		.dashicons {
-			color: #2271b1;
-		}
-		
-		.mp-upload-text {
-			strong {
-				font-size: 16px;
-				color: #1d2327;
-			}
-			
-			.description {
-				font-size: 13px;
-				color: #646970;
-			}
-		}
-	}
-	
-	&.has-file {
-		border-color: #46b450;
-		background: rgba(70, 180, 80, 0.05);
-	}
+  border: 2px dashed #d9d7d8;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  transition: all 200ms ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--mp-color-primary);
+    background: rgba(83, 68, 244, 0.02);
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  .mp-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+
+    .dashicons {
+      color: var(--mp-color-primary);
+    }
+
+    .mp-upload-text {
+      strong {
+        font-size: 16px;
+        color: var(--mp-color-text);
+      }
+
+      .description {
+        font-size: 13px;
+        color: var(--mp-color-text-secondary);
+      }
+    }
+  }
+
+  &.has-file {
+    border-color: #1e8c1e;
+    background: rgba(30, 140, 30, 0.05);
+  }
 }
 
 // Table styles
 .menupilot-page {
-	.widefat {
-		margin-top: 20px;
-		border-radius: 6px;
-		overflow: hidden;
-		
-		thead {
-			background: #f9f9f9;
-			
-			th {
-				font-weight: 600;
-				color: #23282d;
-				padding: 12px;
-			}
-		}
-		
-		tbody {
-			tr {
-				&:hover {
-					background: #f9f9f9;
-				}
-			}
-			
-			td {
-				padding: 12px;
-				vertical-align: middle;
-			}
-		}
-		
-		.check-column {
-			width: 40px;
-			text-align: center;
-		}
-	}
-	
-	// File info display
-	#mp-file-info {
-		background: #f0f6fc;
-		border: 1px solid #2271b1;
-		border-radius: 4px;
-		padding: 12px;
-		text-align: left;
-		
-		strong {
-			color: #1d2327;
-		}
-		
-		#mp-file-name {
-			color: #2271b1;
-			font-weight: 500;
-		}
-	}
+  .widefat {
+    margin-top: 20px;
+    border-radius: 6px;
+    overflow: hidden;
+
+    thead {
+      background: #f9f9f9;
+
+      th {
+        font-weight: 600;
+        color: #23282d;
+        padding: 12px;
+      }
+    }
+
+    tbody {
+      tr {
+        &:hover {
+          background: #f9f9f9;
+        }
+      }
+
+      td {
+        padding: 12px;
+        vertical-align: middle;
+      }
+    }
+
+    .check-column {
+      width: 40px;
+      text-align: center;
+    }
+  }
+
+  // File info display
+  #mp-file-info {
+    background: rgba(83, 68, 244, 0.05);
+    border: 1px solid var(--mp-color-primary);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: left;
+
+    strong {
+      color: var(--mp-color-text);
+    }
+
+    #mp-file-name {
+      color: var(--mp-color-primary);
+      font-weight: 500;
+    }
+  }
+
+  // Form table styles (WordPress standard)
+  .form-table {
+    th {
+      width: 200px;
+      padding: 15px 10px;
+    }
+
+    td {
+      padding: 15px 10px;
+    }
+
+    .description {
+      margin-top: 5px;
+      color: var(--mp-color-text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    input[type="checkbox"] {
+      margin-top: 2px;
+    }
+
+    select {
+      min-width: 200px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="url"],
+    input[type="number"] {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
 }
 
+// Form table styles also available globally in menupilot pages
+.menupilot-page .form-table {
+  th {
+    width: 200px;
+    padding: 15px 10px;
+  }
+
+  td {
+    padding: 15px 10px;
+  }
+
+  .description {
+    margin-top: 5px;
+    color: var(--mp-color-text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  input[type="checkbox"] {
+    margin-top: 2px;
+  }
+
+  select {
+    min-width: 200px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="url"],
+  input[type="number"] {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+// Section structure (EXACT match from TurnstileWP)
+.mp-section {
+  //   margin-top: 20px;
+  //   padding: 20px 0;
+
+  h3 {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 27px;
+    color: var(--mp-color-text);
+    margin: 0;
+  }
+
+  .mp-sub-section h2 {
+    margin-bottom: 16px;
+  }
+
+  .mp-sub-section {
+    background-color: #fcfcfd;
+    // border: solid 1px #d8d8d8;
+    border-top: none;
+    padding: 0 0 1rem 0;
+
+    .mp-field {
+      display: -webkit-box;
+      display: -moz-box;
+      display: flexbox;
+      display: flex;
+      display: flex;
+      border-top: solid 1px #d8d8d8;
+      background-color: #fcfcfd;
+      margin: 0;
+      padding: 22px 0 22px 22px;
+
+      .mp-label {
+        display: -webkit-inline-box;
+        display: -moz-inline-box;
+        display: inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-direction: normal;
+        -webkit-box-orient: horizontal;
+        -moz-box-direction: normal;
+        -moz-box-orient: horizontal;
+        flex-direction: row;
+        width: 200px;
+        min-width: 200px;
+        color: #1d2327;
+        font-weight: 400;
+        text-shadow: none;
+        vertical-align: baseline;
+      }
+
+      .mp-option {
+        display: -webkit-inline-box;
+        display: -moz-inline-box;
+        display: inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        padding-left: 40px;
+        -webkit-box-direction: normal;
+        -webkit-box-orient: vertical;
+        -moz-box-direction: normal;
+        -moz-box-orient: vertical;
+        flex-direction: column;
+        padding-right: 20px;
+
+        .mp-description {
+          p {
+            color: #999;
+            margin-top: 6px;
+
+            &:last-child {
+              /* margin-bottom: 0; */
+            }
+          }
+        }
+      }
+    }
+    .mp-actions {
+      padding: 0 32px;
+    }
+  }
+
+  .mp-field-group {
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+    padding: 32px;
+    min-width: 255px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    background: #fff;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .mp-group-title {
+      h2 {
+        margin: 0;
+        line-height: 1;
+        padding-bottom: 24px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        align-items: center;
+        display: flex;
+      }
+    }
+
+    .mp-field {
+      display: -webkit-box;
+      display: -moz-box;
+      display: flexbox;
+      display: flex;
+      display: flex;
+      border-top: none;
+      background-color: #fff;
+      margin: 0;
+      padding: 22px 0 22px 22px;
+
+      .mp-label {
+        display: -webkit-inline-box;
+        display: -moz-inline-box;
+        display: inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-direction: normal;
+        -webkit-box-orient: horizontal;
+        -moz-box-direction: normal;
+        -moz-box-orient: horizontal;
+        flex-direction: row;
+        width: 200px;
+        min-width: 200px;
+        color: #1d2327;
+        font-weight: 400;
+        text-shadow: none;
+        vertical-align: baseline;
+      }
+
+      .mp-option {
+        display: -webkit-inline-box;
+        display: -moz-inline-box;
+        display: inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        padding-left: 40px;
+        -webkit-box-direction: normal;
+        -webkit-box-orient: vertical;
+        -moz-box-direction: normal;
+        -moz-box-orient: vertical;
+        flex-direction: column;
+        padding-right: 20px;
+
+        .mp-description {
+          p {
+            color: #999;
+            margin-top: 6px;
+
+            &:last-child {
+              /* margin-bottom: 0; */
+            }
+          }
+        }
+      }
+
+      &:not(:last-child) {
+        padding-bottom: 0;
+      }
+    }
+  }
+
+  .mp-content-field {
+    margin-bottom: 32px;
+
+    &:last-child {
+      padding-bottom: 22px;
+    }
+  }
+}
+
+.mp-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+// Toggle switch styles (matching TurnstileWP)
+.mp-toggle {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.mp-toggle input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.mp-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #e4e4e4;
+  border-radius: 24px;
+  transition: background 0.2s;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+.mp-toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.mp-toggle input:checked + .mp-toggle-slider {
+  background-color: var(--mp-color-primary);
+}
+
+.mp-toggle input:checked + .mp-toggle-slider::before {
+  transform: translateX(22px);
+}
