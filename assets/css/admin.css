@@ -147,6 +147,13 @@
   align-items: start;
   transition: grid-template-columns 200ms ease-in-out;
 }
+.mp-2col.mp-2col--no-sidebar {
+  grid-template-columns: 1fr;
+}
+.mp-2col.mp-2col--no-sidebar .mp-2col-content {
+  grid-column: 1/-1;
+  width: 100%;
+}
 
 .mp-vtabs {
   border-right: 1px solid #e5e7eb;
@@ -204,6 +211,11 @@
 
 .mp-2col-content {
   min-width: 0;
+  background: #fff;
+}
+
+.mp-content {
+  background: #fff;
 }
 
 .mp-content-inner {

@@ -29,6 +29,8 @@ $is_active = function (string $slug) use ($current_page): string {
         </div>
         <nav class="mp-nav">
             <a class="mp-nav-item<?php echo esc_attr($is_active('menupilot-settings')); ?>" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-settings')); ?>">Settings</a>
+            <a class="mp-nav-item<?php echo esc_attr($is_active('menupilot-export')); ?>" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-export')); ?>">Export Menu</a>
+            <a class="mp-nav-item<?php echo esc_attr($is_active('menupilot-import')); ?>" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-import')); ?>">Import Menu</a>
             <a class="mp-nav-item<?php echo esc_attr($is_active('menupilot-tools')); ?>" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-tools')); ?>">Tools</a>
             <a class="mp-nav-item<?php echo esc_attr($is_active('menupilot-help')); ?>" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-help')); ?>">Help</a>
             <span class="mp-version">v<?php echo esc_html($plugin_version); ?></span>
