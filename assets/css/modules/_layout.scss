@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid #e5e7eb;
   gap: 16px;
   background: #fff;
   border-radius: 6px 6px 0 0;
@@ -15,7 +15,7 @@
     align-items: center;
 
     .dashicons {
-      color: #2271b1;
+      color: var(--mp-color-primary);
     }
   }
 
@@ -24,12 +24,12 @@
       margin: 0 0 6px;
       font-size: 24px;
       font-weight: 600;
-      color: #1d2327;
+      color: var(--mp-color-text);
     }
 
     .mp-page-desc {
       margin: 0;
-      color: #646970;
+      color: var(--mp-color-text-secondary);
       font-size: 14px;
     }
   }
@@ -70,9 +70,9 @@
   background: transparent;
   border-width: 1px 0;
   border-style: solid;
-  border-bottom-color: #e7e7e7;
+  border-bottom-color: #e5e7eb;
   border-top: none;
-  color: #545473;
+  color: var(--mp-color-text-secondary);
   font-weight: 400;
   text-decoration: none;
   font-size: 13px;
@@ -82,13 +82,13 @@
   transition: all 150ms ease-in-out;
 
   &:hover {
-    box-shadow: inset 4px 0 0 0 #2271b1;
-    color: #2271b1;
+    box-shadow: inset 4px 0 0 0 var(--mp-color-primary);
+    color: var(--mp-color-primary);
   }
 
   &.is-active {
-    box-shadow: inset 4px 0 0 0 #2271b1;
-    color: #23282d;
+    box-shadow: inset 4px 0 0 0 var(--mp-color-primary);
+    color: var(--mp-color-text);
     font-weight: 600;
   }
 
@@ -118,6 +118,7 @@
 .mp-2col-content {
   min-width: 0;
   background: #fff;
+  border-left: 1px solid #e6e7eb;
 }
 
 .mp-content {
@@ -125,8 +126,8 @@
 }
 
 .mp-content-inner {
-  padding: 32px;
-  background: #f9f9f9;
+  // padding: 32px;
+  // background: #fff;
 }
 
 // Collapsed state for vertical tabs
@@ -174,13 +175,13 @@
   .wp-core-ui {
     .button-primary {
       color: #fff;
-      background: #2271b1;
-      border: 1px solid #2271b1;
+      background: var(--mp-color-primary);
+      border: 1px solid var(--mp-color-primary);
 
       &:hover,
       &:focus {
-        background: #135e96;
-        border-color: #135e96;
+        background: var(--mp-color-accent);
+        border-color: var(--mp-color-accent);
       }
     }
   }
@@ -198,7 +199,7 @@
   gap: 6px;
   padding: 6px 10px;
   border: 1px solid #d9d7d8;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #fff;
   color: #333;
   cursor: pointer;

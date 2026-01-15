@@ -305,6 +305,14 @@ class Menu_Importer {
 	 * @return string Normalized URL.
 	 */
 	private function normalize_url( string $url ): string {
+		// Check if URL normalization is enabled
+		$settings = new Settings();
+		$enable_normalization = $settings->get_option('enable_url_normalization', true);
+		
+		if ( ! $enable_normalization ) {
+			return $url;
+		}
+
 		// If URL is empty, return it as is
 		if ( empty($url) ) {
 			return $url;
