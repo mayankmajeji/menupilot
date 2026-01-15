@@ -12,6 +12,7 @@ namespace MenuPilot\Rest;
 
 use MenuPilot\Menu_Exporter;
 use MenuPilot\Menu_Importer;
+use MenuPilot\Settings;
 use WP_REST_Controller;
 use WP_REST_Server;
 use WP_Error;
@@ -239,6 +240,15 @@ class REST_Controller extends WP_REST_Controller
 			);
 		}
 
+		// Apply default menu name pattern if menu_name is empty or uses default
+		if ( empty($menu_name) || $menu_name === (isset($menu_data['menu']['name']) ? $menu_data['menu']['name'] : '') ) {
+			$settings = new Settings();
+			$pattern = $settings->get_option('default_menu_name_pattern', '{original_name}');
+			$original_name = isset($menu_data['menu']['name']) ? $menu_data['menu']['name'] : __('Imported Menu', 'menupilot');
+			
+			$menu_name = $this->apply_menu_name_pattern($pattern, $original_name);
+		}
+
 		// Check if menu with same name already exists
 		$existing_menu = wp_get_nav_menu_object($menu_name);
 		if ($existing_menu) {
@@ -354,5 +364,25 @@ class REST_Controller extends WP_REST_Controller
 			'success' => true,
 			'options' => $options,
 		));
+	}
+
+	/**
+	 * Apply menu name pattern
+	 *
+	 * @param string $pattern Pattern string.
+	 * @param string $original_name Original menu name.
+	 * @return string Processed menu name.
+	 */
+	private function apply_menu_name_pattern( string $pattern, string $original_name ): string {
+		$date = gmdate('Y-m-d');
+		$time = gmdate('His');
+		
+		$menu_name = str_replace(
+			array('{original_name}', '{date}', '{time}'),
+			array($original_name, $date, $time),
+			$pattern
+		);
+		
+		return sanitize_text_field($menu_name);
 	}
 }
