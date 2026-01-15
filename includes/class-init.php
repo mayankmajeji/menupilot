@@ -48,6 +48,8 @@ class Init
 	private const PLUGIN_SCREEN_IDS = array(
 		'toplevel_page_menupilot-settings',
 		'menupilot_page_menupilot-settings',
+		'menupilot_page_menupilot-export',
+		'menupilot_page_menupilot-import',
 		'menupilot_page_menupilot-tools',
 		'menupilot_page_menupilot-help',
 	);
@@ -347,6 +349,26 @@ class Init
 			array($this, 'render_settings_page')
 		);
 
+		// Export Menu submenu
+		add_submenu_page(
+			'menupilot-settings',
+			__('Export Menu', 'menupilot'),
+			__('Export Menu', 'menupilot'),
+			'manage_options',
+			'menupilot-export',
+			array($this, 'render_export_page')
+		);
+
+		// Import Menu submenu
+		add_submenu_page(
+			'menupilot-settings',
+			__('Import Menu', 'menupilot'),
+			__('Import Menu', 'menupilot'),
+			'manage_options',
+			'menupilot-import',
+			array($this, 'render_import_page')
+		);
+
 		// Tools submenu
 		add_submenu_page(
 			'menupilot-settings',
@@ -378,6 +400,30 @@ class Init
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-settings-page.php';
 		$settings_page = new \MenuPilot\Admin\Settings_Page();
 		$settings_page->render();
+	}
+
+	/**
+	 * Render export page
+	 *
+	 * @return void
+	 */
+	public function render_export_page(): void
+	{
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-export-page.php';
+		$export_page = new \MenuPilot\Admin\Export_Page();
+		$export_page->render();
+	}
+
+	/**
+	 * Render import page
+	 *
+	 * @return void
+	 */
+	public function render_import_page(): void
+	{
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-import-page.php';
+		$import_page = new \MenuPilot\Admin\Import_Page();
+		$import_page->render();
 	}
 
 	/**

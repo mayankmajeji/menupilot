@@ -3,16 +3,19 @@
 ## Requirements
 
 ### Minimum Requirements
+
 - **WordPress:** 5.8 or higher
 - **PHP:** 7.4 or higher
 - **MySQL:** 5.6 or higher (or MariaDB 10.0+)
 
 ### Recommended
+
 - **WordPress:** 6.0 or higher
 - **PHP:** 8.0 or higher
 - **Memory Limit:** 128MB or higher
 
 ### Server Requirements
+
 - PHP extensions: `json`, `mbstring`
 - Write permissions for plugin directory
 - REST API enabled (default in WordPress)
@@ -68,11 +71,13 @@ After activation, you should see:
 MenuPilot works out of the box with default settings. However, you can customize:
 
 #### Export Settings (Tools → Export Settings)
+
 - Default export format (JSON)
 - Include/exclude metadata options
 - Export file naming convention
 
 #### Import Settings (Tools → Import Settings)
+
 - Default import behavior
 - Auto-match sensitivity
 - URL normalization rules
@@ -80,6 +85,7 @@ MenuPilot works out of the box with default settings. However, you can customize
 ### Permissions
 
 MenuPilot requires:
+
 - **Capability:** `manage_options` (Administrator)
 - **REST API:** Must be enabled (default)
 - **File Upload:** For importing JSON files
@@ -91,6 +97,7 @@ MenuPilot requires:
 **Problem:** MenuPilot menu doesn't appear in admin
 
 **Solutions:**
+
 1. Check user has `manage_options` capability
 2. Clear browser cache
 3. Check for plugin conflicts
@@ -101,6 +108,7 @@ MenuPilot requires:
 **Problem:** Export button does nothing
 
 **Solutions:**
+
 1. Check browser console for JavaScript errors
 2. Verify REST API is enabled: `Settings → Permalinks → Save`
 3. Check user permissions
@@ -111,6 +119,7 @@ MenuPilot requires:
 **Problem:** Import shows error or doesn't work
 
 **Solutions:**
+
 1. Check JSON file is valid (use JSON validator)
 2. Verify file size isn't too large
 3. Check PHP `upload_max_filesize` setting
@@ -122,6 +131,7 @@ MenuPilot requires:
 **Problem:** "Failed to fetch" or 401/403 errors
 
 **Solutions:**
+
 1. Verify REST API: Visit `/wp-json/`
 2. Check authentication (must be logged in)
 3. Verify nonce in request headers
@@ -133,6 +143,7 @@ MenuPilot requires:
 **Problem:** Import preview modal doesn't appear
 
 **Solutions:**
+
 1. Check browser console for errors
 2. Verify JavaScript is enabled
 3. Check for jQuery conflicts
@@ -151,6 +162,7 @@ MenuPilot requires:
 ### Data Cleanup
 
 MenuPilot does **not** modify database structure. Uninstallation:
+
 - ✅ Removes plugin files
 - ✅ Removes plugin options (if any)
 - ✅ Does NOT delete menus (WordPress core data)
@@ -161,6 +173,7 @@ MenuPilot does **not** modify database structure. Uninstallation:
 If you want to remove all MenuPilot data:
 
 1. **Delete Options:**
+
    ```sql
    DELETE FROM wp_options WHERE option_name LIKE 'menupilot_%';
    ```
@@ -178,6 +191,7 @@ If you want to remove all MenuPilot data:
 ### Automatic Updates
 
 If installed from WordPress.org:
+
 1. WordPress will notify you of updates
 2. Click **"Update Now"** when available
 3. Plugin updates automatically
@@ -202,6 +216,7 @@ If installed from WordPress.org:
 ### Network Activation
 
 MenuPilot can be network-activated:
+
 1. Navigate to **Network Admin → Plugins**
 2. Find **MenuPilot**
 3. Click **"Network Activate"**
@@ -230,4 +245,3 @@ npm run build
 ---
 
 **Next:** [User Guide](./04-user-guide.md)
-
