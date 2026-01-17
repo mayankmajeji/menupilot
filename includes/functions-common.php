@@ -1,13 +1,17 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot;
+
 /**
  * Common utility functions
  *
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Get client IP address with proper fallback and sanitization
@@ -46,11 +50,12 @@ function get_client_ip(): string {
  * @return void
  */
 function log_debug( string $message, string $level = 'info' ): void {
-	if ( ! WP_DEBUG || ! WP_DEBUG_LOG ) {
+	if ( ! defined('WP_DEBUG') || ! WP_DEBUG || ! defined('WP_DEBUG_LOG') || ! WP_DEBUG_LOG ) {
 		return;
 	}
 
 	$prefix = '[MenuPilot]';
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug logging function, only runs when WP_DEBUG is enabled
 	error_log("{$prefix} [{$level}] {$message}");
 }
 

@@ -9,6 +9,7 @@ if ( ! defined('WPINC') ) {
 	die;
 }
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variable, local scope
 $faqs = array(
 	array(
 		'question' => __('What does MenuPilot do?', 'menupilot'),
@@ -53,18 +54,24 @@ $faqs = array(
 );
 ?>
 
-<div class="mp-faqs-wrapper">
-	<?php foreach ( $faqs as $index => $faq ) : ?>
-		<div class="mp-faq-item <?php echo $index === 0 ? 'is-open' : ''; ?>">
-			<button type="button" class="mp-faq-question">
-				<span class="mp-faq-title"><?php echo esc_html($faq['question']); ?></span>
-				<span class="mp-faq-icon">
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<polyline points="6 9 12 15 18 9"></polyline>
-					</svg>
-				</span>
-			</button>
-			<div class="mp-faq-answer">
+<div id="faq-content" class="turnstilewp-faq-accordion" role="tablist">
+	<?php
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template loop variables, local scope
+	foreach ( $faqs as $index => $faq ) : ?>
+		<?php
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables, local scope
+		$faq_id = $index + 1;
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variable, local scope
+		$question_id = 'faq-q-' . $faq_id;
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variable, local scope
+		$answer_id = 'faq-a-' . $faq_id;
+		?>
+		<div class="faq-block">
+			<h3 class="faq-question" role="tab" id="<?php echo esc_attr($question_id); ?>" aria-controls="<?php echo esc_attr($answer_id); ?>" aria-expanded="false" tabindex="0">
+				<?php echo esc_html($faq['question']); ?>
+				<span class="faq-icon"><?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/caret-icon.php'; ?></span>
+			</h3>
+			<div class="faq-answer" id="<?php echo esc_attr($answer_id); ?>" aria-labelledby="<?php echo esc_attr($question_id); ?>" role="tabpanel" aria-hidden="true" style="display:none;">
 				<p><?php echo esc_html($faq['answer']); ?></p>
 			</div>
 		</div>
@@ -73,24 +80,30 @@ $faqs = array(
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	var faqItems = document.querySelectorAll('.mp-faq-item');
-	
-	faqItems.forEach(function(item) {
-		var button = item.querySelector('.mp-faq-question');
-		
-		button.addEventListener('click', function() {
-			var isOpen = item.classList.contains('is-open');
-			
-			// Close all items
-			faqItems.forEach(function(otherItem) {
-				otherItem.classList.remove('is-open');
+	var questions = document.querySelectorAll('.faq-question');
+	var answers = document.querySelectorAll('.faq-answer');
+	questions.forEach(function(q, idx) {
+		q.addEventListener('click', function() {
+			var expanded = q.getAttribute('aria-expanded') === 'true';
+			// Collapse all
+			questions.forEach(function(qq, i) {
+				qq.setAttribute('aria-expanded', 'false');
+				answers[i].style.display = 'none';
 			});
-			
-			// Toggle current item
-			if (!isOpen) {
-				item.classList.add('is-open');
+			// Expand this one if it was not already open
+			if (!expanded) {
+				q.setAttribute('aria-expanded', 'true');
+				answers[idx].style.display = 'block';
 			}
 		});
+		q.addEventListener('keydown', function(e) {
+			if (e.key === 'Enter' || e.key === ' ') {
+				q.click();
+				e.preventDefault();
+			}
+		});
+		// Start collapsed
+		answers[idx].style.display = 'none';
 	});
 });
 </script>

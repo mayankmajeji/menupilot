@@ -1,4 +1,7 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
 
 /**
  * Settings Page Class
@@ -6,9 +9,9 @@
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use MenuPilot\Settings;
 
@@ -269,7 +272,7 @@ class Settings_Page
 					</fieldset>
 				</div>
 				<div class="mp-description">
-					<p><?php esc_html_e('Default pattern for imported menu names. Available placeholders: {original_name}, {date}, {time}.', 'menupilot'); ?></p>
+					<p><?php esc_html_e('Default pattern for imported menu names. This pattern is automatically applied when you import a menu and leave the menu name field unchanged (or empty). Available placeholders: {original_name}, {date}, {time}.', 'menupilot'); ?></p>
 				</div>
 			</div>
 		</div>
@@ -480,7 +483,8 @@ class Settings_Page
 		);
 
 		// Get current tab (default to general)
-		$current_tab = isset($_GET['settings_tab']) ? (string) $_GET['settings_tab'] : 'general';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation parameter, not a form submission
+		$current_tab = isset($_GET['settings_tab']) ? sanitize_text_field(wp_unslash((string) $_GET['settings_tab'])) : 'general';
 		if (! array_key_exists($current_tab, $tabs)) {
 			$current_tab = 'general';
 		}

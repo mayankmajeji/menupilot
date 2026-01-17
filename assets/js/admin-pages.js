@@ -210,7 +210,7 @@ jQuery(document).ready(function ($) {
     const menu = importData.menu || {};
     const context = importData.export_context || {};
 
-    const menuName = menu.name || "Untitled Menu";
+    const originalMenuName = menu.name || "Untitled Menu";
     const menuSlug = menu.slug || "";
     const items = menu.items || [];
     const locations = menu.locations || [];
@@ -220,6 +220,10 @@ jQuery(document).ready(function ($) {
     const exportedBy = context.exported_by || "";
     const registeredLocations = menupilot.registeredLocations || {};
     const sameSize = sourceUrl === menupilot.siteUrl;
+    
+    // Apply default menu name pattern
+    const defaultPattern = menupilot.defaultMenuNamePattern || '{original_name}';
+    const menuName = applyMenuNamePattern(defaultPattern, originalMenuName);
 
     // Calculate matched items
     let matchedCount = 0;
@@ -297,7 +301,7 @@ jQuery(document).ready(function ($) {
     html += '<table class="form-table"><tbody>';
     html += '<tr><th scope="row"><label for="mp-import-menu-name">Menu Name:</label></th>';
     html += '<td><input type="text" id="mp-import-menu-name" name="menu_name" value="' + escapeHtml(menuName) + '" class="regular-text" required />';
-    html += '<p class="description">Enter a name for the imported menu.</p></td></tr>';
+    html += '<p class="description">Enter a name for the imported menu. The default pattern from Settings has been applied, but you can change it.</p></td></tr>';
     html += '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
     html += '<td><select id="mp-import-location" name="location"><option value="">— Do not assign —</option>';
 
@@ -426,9 +430,13 @@ jQuery(document).ready(function ($) {
     const menu = importData.menu || {};
     const context = importData.export_context || {};
 
-    const menuName = menu.name || "Untitled Menu";
+    const originalMenuName = menu.name || "Untitled Menu";
     const menuSlug = menu.slug || "";
     const items = menu.items || [];
+    
+    // Apply default menu name pattern
+    const defaultPattern = menupilot.defaultMenuNamePattern || '{original_name}';
+    const menuName = applyMenuNamePattern(defaultPattern, originalMenuName);
     const locations = menu.locations || [];
 
     const sourceUrl = context.site_url || "";
@@ -488,7 +496,7 @@ jQuery(document).ready(function ($) {
       escapeHtml(menuName) +
       '" class="regular-text" required />';
     html +=
-      '<p class="description">Enter a name for the imported menu.</p></td></tr>';
+      '<p class="description">Enter a name for the imported menu. The default pattern from Settings has been applied, but you can change it.</p></td></tr>';
     html +=
       '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
     html +=
@@ -533,6 +541,26 @@ jQuery(document).ready(function ($) {
     html += "</tbody></table></div>";
 
     return html;
+  }
+
+  // Helper function to apply menu name pattern
+  function applyMenuNamePattern(pattern, originalName) {
+    if (!pattern || !originalName) {
+      return originalName || "Untitled Menu";
+    }
+    
+    const date = new Date();
+    const dateStr = date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0');
+    const timeStr = String(date.getHours()).padStart(2, '0') + 
+                    String(date.getMinutes()).padStart(2, '0') + 
+                    String(date.getSeconds()).padStart(2, '0');
+    
+    return pattern
+      .replace(/{original_name}/g, originalName)
+      .replace(/{date}/g, dateStr)
+      .replace(/{time}/g, timeStr);
   }
 
   // Helper function to escape HTML

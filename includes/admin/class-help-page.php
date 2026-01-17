@@ -1,13 +1,17 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
+
 /**
  * Help Page Class
  *
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class Help_Page
@@ -39,7 +43,8 @@ class Help_Page {
 		);
 
 		// Get current tab
-		$current_help_tab = isset($_GET['help_tab']) ? (string) $_GET['help_tab'] : 'support';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation parameter, not a form submission
+		$current_help_tab = isset($_GET['help_tab']) ? sanitize_text_field(wp_unslash((string) $_GET['help_tab'])) : 'support';
 		if ( ! array_key_exists($current_help_tab, $help_tabs) ) {
 			$current_help_tab = 'support';
 		}
@@ -94,86 +99,107 @@ class Help_Page {
 						</div>
 
 						<div class="mp-content-inner">
-							<?php if ( $current_help_tab === 'support' ) : ?>
-								<!-- Support Tab Content -->
-								<div class="mp-support-cards">
-									<div class="mp-support-card mp-card">
-										<div class="mp-support-card-content">
-											<div class="mp-support-icon is-primary-icon">
-												<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/wordpress-support-icon.php'; ?>
+							<div class="mp-section">
+								<div class="mp-sub-section">
+									<?php if ( $current_help_tab === 'support' ) : ?>
+										<!-- Support Tab Content -->
+										<div class="mp-field-group">
+											<div class="mp-field">
+												<div class="inside">
+													<div class="mp-support-cards">
+														<div class="mp-support-card turnstilewp-box">
+															<div class="mp-support-card-content">
+																<div class="mp-support-icon">
+																	<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/wordpress-support-icon.php'; ?>
+																</div>
+																<h3><?php esc_html_e('Support', 'menupilot'); ?></h3>
+																<p><?php esc_html_e('MenuPilot is available on WordPress.org where you can download the plugin, submit a bug ticket, and follow along with updates.', 'menupilot'); ?></p>
+															</div>
+															<div class="turnstilewp-buttons">
+																<a class="button button-primary" href="https://wordpress.org/plugins/menupilot/" target="_blank" rel="noopener">
+																	<?php esc_html_e('Visit WordPress.org', 'menupilot'); ?>
+																</a>
+															</div>
+														</div>
+														<div class="mp-support-card turnstilewp-box">
+															<div class="mp-support-card-content">
+																<div class="mp-support-icon">
+																	<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/github-icon.php'; ?>
+																</div>
+																<h3><?php esc_html_e('GitHub', 'menupilot'); ?></h3>
+																<p><?php esc_html_e('MenuPilot is also available on GitHub where you can browse the code, open a bug report, and follow along with development.', 'menupilot'); ?></p>
+															</div>
+															<div class="turnstilewp-buttons">
+																<a class="button button-primary" href="https://github.com/mayankmajeji/menupilot" target="_blank" rel="noopener">
+																	<?php esc_html_e('Visit GitHub', 'menupilot'); ?>
+																</a>
+															</div>
+														</div>
+													</div>
+												</div>
 											</div>
-											<h3><?php esc_html_e('WordPress.org', 'menupilot'); ?></h3>
-											<p><?php esc_html_e('MenuPilot is available on WordPress.org where you can download the plugin, submit a bug ticket, and follow along with updates.', 'menupilot'); ?></p>
 										</div>
-										<div class="menupilot-buttons">
-											<a class="button button-primary" href="https://wordpress.org/plugins/menupilot/" target="_blank" rel="noopener">
-												<?php esc_html_e('Visit WordPress.org', 'menupilot'); ?>
-											</a>
-										</div>
-									</div>
 
-									<div class="mp-support-card mp-card">
-										<div class="mp-support-card-content">
-											<div class="mp-support-icon is-primary-icon">
-												<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/github-icon.php'; ?>
+									<?php elseif ( $current_help_tab === 'faqs' ) : ?>
+										<!-- FAQs Tab Content -->
+										<div class="mp-field-group">
+											<div class="mp-group-title">
+												<h2><?php esc_html_e('Frequently Asked Questions', 'menupilot'); ?></h2>
 											</div>
-											<h3><?php esc_html_e('GitHub', 'menupilot'); ?></h3>
-											<p><?php esc_html_e('MenuPilot is also available on GitHub where you can browse the code, open a bug report, and follow along with development.', 'menupilot'); ?></p>
+											<div class="turnstilewp-faqs-wrapper">
+												<div class="inside">
+													<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/faqs.php'; ?>
+												</div>
+											</div>
 										</div>
-										<div class="menupilot-buttons">
-											<a class="button button-primary" href="https://github.com/mayankmajeji/menupilot" target="_blank" rel="noopener">
-												<?php esc_html_e('Visit GitHub', 'menupilot'); ?>
-											</a>
-										</div>
-									</div>
-								</div>
 
-							<?php elseif ( $current_help_tab === 'faqs' ) : ?>
-								<!-- FAQs Tab Content -->
-								<div class="mp-card">
-									<h2><?php esc_html_e('Frequently Asked Questions', 'menupilot'); ?></h2>
-									<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/faqs.php'; ?>
-								</div>
-
-							<?php elseif ( $current_help_tab === 'system' ) : ?>
-								<!-- System Info Tab Content -->
-								<div class="mp-card">
-									<h2><?php esc_html_e('System Information', 'menupilot'); ?></h2>
-									<div class="mp-system-info">
-										<ul>
-											<li>
-												<span class="mp-si-label"><?php esc_html_e('Plugin Version', 'menupilot'); ?></span>
-												<span class="mp-si-value"><?php
-													// translators: %s: Plugin version number
-													echo esc_html(sprintf(__('v%s', 'menupilot'), $plugin_ver));
-												?></span>
-											</li>
-											<li>
-												<span class="mp-si-label"><?php esc_html_e('WordPress', 'menupilot'); ?></span>
-												<span class="mp-si-value"><?php
-													// translators: %s: WordPress version number
-													echo esc_html(sprintf(__('v%s', 'menupilot'), $wp_version));
-												?></span>
-											</li>
-											<li>
-												<span class="mp-si-label"><?php esc_html_e('PHP', 'menupilot'); ?></span>
-												<span class="mp-si-value"><?php
-													// translators: %s: PHP version number
-													echo esc_html(sprintf(__('v%s', 'menupilot'), $php_version));
-												?></span>
-											</li>
-											<li>
-												<span class="mp-si-label"><?php esc_html_e('Memory Limit', 'menupilot'); ?></span>
-												<span class="mp-si-value"><?php echo esc_html((string) ini_get('memory_limit')); ?></span>
-											</li>
-										</ul>
-										<div class="menupilot-buttons">
-											<button type="button" class="button button-primary" id="mp-copy-system-info"><?php esc_html_e('Copy System Info', 'menupilot'); ?></button>
-											<span id="mp-copy-system-info-msg" style="margin-left:8px;color:#46b450;display:none;"><?php esc_html_e('Copied!', 'menupilot'); ?></span>
+									<?php elseif ( $current_help_tab === 'system' ) : ?>
+										<!-- System Info Tab Content -->
+										<div class="mp-field-group">
+											<div class="mp-group-title">
+												<h2><?php esc_html_e('System Info', 'menupilot'); ?></h2>
+											</div>
+											<div class="mp-field">
+												<div class="inside">
+													<div class="twp-system-info">
+														<ul>
+															<li>
+																<span class="twp-si-label"><?php esc_html_e('Plugin Version', 'menupilot'); ?></span>
+																<span class="twp-si-value"><?php
+																	// translators: %s: Plugin version number
+																	echo esc_html(sprintf(__('v%s', 'menupilot'), $plugin_ver));
+																?></span>
+															</li>
+															<li>
+																<span class="twp-si-label"><?php esc_html_e('WordPress', 'menupilot'); ?></span>
+																<span class="twp-si-value"><?php
+																	// translators: %s: WordPress version number
+																	echo esc_html(sprintf(__('v%s', 'menupilot'), $wp_version));
+																?></span>
+															</li>
+															<li>
+																<span class="twp-si-label"><?php esc_html_e('PHP', 'menupilot'); ?></span>
+																<span class="twp-si-value"><?php
+																	// translators: %s: PHP version number
+																	echo esc_html(sprintf(__('v%s', 'menupilot'), $php_version));
+																?></span>
+															</li>
+															<li>
+																<span class="twp-si-label"><?php esc_html_e('Memory Limit', 'menupilot'); ?></span>
+																<span class="twp-si-value"><?php echo esc_html((string) ini_get('memory_limit')); ?></span>
+															</li>
+														</ul>
+														<div class="turnstilewp-buttons">
+															<button type="button" class="button button-primary" id="mp-copy-system-info"><?php esc_html_e('Copy System Info', 'menupilot'); ?></button>
+															<span id="mp-copy-system-info-msg" style="margin-left:8px;color:#46b450;display:none;"><?php esc_html_e('Copied!', 'menupilot'); ?></span>
+														</div>
+													</div>
+												</div>
+											</div>
 										</div>
-									</div>
+									<?php endif; ?>
 								</div>
-							<?php endif; ?>
+							</div>
 						</div>
 					</section>
 				</div>
