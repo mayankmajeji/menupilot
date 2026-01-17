@@ -1023,9 +1023,6 @@
   border-radius: 10px;
   padding: 14px 24px;
 }
-.menupilot-page--help .turnstilewp-faq-accordion {
-  margin-top: 1.5em;
-}
 .menupilot-page--help .faq-block {
   border-bottom: 1px solid;
   border-color: #eee transparent;
@@ -1037,7 +1034,6 @@
   padding: 1em 0;
   color: #1d2327;
   font-size: 16px !important;
-  margin: 1em 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
