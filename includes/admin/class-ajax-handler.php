@@ -1,13 +1,17 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
+
 /**
  * AJAX Handler Class
  *
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use MenuPilot\Menu_Exporter;
 use MenuPilot\Menu_Importer;
@@ -126,7 +130,8 @@ class Ajax_Handler {
 	 */
 	public function export_settings(): void {
 		// Verify nonce
-		if ( ! isset($_GET['_wpnonce']) || ! wp_verify_nonce((string) $_GET['_wpnonce'], 'menupilot_tools_export') ) {
+		$nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_wpnonce'])) : '';
+		if ( ! $nonce || ! wp_verify_nonce($nonce, 'menupilot_tools_export') ) {
 			wp_die(esc_html__('Security check failed.', 'menupilot'), 403);
 		}
 
@@ -158,11 +163,12 @@ class Ajax_Handler {
 		// Send download headers
 		$filename = 'menupilot-settings-' . gmdate('Y-m-d-His') . '.json';
 		header('Content-Type: application/json; charset=utf-8');
-		header('Content-Disposition: attachment; filename="' . $filename . '"');
+		header('Content-Disposition: attachment; filename="' . esc_attr($filename) . '"');
 		header('Cache-Control: no-cache, no-store, must-revalidate');
 		header('Pragma: no-cache');
 		header('Expires: 0');
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() already properly encodes JSON output
 		echo $json;
 		exit;
 	}
@@ -190,7 +196,7 @@ class Ajax_Handler {
 		}
 
 		// Get JSON data
-		$json_data = isset($_POST['json_data']) ? wp_unslash((string) $_POST['json_data']) : '';
+		$json_data = isset($_POST['json_data']) ? sanitize_textarea_field(wp_unslash((string) $_POST['json_data'])) : '';
 		if ( empty($json_data) ) {
 			wp_send_json_error(array(
 				'message' => __('No import data received.', 'menupilot'),
@@ -392,7 +398,7 @@ class Ajax_Handler {
 		// Get parameters
 		$menu_name = isset($_POST['menu_name']) ? sanitize_text_field(wp_unslash((string) $_POST['menu_name'])) : '';
 		$location = isset($_POST['location']) ? sanitize_text_field(wp_unslash((string) $_POST['location'])) : '';
-		$json_data = isset($_POST['json_data']) ? wp_unslash((string) $_POST['json_data']) : '';
+		$json_data = isset($_POST['json_data']) ? sanitize_textarea_field(wp_unslash((string) $_POST['json_data'])) : '';
 
 		// Validate menu name
 		if ( empty($menu_name) ) {

@@ -1,4 +1,7 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot\Rest;
 
 /**
  * REST API Controller
@@ -6,9 +9,9 @@
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot\Rest;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use MenuPilot\Menu_Exporter;
 use MenuPilot\Menu_Importer;

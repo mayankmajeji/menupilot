@@ -1,9 +1,21 @@
+<?php
+/**
+ * REST API Mapping Class (Fragment)
+ *
+ * @package MenuPilot
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 	/**
 	 * Get available content for mapping
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Fragment file, method is part of REST_Controller class
 	public function get_mapping_options( \WP_REST_Request $request ) {
 		$options = array(
 			'posts' => array(),

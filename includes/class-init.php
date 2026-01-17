@@ -1,4 +1,7 @@
 <?php
+declare(strict_types=1);
+
+namespace MenuPilot;
 
 /**
  * Plugin initialization class
@@ -6,9 +9,9 @@
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class Init
@@ -205,6 +208,7 @@ class Init
 				'siteUrl' => get_site_url(),
 				'registeredLocations' => get_registered_nav_menus(),
 				'previewColumns' => Column_Manager::get_columns_for_js(),
+				'defaultMenuNamePattern' => $this->settings->get_option('default_menu_name_pattern', '{original_name}'),
 			)
 		);
 	}

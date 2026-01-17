@@ -11,10 +11,13 @@ if (! defined('WPINC')) {
 }
 
 // Get plugin version
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variable, local scope
 $plugin_version = defined('MENUPILOT_VERSION') ? MENUPILOT_VERSION : '1.0.0';
 
 // Resolve current page for active link
-$current_page = isset($_GET['page']) ? (string) $_GET['page'] : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Read-only navigation parameter, not a form submission. Template variable, local scope.
+$current_page = isset($_GET['page']) ? sanitize_text_field(wp_unslash((string) $_GET['page'])) : '';
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template helper function variable, local scope
 $is_active = function (string $slug) use ($current_page): string {
     return $current_page === $slug ? ' is-active' : '';
 };

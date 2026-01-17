@@ -2,13 +2,13 @@
 Contributors: mayankmajeji
 Tags: menus, navigation, import export, migration
 Requires at least: 5.8
-Tested up to: 6.5
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Safely import and export WordPress navigation menus with a preview-first workflow. Review, map, and import menus with full visibility and no silent changes.
+Safely import and export WordPress navigation menus with a preview-first workflow. Review and map menus before importing.
 
 == Description ==
 
