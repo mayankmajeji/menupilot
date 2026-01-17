@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
+
 /**
  * Tools Page Class
  *
  * @package MenuPilot
  */
 
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
+if (! defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Class Tools_Page
@@ -17,6 +21,178 @@ namespace MenuPilot\Admin;
  */
 class Tools_Page
 {
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->init_hooks();
+    }
+
+    /**
+     * Initialize hooks
+     *
+     * @return void
+     */
+    private function init_hooks(): void
+    {
+        // Process form submissions only on admin_init to avoid running on every page load
+        add_action('admin_init', array($this, 'process_form_submissions'));
+    }
+
+    /**
+     * Process form submissions for tools page
+     *
+     * @return void
+     */
+    public function process_form_submissions(): void
+    {
+        // Only process if we're on the tools page
+        if (! isset($_GET['page']) || 'menupilot-tools' !== $_GET['page']) {
+            return;
+        }
+
+        // Check user capabilities first
+        if (! current_user_can('manage_options')) {
+            return;
+        }
+
+        // Process import settings
+        if (isset($_POST['menupilot_tools_action']) && 'import' === $_POST['menupilot_tools_action']) {
+            // Verify nonce
+            if (! isset($_POST['menupilot_tools_nonce']) || ! wp_verify_nonce(sanitize_text_field(wp_unslash((string) $_POST['menupilot_tools_nonce'])), 'menupilot_tools_action')) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Security check failed. Please try again.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Process file upload
+            if (! isset($_FILES['import_file']) || ! is_array($_FILES['import_file'])) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('No file uploaded.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Validate and sanitize file upload
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- $_FILES is validated and sanitized below
+            $file = $_FILES['import_file'];
+
+            // Validate file upload error
+            if (! isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('File upload error occurred.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Validate file was actually uploaded
+            if (! isset($file['tmp_name']) || ! is_uploaded_file($file['tmp_name'])) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Invalid file upload.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Sanitize file path
+            $file_tmp_name = sanitize_text_field($file['tmp_name']);
+
+            // Validate file extension
+            $file_name = isset($file['name']) ? sanitize_file_name($file['name']) : '';
+            if (! preg_match('/\.json$/i', $file_name)) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Invalid file type. Please upload a JSON file.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Read file content
+            $file_content = file_get_contents($file_tmp_name);
+            if (false === $file_content) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Failed to read uploaded file.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            $import_data = json_decode($file_content, true);
+            if (json_last_error() !== JSON_ERROR_NONE || ! isset($import_data['settings'])) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Invalid settings file format.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Import settings
+            $settings = $import_data['settings'];
+            if (is_array($settings)) {
+                update_option('menupilot_settings', $settings);
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_success',
+                    __('Settings imported successfully!', 'menupilot'),
+                    'success'
+                );
+            } else {
+                add_settings_error(
+                    'menupilot_tools',
+                    'import_failed',
+                    __('Invalid settings data in file.', 'menupilot'),
+                    'error'
+                );
+            }
+        }
+
+        // Process reset settings
+        if (isset($_POST['menupilot_tools_action']) && 'reset' === $_POST['menupilot_tools_action']) {
+            // Verify nonce
+            if (! isset($_POST['menupilot_tools_nonce']) || ! wp_verify_nonce(sanitize_text_field(wp_unslash((string) $_POST['menupilot_tools_nonce'])), 'menupilot_tools_action')) {
+                add_settings_error(
+                    'menupilot_tools',
+                    'reset_failed',
+                    __('Security check failed. Please try again.', 'menupilot'),
+                    'error'
+                );
+                return;
+            }
+
+            // Reset to defaults
+            require_once MENUPILOT_PLUGIN_DIR . 'includes/class-settings.php';
+            $settings = new \MenuPilot\Settings();
+            delete_option('menupilot_settings');
+            $settings->add_default_options();
+
+            add_settings_error(
+                'menupilot_tools',
+                'reset_success',
+                __('All settings have been reset to their default values.', 'menupilot'),
+                'success'
+            );
+        }
+    }
 
     /**
      * Render the tools page
