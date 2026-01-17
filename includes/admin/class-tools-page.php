@@ -37,7 +37,8 @@ class Tools_Page
         );
 
         // Get current tab
-        $current_tab = isset($_GET['tools_tab']) ? (string) $_GET['tools_tab'] : 'import';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation parameter, not a form submission
+        $current_tab = isset($_GET['tools_tab']) ? sanitize_text_field(wp_unslash((string) $_GET['tools_tab'])) : 'import';
         if (! array_key_exists($current_tab, $tabs)) {
             $current_tab = 'import';
         }

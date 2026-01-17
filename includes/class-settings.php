@@ -147,64 +147,123 @@ class Settings {
 		}
 
 		$sanitized = array();
+		
+		// Get existing settings to preserve values not in the form
+		$existing_settings = $this->get_settings();
+		
+		// Define known settings fields and their types
+		$known_fields = array(
+			'enable_url_normalization' => 'checkbox',
+			'unmatched_items_behavior' => 'select',
+			'default_menu_name_pattern' => 'text',
+			'default_menu_name_pattern_custom' => 'text',
+			'export_filename_pattern' => 'text',
+			'export_filename_pattern_custom' => 'text',
+		);
+
+		// Sanitize each known field
+		foreach ( $known_fields as $field_id => $field_type ) {
+			if ( array_key_exists($field_id, $input) ) {
+				$value = $input[ $field_id ];
+
+				// Default sanitization based on field type
+				switch ( $field_type ) {
+					case 'text':
+					case 'select':
+						$sanitized[ $field_id ] = sanitize_text_field($value);
+						break;
+					case 'multiselect':
+						$sanitized[ $field_id ] = array_map('sanitize_text_field', is_array($value) ? $value : array());
+						break;
+					case 'checkbox':
+						$sanitized[ $field_id ] = ( $value === '1' || $value === 1 || $value === true ) ? 1 : 0;
+						break;
+					case 'textarea':
+						$sanitized[ $field_id ] = sanitize_textarea_field($value);
+						break;
+					case 'number':
+						$sanitized[ $field_id ] = intval($value);
+						break;
+					case 'email':
+						$sanitized[ $field_id ] = sanitize_email($value);
+						break;
+					case 'url':
+						$sanitized[ $field_id ] = esc_url_raw($value);
+						break;
+					default:
+						$sanitized[ $field_id ] = sanitize_text_field($value);
+				}
+			} else {
+				// Preserve existing value if not in input
+				if ( array_key_exists($field_id, $existing_settings) ) {
+					$sanitized[ $field_id ] = $existing_settings[ $field_id ];
+				}
+			}
+		}
+
+		// Also check for filter-based fields (for extensibility)
 		$fields_structure = $this->get_fields_structure();
+		if ( ! empty($fields_structure) ) {
+			foreach ( $fields_structure as $tab_sections ) {
+				foreach ( $tab_sections as $section_fields ) {
+					foreach ( $section_fields as $field ) {
+						$id = $field['field_id'] ?? '';
+						$type = $field['type'] ?? 'text';
 
-		foreach ( $fields_structure as $tab_sections ) {
-			foreach ( $tab_sections as $section_fields ) {
-				foreach ( $section_fields as $field ) {
-					$id = $field['field_id'] ?? '';
-					$type = $field['type'] ?? 'text';
+						if ( ! $id || array_key_exists($id, $sanitized) ) {
+							continue; // Already handled or no ID
+						}
 
-					if ( ! $id || ! array_key_exists($id, $input) ) {
-						continue;
-					}
+						if ( ! array_key_exists($id, $input) ) {
+							// Preserve existing value
+							if ( array_key_exists($id, $existing_settings) ) {
+								$sanitized[ $id ] = $existing_settings[ $id ];
+							}
+							continue;
+						}
 
-					$value = $input[ $id ];
+						$value = $input[ $id ];
 
-					// Use custom sanitize callback if provided
-					if ( ! empty($field['sanitize_callback']) && is_callable($field['sanitize_callback']) ) {
-						$sanitized[ $id ] = call_user_func($field['sanitize_callback'], $value);
-						continue;
-					}
+						// Use custom sanitize callback if provided
+						if ( ! empty($field['sanitize_callback']) && is_callable($field['sanitize_callback']) ) {
+							$sanitized[ $id ] = call_user_func($field['sanitize_callback'], $value);
+							continue;
+						}
 
-					// Default sanitization based on field type
-					switch ( $type ) {
-						case 'text':
-						case 'select':
-							$sanitized[ $id ] = sanitize_text_field($value);
-							break;
-						case 'multiselect':
-							$sanitized[ $id ] = array_map('sanitize_text_field', is_array($value) ? $value : array());
-							break;
-						case 'checkbox':
-							$sanitized[ $id ] = ( $value === '1' || $value === 1 || $value === true ) ? 1 : 0;
-							break;
-						case 'textarea':
-							$sanitized[ $id ] = sanitize_textarea_field($value);
-							break;
-						case 'number':
-							$sanitized[ $id ] = intval($value);
-							break;
-						case 'email':
-							$sanitized[ $id ] = sanitize_email($value);
-							break;
-						case 'url':
-							$sanitized[ $id ] = esc_url_raw($value);
-							break;
-						default:
-							$sanitized[ $id ] = sanitize_text_field($value);
+						// Default sanitization based on field type
+						switch ( $type ) {
+							case 'text':
+							case 'select':
+								$sanitized[ $id ] = sanitize_text_field($value);
+								break;
+							case 'multiselect':
+								$sanitized[ $id ] = array_map('sanitize_text_field', is_array($value) ? $value : array());
+								break;
+							case 'checkbox':
+								$sanitized[ $id ] = ( $value === '1' || $value === 1 || $value === true ) ? 1 : 0;
+								break;
+							case 'textarea':
+								$sanitized[ $id ] = sanitize_textarea_field($value);
+								break;
+							case 'number':
+								$sanitized[ $id ] = intval($value);
+								break;
+							case 'email':
+								$sanitized[ $id ] = sanitize_email($value);
+								break;
+							case 'url':
+								$sanitized[ $id ] = esc_url_raw($value);
+								break;
+							default:
+								$sanitized[ $id ] = sanitize_text_field($value);
+						}
 					}
 				}
 			}
 		}
 
-		// Save custom pattern values separately for display purposes
-		if ( isset($input['default_menu_name_pattern_custom']) ) {
-			$sanitized['default_menu_name_pattern_custom'] = sanitize_text_field($input['default_menu_name_pattern_custom']);
-		}
-		if ( isset($input['export_filename_pattern_custom']) ) {
-			$sanitized['export_filename_pattern_custom'] = sanitize_text_field($input['export_filename_pattern_custom']);
-		}
+		// Merge with existing settings to preserve any other values
+		$sanitized = wp_parse_args($sanitized, $existing_settings);
 
 		add_settings_error(
 			'menupilot_settings',

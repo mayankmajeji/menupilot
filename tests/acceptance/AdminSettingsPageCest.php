@@ -5,6 +5,7 @@
  * @package MenuPilot
  */
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Codeception test class follows framework naming convention
 class AdminSettingsPageCest {
 
 	public function _before(\AcceptanceTester $I) {

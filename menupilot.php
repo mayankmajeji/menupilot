@@ -8,7 +8,7 @@
  * Author: Mayank Majeji
  * Author URI: 
  * Requires at least: 5.8
- * Tested up to: 6.5
+ * Tested up to: 6.9
  * Requires PHP: 7.4
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -41,12 +41,15 @@ require_once MENUPILOT_PLUGIN_DIR . 'includes/class-loader.php';
  */
 function menupilot_init()
 {
-	// Load text domain
-	load_plugin_textdomain(
-		'menupilot',
-		false,
-		dirname(MENUPILOT_PLUGIN_BASENAME) . '/i18n/languages'
-	);
+	// Text domain is automatically loaded by WordPress.org for hosted plugins
+	// For non-WordPress.org installations or custom language paths, use the filter:
+	// add_filter('override_load_textdomain', function($override, $domain) {
+	//     if ($domain === 'menupilot') {
+	//         load_plugin_textdomain('menupilot', false, dirname(MENUPILOT_PLUGIN_BASENAME) . '/i18n/languages');
+	//         return true;
+	//     }
+	//     return $override;
+	// }, 10, 2);
 
 	// Initialize main plugin class as singleton
 	\MenuPilot\Init::get_instance()->init();

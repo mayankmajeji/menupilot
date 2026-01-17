@@ -180,10 +180,12 @@
   align-items: center;
   gap: 10px;
   transition: all 150ms ease-in-out;
+  color: #545473 !important;
+  opacity: 0.7;
 }
 .mp-vtab:hover {
   box-shadow: inset 4px 0 0 0 var(--mp-color-primary);
-  color: var(--mp-color-primary);
+  color: var(--mp-color-primary) !important;
 }
 .mp-vtab.is-active {
   box-shadow: inset 4px 0 0 0 var(--mp-color-primary);
@@ -908,140 +910,185 @@
 }
 .menupilot-page--help .mp-support-cards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+  max-width: 1200px;
 }
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
+  .menupilot-page--help .mp-support-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
   .menupilot-page--help .mp-support-cards {
     grid-template-columns: 1fr;
   }
 }
-.menupilot-page--help .mp-support-card {
+.menupilot-page--help .mp-support-card,
+.menupilot-page--help .turnstilewp-box {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: 24px;
+  justify-content: space-between;
 }
-.menupilot-page--help .mp-support-card .mp-support-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.menupilot-page--help .mp-support-card h3,
+.menupilot-page--help .turnstilewp-box h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--mp-color-text);
 }
-.menupilot-page--help .mp-support-card .mp-support-icon {
+.menupilot-page--help .mp-support-card p,
+.menupilot-page--help .turnstilewp-box p {
+  margin: 0;
+  color: var(--mp-color-text-secondary);
+  line-height: 1.6;
+  font-size: 14px;
+}
+.menupilot-page--help .mp-support-card .mp-support-icon,
+.menupilot-page--help .turnstilewp-box .mp-support-icon {
   width: 32px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-.menupilot-page--help .mp-support-card .mp-support-icon svg {
+.menupilot-page--help .mp-support-card .mp-support-icon svg,
+.menupilot-page--help .turnstilewp-box .mp-support-icon svg {
   width: 32px;
   height: 32px;
   display: block;
-  stroke: #2271b1;
 }
-.menupilot-page--help .mp-support-card .menupilot-buttons {
+.menupilot-page--help .mp-support-card.is-primary-icon .mp-support-icon svg,
+.menupilot-page--help .mp-support-card.is-primary-icon .mp-support-icon svg *,
+.menupilot-page--help .turnstilewp-box.is-primary-icon .mp-support-icon svg,
+.menupilot-page--help .turnstilewp-box.is-primary-icon .mp-support-icon svg * {
+  stroke: var(--mp-color-primary);
+}
+.menupilot-page--help .mp-support-card .mp-support-card-content,
+.menupilot-page--help .turnstilewp-box .mp-support-card-content {
+  display: grid;
+  gap: 16px;
+}
+.menupilot-page--help .mp-support-card .turnstilewp-buttons,
+.menupilot-page--help .turnstilewp-box .turnstilewp-buttons {
   margin-top: 0;
 }
-.menupilot-page--help .mp-system-info {
+.menupilot-page--help .twp-system-info {
   max-width: 576px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
 }
-.menupilot-page--help .mp-system-info ul {
-  margin: 0 0 20px;
+.menupilot-page--help .twp-system-info ul {
+  margin: 0 0 12px;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 12px;
 }
-.menupilot-page--help .mp-system-info li {
+.menupilot-page--help .twp-system-info li {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding-bottom: 12px;
   border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
 }
-.menupilot-page--help .mp-system-info li:last-child {
+.menupilot-page--help .twp-system-info li:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
-.menupilot-page--help .mp-system-info li .mp-si-label {
-  font-weight: 600;
-  color: #1d2327;
+.menupilot-page--help .twp-system-info li .twp-si-label {
+  font-weight: 700;
 }
-.menupilot-page--help .mp-system-info li .mp-si-value {
+.menupilot-page--help .twp-system-info li .twp-si-value {
   text-align: right;
-  color: #646970;
+  color: var(--mp-color-text-secondary);
 }
-.menupilot-page--help .mp-system-info .menupilot-buttons {
+.menupilot-page--help .twp-system-info li + li {
+  margin-top: 8px;
+}
+.menupilot-page--help .twp-system-info .turnstilewp-buttons {
   margin-top: 20px;
 }
-.menupilot-page--help .mp-faqs-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.menupilot-page--help .mp-faq-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  overflow: hidden;
+.menupilot-page--help .turnstilewp-faqs-wrapper {
+  max-width: 576px;
   background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 24px;
 }
-.menupilot-page--help .mp-faq-question {
-  width: 100%;
+.menupilot-page--help .turnstilewp-faq-accordion {
+  margin-top: 1.5em;
+}
+.menupilot-page--help .faq-block {
+  border-bottom: 1px solid;
+  border-color: #eee transparent;
+}
+.menupilot-page--help .faq-block:last-child {
+  border-bottom: none;
+}
+.menupilot-page--help .faq-question {
+  padding: 1em 0;
+  color: #1d2327;
+  font-size: 16px !important;
+  margin: 1em 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  transition: background 150ms ease-in-out;
 }
-.menupilot-page--help .mp-faq-question:hover {
-  background: #f9f9f9;
+.menupilot-page--help .faq-question[aria-expanded=true] {
+  background: #f1f5f9;
 }
-.menupilot-page--help .mp-faq-question .mp-faq-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d2327;
+.menupilot-page--help .faq-question:focus {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  z-index: 1;
 }
-.menupilot-page--help .mp-faq-question .mp-faq-icon {
+.menupilot-page--help .faq-icon {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.8em;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 200ms ease-in-out;
-}
-.menupilot-page--help .mp-faq-question .mp-faq-icon svg {
-  width: 20px;
-  height: 20px;
-  stroke: #646970;
-}
-.menupilot-page--help .mp-faq-answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 300ms ease-in-out;
-}
-.menupilot-page--help .mp-faq-answer p {
-  padding: 0 20px 16px 20px;
-  margin: 0;
-  color: #50575e;
-  line-height: 1.6;
-}
-.menupilot-page--help .mp-faq-item.is-open .mp-faq-question {
-  background: #f9f9f9;
-}
-.menupilot-page--help .mp-faq-item.is-open .mp-faq-question .mp-faq-icon {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1em 1em;
+  transition: transform 0.2s;
   transform: rotate(180deg);
 }
-.menupilot-page--help .mp-faq-item.is-open .mp-faq-answer {
-  max-height: 500px;
+.menupilot-page--help .faq-icon svg path {
+  stroke: #8a8a9e;
 }
-
-.menupilot-buttons {
+.menupilot-page--help .faq-question[aria-expanded=true] .faq-icon {
+  transform: rotate(90deg);
+}
+.menupilot-page--help .faq-answer {
+  padding: 1.1em 0 1.3em 0;
+  background: #fff;
+  color: #222;
+  font-size: 1em;
+  border-top: 1px solid #e5e7eb;
+  line-height: 1.7;
+}
+.menupilot-page--help .faq-answer ul {
+  margin: 0.5em 0 0 1.2em;
+}
+@media (max-width: 600px) {
+  .menupilot-page--help .faq-question,
+  .menupilot-page--help .faq-answer {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+  .menupilot-page--help .faq-answer {
+    padding-left: 2em;
+  }
+}
+.turnstilewp-buttons {
   margin-top: 16px;
 }
 
