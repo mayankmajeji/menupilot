@@ -1,222 +1,220 @@
 // Help page styles (matching TurnstileWP structure)
 .menupilot-page--help {
-	// Support cards grid
-	.mp-support-cards {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 24px;
-		max-width: 1200px;
-		@media (max-width: 1100px) {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-		@media (max-width: 720px) {
-			grid-template-columns: 1fr;
-		}
-	}
+  // Support cards grid
+  .mp-support-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    @media (max-width: 1100px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
 
-	.mp-support-card,
-	.turnstilewp-box {
-		background: #fff;
-		border: 1px solid #e5e7eb;
-		border-radius: 10px;
-		padding: 24px;
-		text-align: left;
-		display: flex;
-		flex-direction: column;
-		gap: 24px;
-		justify-content: space-between;
+  .mp-support-card,
+  .turnstilewp-box {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    justify-content: space-between;
 
-		h3 {
-			margin: 0;
-			font-size: 18px;
-			font-weight: 700;
-			color: var(--mp-color-text);
-		}
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--mp-color-text);
+    }
 
-		p {
-			margin: 0;
-			color: var(--mp-color-text-secondary);
-			line-height: 1.6;
-			font-size: 14px;
-		}
+    p {
+      margin: 0;
+      color: var(--mp-color-text-secondary);
+      line-height: 1.6;
+      font-size: 14px;
+    }
 
-		.mp-support-icon {
-			width: 32px;
-			height: 32px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
+    .mp-support-icon {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
 
-			svg {
-				width: 32px;
-				height: 32px;
-				display: block;
-			}
-		}
+      svg {
+        width: 32px;
+        height: 32px;
+        display: block;
+      }
+    }
 
-		&.is-primary-icon {
-			.mp-support-icon {
-				svg,
-				svg * {
-					stroke: var(--mp-color-primary);
-				}
-			}
-		}
+    &.is-primary-icon {
+      .mp-support-icon {
+        svg,
+        svg * {
+          stroke: var(--mp-color-primary);
+        }
+      }
+    }
 
-		.mp-support-card-content {
-			display: grid;
-			gap: 16px;
-		}
+    .mp-support-card-content {
+      display: grid;
+      gap: 16px;
+    }
 
-		.turnstilewp-buttons {
-			margin-top: 0;
-		}
-	}
+    .turnstilewp-buttons {
+      margin-top: 0;
+    }
+  }
 
-	// System info styling (matching TurnstileWP)
-	.twp-system-info {
-		max-width: 576px;
-		background: #fff;
-		border: 1px solid #e5e7eb;
-		border-radius: 10px;
-		padding: 24px;
+  // System info styling (matching TurnstileWP)
+  .twp-system-info {
+    max-width: 576px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 24px;
 
-		ul {
-			margin: 0 0 12px;
-			padding: 0;
-			list-style: none;
-			display: grid;
-		}
+    ul {
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+    }
 
-		li {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 12px;
-			border-bottom: 1px solid #e5e7eb;
-			padding-bottom: 12px;
+    li {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 12px;
 
-			&:last-child {
-				border-bottom: none;
-				padding-bottom: 0;
-			}
+      &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
 
-			.twp-si-label {
-				font-weight: 700;
-			}
+      .twp-si-label {
+        font-weight: 700;
+      }
 
-			.twp-si-value {
-				text-align: right;
-				color: var(--mp-color-text-secondary);
-			}
-		}
+      .twp-si-value {
+        text-align: right;
+        color: var(--mp-color-text-secondary);
+      }
+    }
 
-		li + li {
-			margin-top: 8px;
-		}
+    li + li {
+      margin-top: 8px;
+    }
 
-		.turnstilewp-buttons {
-			margin-top: 20px;
-		}
-	}
+    .turnstilewp-buttons {
+      margin-top: 20px;
+    }
+  }
 
-	// FAQs wrapper (matching TurnstileWP)
-	.turnstilewp-faqs-wrapper {
-		max-width: 576px;
-		background: #fff;
-		border: 1px solid #e5e7eb;
-		border-radius: 10px;
-		padding: 14px 24px;
-	}
+  // FAQs wrapper (matching TurnstileWP)
+  .turnstilewp-faqs-wrapper {
+    max-width: 576px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 24px;
+  }
 
-	// FAQ Accordion styles (matching TurnstileWP exactly)
-	.turnstilewp-faq-accordion {
-		margin-top: 1.5em;
-	}
+  // FAQ Accordion styles (matching TurnstileWP exactly)
+  .turnstilewp-faq-accordion {
+    // margin-top: 1.5em;
+  }
 
-	.faq-block {
-		border-bottom: 1px solid;
-		border-color: #eee transparent;
+  .faq-block {
+    border-bottom: 1px solid;
+    border-color: #eee transparent;
 
-		&:last-child {
-			border-bottom: none;
-		}
-	}
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 
-	.faq-question {
-		padding: 1em 0;
-		color: #1d2327;
-		font-size: 16px !important;
-		margin: 1em 0;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
+  .faq-question {
+    padding: 1em 0;
+    color: #1d2327;
+    font-size: 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-		&[aria-expanded="true"] {
-			background: #f1f5f9;
-		}
+    &[aria-expanded="true"] {
+      background: #f1f5f9;
+    }
 
-		&:focus {
-			box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-			z-index: 1;
-		}
-	}
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      z-index: 1;
+    }
+  }
 
-	.faq-icon {
-		display: inline-block;
-		width: 1.2em;
-		height: 1.2em;
-		margin-right: 0.8em;
-		flex-shrink: 0;
-		background-repeat: no-repeat;
-		background-position: center;
-		background-size: 1em 1em;
-		transition: transform 0.2s;
-		transform: rotate(180deg);
+  .faq-icon {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 0.8em;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 1em 1em;
+    transition: transform 0.2s;
+    transform: rotate(180deg);
 
-		svg {
-			path {
-				stroke: #8a8a9e;
-			}
-		}
-	}
+    svg {
+      path {
+        stroke: #8a8a9e;
+      }
+    }
+  }
 
-	.faq-question[aria-expanded="true"] .faq-icon {
-		transform: rotate(90deg);
-	}
+  .faq-question[aria-expanded="true"] .faq-icon {
+    transform: rotate(90deg);
+  }
 
-	.faq-answer {
-		padding: 1.1em 0 1.3em 0;
-		background: #fff;
-		color: #222;
-		font-size: 1em;
-		border-top: 1px solid #e5e7eb;
-		line-height: 1.7;
+  .faq-answer {
+    padding: 1.1em 0 1.3em 0;
+    background: #fff;
+    color: #222;
+    font-size: 1em;
+    border-top: 1px solid #e5e7eb;
+    line-height: 1.7;
 
-		ul {
-			margin: 0.5em 0 0 1.2em;
-		}
-	}
+    ul {
+      margin: 0.5em 0 0 1.2em;
+    }
+  }
 
-	@media (max-width: 600px) {
-		.faq-question,
-		.faq-answer {
-			padding-left: 1em;
-			padding-right: 1em;
-		}
+  @media (max-width: 600px) {
+    .faq-question,
+    .faq-answer {
+      padding-left: 1em;
+      padding-right: 1em;
+    }
 
-		.faq-answer {
-			padding-left: 2em;
-		}
-	}
+    .faq-answer {
+      padding-left: 2em;
+    }
+  }
 
-	// Inside wrapper
-	.inside {
-		// Used to wrap content inside field groups
-	}
+  // Inside wrapper
+  .inside {
+    // Used to wrap content inside field groups
+  }
 }
 
 // Generic buttons wrapper (matching TurnstileWP)
 .turnstilewp-buttons {
-	margin-top: 16px;
+  margin-top: 16px;
 }
-

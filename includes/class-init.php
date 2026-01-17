@@ -146,6 +146,11 @@ class Init
 			add_action('admin_init', array($this->settings, 'register_settings'));
 			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
 			add_filter('admin_body_class', array($this, 'add_admin_body_class'));
+			
+			// Initialize Tools_Page early to register form processing hooks
+			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-tools-page.php';
+			new \MenuPilot\Admin\Tools_Page();
+			
 			self::$admin_hooks_registered = true;
 		}
 
@@ -438,7 +443,11 @@ class Init
 	public function render_tools_page(): void
 	{
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-tools-page.php';
-		$tools_page = new \MenuPilot\Admin\Tools_Page();
+		// Instantiate early to register hooks (form processing)
+		static $tools_page = null;
+		if ( null === $tools_page ) {
+			$tools_page = new \MenuPilot\Admin\Tools_Page();
+		}
 		$tools_page->render();
 	}
 
