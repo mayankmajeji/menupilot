@@ -26,7 +26,7 @@ $is_active = function (string $slug) use ($current_page): string {
     <div class="mp-header-inner">
         <div class="mp-left">
             <a class="mp-logo" href="<?php echo esc_url(admin_url('admin.php?page=menupilot-settings')); ?>">
-                <span class="dashicons dashicons-menu-alt" style="font-size: 28px; width: 28px; height: 28px;"></span>
+                <img src="<?php echo esc_url(MENUPILOT_PLUGIN_URL . 'assets/images/favicon.svg'); ?>" alt="MenuPilot" width="28" height="28" style="display: block;" />
                 <span class="mp-brand">MenuPilot</span>
             </a>
         </div>
