@@ -338,13 +338,15 @@ class Init
 	public function add_admin_menu(): void
 	{
 		// Main menu page (Settings)
+		// Use base64-encoded SVG favicon for menu icon
+		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg'));
 		add_menu_page(
 			__('MenuPilot', 'menupilot'),
 			__('MenuPilot', 'menupilot'),
 			'manage_options',
 			'menupilot-settings',
 			array($this, 'render_settings_page'),
-			'dashicons-menu-alt',
+			$menu_icon,
 			65
 		);
 
