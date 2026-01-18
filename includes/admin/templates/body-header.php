@@ -15,7 +15,7 @@ if ( ! defined('WPINC') ) {
 ?>
 <div class="mp-body-header">
 	<div class="mp-bh-left">
-		<span class="dashicons dashicons-menu-alt" style="font-size: 40px; width: 40px; height: 40px;"></span>
+		<img src="<?php echo esc_url(MENUPILOT_PLUGIN_URL . 'assets/images/favicon.svg'); ?>" alt="MenuPilot" width="40" height="40" />
 	</div>
 	<div class="mp-bh-right">
 		<h1><?php echo esc_html(isset($mp_title) && $mp_title !== '' ? $mp_title : get_admin_page_title()); ?></h1>
