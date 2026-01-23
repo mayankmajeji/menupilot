@@ -80,7 +80,42 @@ These features may be considered in future versions, but are **not part of v1**.
 
 1. Upload the plugin files to `/wp-content/plugins/menupilot`, or install via the WordPress Plugins screen.
 2. Activate the plugin through the “Plugins” screen.
-3. Go to **Appearance → Menus** or **Tools → Menu Import/Export** to access MenuPilot.
+3. Go to **MenuPilot** in the WordPress admin menu to access the plugin.
+
+== Configuration ==
+
+MenuPilot requires no configuration to start using. Once activated, you can immediately export and import menus.
+
+== Usage ==
+
+### Exporting a Menu
+
+1. Navigate to **MenuPilot → Export Menu** in the WordPress admin.
+2. Select the menu you want to export from the dropdown.
+3. Click the "Export Menu" button.
+4. A JSON file will be downloaded to your computer.
+5. Save this file for importing to another site.
+
+### Importing a Menu
+
+1. Navigate to **MenuPilot → Import Menu** in the WordPress admin.
+2. Click "Choose File" and select a previously exported JSON file.
+3. Click "Upload & Preview" to see what will be imported.
+4. Review the preview screen:
+   * Check menu name (you can edit it)
+   * Review matched and unmatched items
+   * Manually map items if needed
+   * Remove items you don't want to import
+   * Optionally assign the menu to a theme location
+5. Click "Import Menu" to complete the import.
+6. The menu will be created as a new menu (existing menus are never overwritten).
+
+### Important Notes
+
+* MenuPilot always imports menus as **new menus** - it never overwrites existing menus.
+* Always review the preview screen before importing to ensure items are matched correctly.
+* Unmatched items will be converted to custom links automatically.
+* You can manually map items to different content using the "Map To" dropdown in the preview.
 
 == Frequently Asked Questions ==
 
