@@ -4,7 +4,7 @@ Tags: menus, navigation, import export, migration
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,11 +118,11 @@ Unmatched items are clearly shown in the preview. You can manually map them to e
 
 = Does MenuPilot support multisite? =
 
-No. Multisite support is intentionally not included in v1.
+Multisite support is not currently available, but may be added in future versions.
 
 = Does MenuPilot support XML imports or bulk exports? =
 
-No. MenuPilot v1 supports JSON format only and exports one menu at a time.
+No. MenuPilot supports JSON format only and exports one menu at a time.
 
 == Screenshots ==
 
