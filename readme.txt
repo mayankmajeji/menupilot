@@ -1,4 +1,4 @@
-=== MenuPilot ===
+=== MenuPilot – Preview-First Menu Import & Export ===
 Contributors: mayankmajeji
 Tags: menus, navigation, import export, migration
 Requires at least: 5.8
@@ -20,26 +20,11 @@ This makes MenuPilot ideal for moving menus from **staging to production**, loca
 
 ### What MenuPilot Does
 - Exports a single navigation menu as a JSON file
-- Imports a menu as a **new menu** (no overwrite)
+- Imports a menu as a **new menu** (never overwrites existing menus)
 - Provides a full **preview and mapping screen before import**
 - Intelligently matches menu items to existing content
 - Preserves menu hierarchy, order, and metadata
 - Replaces source site URLs with destination site URLs automatically
-
-### What MenuPilot Does NOT Do (V1)
-MenuPilot v1 is intentionally limited to reduce risk during imports.
-
-It does **not**:
-- Sync or update existing menus
-- Merge or replace menus
-- Duplicate menus
-- Perform backups or restores
-- Support multisite
-- Support mega menu plugins
-- Run automated or scheduled imports
-- Provide WP-CLI commands
-
-These features may be considered in future versions, but are **not part of v1**.
 
 == Features ==
 
