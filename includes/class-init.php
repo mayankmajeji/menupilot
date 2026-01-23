@@ -203,18 +203,46 @@ class Init
 			true
 		);
 
+		$localize_data = array(
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'restUrl' => rest_url('menupilot/v1'),
+			'nonce' => wp_create_nonce('wp_rest'),
+			'siteUrl' => get_site_url(),
+			'registeredLocations' => get_registered_nav_menus(),
+			'previewColumns' => Column_Manager::get_columns_for_js(),
+			'defaultMenuNamePattern' => $this->settings->get_option('default_menu_name_pattern', '{original_name}'),
+			'initFunctions' => array(),
+		);
+
+		// Add initialization data based on current page
+		if ($screen->id === 'menupilot_page_menupilot-settings' || $screen->id === 'toplevel_page_menupilot-settings') {
+			// Settings page - add menu name pattern and export filename pattern init data
+			$localize_data['initFunctions']['menuNamePattern'] = array(
+				'fieldId' => 'default_menu_name_pattern',
+				'customFieldId' => 'default_menu_name_pattern_custom',
+			);
+			$localize_data['initFunctions']['exportFilenamePattern'] = array(
+				'fieldId' => 'export_filename_pattern',
+				'customFieldId' => 'export_filename_pattern_custom',
+			);
+		}
+
+		if ($screen->id === 'menupilot_page_menupilot-help') {
+			// Help page - add FAQ accordion and copy system info init data
+			$localize_data['initFunctions']['faqAccordion'] = true;
+			global $wp_version;
+			$localize_data['initFunctions']['copySystemInfo'] = array(
+				'pluginVer' => defined('MENUPILOT_VERSION') ? MENUPILOT_VERSION : '1.0.0',
+				'wpVersion' => $wp_version,
+				'phpVersion' => PHP_VERSION,
+				'memoryLimit' => (string) ini_get('memory_limit'),
+			);
+		}
+
 		wp_localize_script(
 			'menupilot-admin-pages',
 			'menupilot',
-			array(
-				'ajaxurl' => admin_url('admin-ajax.php'),
-				'restUrl' => rest_url('menupilot/v1'),
-				'nonce' => wp_create_nonce('wp_rest'),
-				'siteUrl' => get_site_url(),
-				'registeredLocations' => get_registered_nav_menus(),
-				'previewColumns' => Column_Manager::get_columns_for_js(),
-				'defaultMenuNamePattern' => $this->settings->get_option('default_menu_name_pattern', '{original_name}'),
-			)
+			$localize_data
 		);
 	}
 

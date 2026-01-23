@@ -276,46 +276,6 @@ class Settings_Page
 				</div>
 			</div>
 		</div>
-		<script>
-		(function() {
-			var customRadio = document.getElementById('<?php echo esc_js($field_id); ?>_custom_radio');
-			var customInput = document.getElementById('<?php echo esc_js($custom_field_id); ?>');
-			var otherRadios = document.querySelectorAll('input[name="menupilot_settings[<?php echo esc_js($field_id); ?>]"]:not(#<?php echo esc_js($field_id); ?>_custom_radio)');
-			var form = customInput.closest('form');
-			
-			function updateCustomValue() {
-				if (customRadio.checked) {
-					customInput.disabled = false;
-					customInput.required = true;
-				} else {
-					customInput.disabled = true;
-					customInput.required = false;
-				}
-			}
-			
-			// Update main field value when custom is selected and form is submitted
-			if (form) {
-				form.addEventListener('submit', function() {
-					if (customRadio.checked && customInput.value) {
-						// Create a hidden input to set the main field value to the custom pattern
-						var hiddenInput = document.createElement('input');
-						hiddenInput.type = 'hidden';
-						hiddenInput.name = 'menupilot_settings[<?php echo esc_js($field_id); ?>]';
-						hiddenInput.value = customInput.value;
-						form.appendChild(hiddenInput);
-					}
-				});
-			}
-			
-			customRadio.addEventListener('change', updateCustomValue);
-			otherRadios.forEach(function(radio) {
-				radio.addEventListener('change', updateCustomValue);
-			});
-			
-			// Initialize on page load
-			updateCustomValue();
-		})();
-		</script>
 	<?php
 	}
 
@@ -379,46 +339,6 @@ class Settings_Page
 				</div>
 			</div>
 		</div>
-		<script>
-		(function() {
-			var customRadio = document.getElementById('<?php echo esc_js($field_id); ?>_custom_radio');
-			var customInput = document.getElementById('<?php echo esc_js($custom_field_id); ?>');
-			var otherRadios = document.querySelectorAll('input[name="menupilot_settings[<?php echo esc_js($field_id); ?>]"]:not(#<?php echo esc_js($field_id); ?>_custom_radio)');
-			var form = customInput.closest('form');
-			
-			function updateCustomValue() {
-				if (customRadio.checked) {
-					customInput.disabled = false;
-					customInput.required = true;
-				} else {
-					customInput.disabled = true;
-					customInput.required = false;
-				}
-			}
-			
-			// Update main field value when custom is selected and form is submitted
-			if (form) {
-				form.addEventListener('submit', function() {
-					if (customRadio.checked && customInput.value) {
-						// Create a hidden input to set the main field value to the custom pattern
-						var hiddenInput = document.createElement('input');
-						hiddenInput.type = 'hidden';
-						hiddenInput.name = 'menupilot_settings[<?php echo esc_js($field_id); ?>]';
-						hiddenInput.value = customInput.value;
-						form.appendChild(hiddenInput);
-					}
-				});
-			}
-			
-			customRadio.addEventListener('change', updateCustomValue);
-			otherRadios.forEach(function(radio) {
-				radio.addEventListener('change', updateCustomValue);
-			});
-			
-			// Initialize on page load
-			updateCustomValue();
-		})();
-		</script>
 	<?php
 	}
 
