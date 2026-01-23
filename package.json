@@ -1,36 +1,51 @@
 {
-	"name": "menupilot",
-	"version": "1.0.0",
-	"description": "Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.",
-	"license": "GPL-2.0-or-later",
-	"private": true,
-	"author": "Mayank Majeji",
-	"engines": {
-		"node": ">=18"
-	},
-	"devDependencies": {
-		"@wordpress/eslint-plugin": "^22.0.0",
-		"@wordpress/stylelint-config": "^23.0.0",
-		"eslint": "^8.57.0",
-		"gulp": "^5.0.0",
-		"gulp-clean-css": "^4.3.0",
-		"gulp-rename": "^2.1.0",
-		"gulp-sass": "^6.0.0",
-		"htmlhint": "^1.7.0",
-		"prettier": "^3.6.0",
-		"sass": "^1.93.0",
-		"stylelint": "^16.0.0",
-		"stylelint-config-standard-scss": "^16.0.0"
-	},
-	"scripts": {
-		"gulp:styles": "gulp styles",
-		"gulp:watch": "gulp watch",
-		"lint:js": "eslint assets/js/**/*.js",
-		"lint:css": "stylelint assets/css/**/*.scss",
-		"lint:html": "htmlhint **/*.html",
-		"lint:all": "npm run lint:js && npm run lint:css && npm run lint:html && composer run lint",
-		"fix:js": "eslint --fix assets/js/**/*.js",
-		"fix:css": "stylelint --fix assets/css/**/*.scss",
-		"test": "composer run test"
-	}
+  "name": "menupilot",
+  "version": "1.0.1",
+  "description": "Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "author": "Mayank Majeji",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@wordpress/eslint-plugin": "^22.0.0",
+    "@wordpress/stylelint-config": "^23.0.0",
+    "eslint": "^8.57.0",
+    "gulp": "^5.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-rename": "^2.1.0",
+    "gulp-sass": "^6.0.0",
+    "htmlhint": "^1.7.0",
+    "prettier": "^3.6.0",
+    "sass": "^1.93.0",
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard-scss": "^16.0.0",
+    "version-bump-prompt": "^6.1.0"
+  },
+  "scripts": {
+    "bump:patch": "bump patch --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
+    "bump:minor": "bump minor --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
+    "bump:major": "bump major --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
+    "build": "gulp styles",
+    "build:admin": "sass --no-source-map assets/css/admin.scss assets/css/admin.css",
+    "build:main": "sass --no-source-map assets/css/main.scss assets/css/main.css",
+    "watch": "gulp watch",
+    "watch:admin": "sass --watch --poll assets/css/admin.scss assets/css/admin.css",
+    "watch:main": "sass --watch --poll assets/css/main.scss assets/css/main.css",
+    "version": "npm install",
+    "gulp:styles": "gulp styles",
+    "gulp:watch": "gulp watch",
+    "lint:js": "eslint assets/js/**/*.js",
+    "lint:css": "stylelint assets/css/**/*.scss",
+    "lint:html": "htmlhint **/*.html",
+    "lint:all": "npm run lint:js && npm run lint:css && npm run lint:html && composer run lint",
+    "fix:js": "eslint --fix assets/js/**/*.js",
+    "fix:css": "stylelint --fix assets/css/**/*.scss",
+    "test": "composer run test",
+    "test:unit": "codecept run unit",
+    "test:integration": "codecept run integration",
+    "test:acceptance": "codecept run acceptance",
+    "test:all": "npm run lint:all && composer run test && npm run test:unit && npm run test:integration"
+  }
 }
