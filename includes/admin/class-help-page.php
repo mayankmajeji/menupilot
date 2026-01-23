@@ -205,57 +205,6 @@ class Help_Page {
 				</div>
 			</div>
 		</div>
-
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			var btn = document.getElementById('mp-copy-system-info');
-			if (!btn) return;
-
-			btn.addEventListener('click', function() {
-				var info = [
-					'MenuPilot: v<?php echo esc_js($plugin_ver); ?>',
-					'WordPress: v<?php echo esc_js($wp_version); ?>',
-					'PHP: v<?php echo esc_js($php_version); ?>',
-					'Memory Limit: <?php echo esc_js((string) ini_get('memory_limit')); ?>'
-				].join('\n');
-
-				function showCopied() {
-					var msg = document.getElementById('mp-copy-system-info-msg');
-					if (msg) {
-						msg.style.display = 'inline';
-						setTimeout(function() {
-							msg.style.display = 'none';
-						}, 1500);
-					}
-				}
-
-				function fallbackCopy(text) {
-					var ta = document.createElement('textarea');
-					ta.value = text;
-					ta.setAttribute('readonly', '');
-					ta.style.position = 'absolute';
-					ta.style.left = '-9999px';
-					document.body.appendChild(ta);
-					ta.select();
-					try {
-						var ok = document.execCommand('copy');
-						document.body.removeChild(ta);
-						if (ok) showCopied();
-					} catch (e) {
-						document.body.removeChild(ta);
-					}
-				}
-
-				if (navigator.clipboard && navigator.clipboard.writeText) {
-					navigator.clipboard.writeText(info).then(showCopied).catch(function() {
-						fallbackCopy(info);
-					});
-				} else {
-					fallbackCopy(info);
-				}
-			});
-		});
-		</script>
 		<?php
 	}
 }

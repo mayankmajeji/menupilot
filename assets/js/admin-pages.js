@@ -964,4 +964,196 @@ jQuery(document).ready(function ($) {
         }
       });
   }
+
+  // Settings Page - Menu Name Pattern Field Handler
+  function initMenuNamePatternField(fieldId, customFieldId) {
+    var customRadio = document.getElementById(fieldId + '_custom_radio');
+    var customInput = document.getElementById(customFieldId);
+    if (!customRadio || !customInput) return;
+
+    var otherRadios = document.querySelectorAll('input[name="menupilot_settings[' + fieldId + ']"]:not(#' + fieldId + '_custom_radio)');
+    var form = customInput.closest('form');
+
+    function updateCustomValue() {
+      if (customRadio.checked) {
+        customInput.disabled = false;
+        customInput.required = true;
+      } else {
+        customInput.disabled = true;
+        customInput.required = false;
+      }
+    }
+
+    // Update main field value when custom is selected and form is submitted
+    if (form) {
+      form.addEventListener('submit', function() {
+        if (customRadio.checked && customInput.value) {
+          // Create a hidden input to set the main field value to the custom pattern
+          var hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'menupilot_settings[' + fieldId + ']';
+          hiddenInput.value = customInput.value;
+          form.appendChild(hiddenInput);
+        }
+      });
+    }
+
+    customRadio.addEventListener('change', updateCustomValue);
+    otherRadios.forEach(function(radio) {
+      radio.addEventListener('change', updateCustomValue);
+    });
+
+    // Initialize on page load
+    updateCustomValue();
+  }
+
+  // Settings Page - Export Filename Pattern Field Handler
+  function initExportFilenamePatternField(fieldId, customFieldId) {
+    var customRadio = document.getElementById(fieldId + '_custom_radio');
+    var customInput = document.getElementById(customFieldId);
+    if (!customRadio || !customInput) return;
+
+    var otherRadios = document.querySelectorAll('input[name="menupilot_settings[' + fieldId + ']"]:not(#' + fieldId + '_custom_radio)');
+    var form = customInput.closest('form');
+
+    function updateCustomValue() {
+      if (customRadio.checked) {
+        customInput.disabled = false;
+        customInput.required = true;
+      } else {
+        customInput.disabled = true;
+        customInput.required = false;
+      }
+    }
+
+    // Update main field value when custom is selected and form is submitted
+    if (form) {
+      form.addEventListener('submit', function() {
+        if (customRadio.checked && customInput.value) {
+          // Create a hidden input to set the main field value to the custom pattern
+          var hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'menupilot_settings[' + fieldId + ']';
+          hiddenInput.value = customInput.value;
+          form.appendChild(hiddenInput);
+        }
+      });
+    }
+
+    customRadio.addEventListener('change', updateCustomValue);
+    otherRadios.forEach(function(radio) {
+      radio.addEventListener('change', updateCustomValue);
+    });
+
+    // Initialize on page load
+    updateCustomValue();
+  }
+
+  // FAQ Accordion Handler
+  function initFAQAccordion() {
+    var questions = document.querySelectorAll('.faq-question');
+    var answers = document.querySelectorAll('.faq-answer');
+    if (questions.length === 0) return;
+
+    questions.forEach(function(q, idx) {
+      q.addEventListener('click', function() {
+        var expanded = q.getAttribute('aria-expanded') === 'true';
+        // Collapse all
+        questions.forEach(function(qq, i) {
+          qq.setAttribute('aria-expanded', 'false');
+          answers[i].style.display = 'none';
+        });
+        // Expand this one if it was not already open
+        if (!expanded) {
+          q.setAttribute('aria-expanded', 'true');
+          answers[idx].style.display = 'block';
+        }
+      });
+      q.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          q.click();
+          e.preventDefault();
+        }
+      });
+      // Start collapsed
+      answers[idx].style.display = 'none';
+    });
+  }
+
+  // Help Page - Copy System Info Handler
+  function initCopySystemInfo(pluginVer, wpVersion, phpVersion, memoryLimit) {
+    var btn = document.getElementById('mp-copy-system-info');
+    if (!btn) return;
+
+    btn.addEventListener('click', function() {
+      var info = [
+        'MenuPilot: v' + pluginVer,
+        'WordPress: v' + wpVersion,
+        'PHP: v' + phpVersion,
+        'Memory Limit: ' + memoryLimit
+      ].join('\n');
+
+      function showCopied() {
+        var msg = document.getElementById('mp-copy-system-info-msg');
+        if (msg) {
+          msg.style.display = 'inline';
+          setTimeout(function() {
+            msg.style.display = 'none';
+          }, 1500);
+        }
+      }
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          if (ok) showCopied();
+        } catch (e) {
+          document.body.removeChild(ta);
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(info).then(showCopied).catch(function() {
+          fallbackCopy(info);
+        });
+      } else {
+        fallbackCopy(info);
+      }
+    });
+  }
+
+  // Initialize functions based on data attributes or page context
+  if (typeof menupilot !== 'undefined' && menupilot.initFunctions) {
+    if (menupilot.initFunctions.menuNamePattern) {
+      initMenuNamePatternField(
+        menupilot.initFunctions.menuNamePattern.fieldId,
+        menupilot.initFunctions.menuNamePattern.customFieldId
+      );
+    }
+    if (menupilot.initFunctions.exportFilenamePattern) {
+      initExportFilenamePatternField(
+        menupilot.initFunctions.exportFilenamePattern.fieldId,
+        menupilot.initFunctions.exportFilenamePattern.customFieldId
+      );
+    }
+    if (menupilot.initFunctions.faqAccordion) {
+      initFAQAccordion();
+    }
+    if (menupilot.initFunctions.copySystemInfo) {
+      initCopySystemInfo(
+        menupilot.initFunctions.copySystemInfo.pluginVer,
+        menupilot.initFunctions.copySystemInfo.wpVersion,
+        menupilot.initFunctions.copySystemInfo.phpVersion,
+        menupilot.initFunctions.copySystemInfo.memoryLimit
+      );
+    }
+  }
 });

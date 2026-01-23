@@ -78,33 +78,3 @@ $faqs = array(
 	<?php endforeach; ?>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-	var questions = document.querySelectorAll('.faq-question');
-	var answers = document.querySelectorAll('.faq-answer');
-	questions.forEach(function(q, idx) {
-		q.addEventListener('click', function() {
-			var expanded = q.getAttribute('aria-expanded') === 'true';
-			// Collapse all
-			questions.forEach(function(qq, i) {
-				qq.setAttribute('aria-expanded', 'false');
-				answers[i].style.display = 'none';
-			});
-			// Expand this one if it was not already open
-			if (!expanded) {
-				q.setAttribute('aria-expanded', 'true');
-				answers[idx].style.display = 'block';
-			}
-		});
-		q.addEventListener('keydown', function(e) {
-			if (e.key === 'Enter' || e.key === ' ') {
-				q.click();
-				e.preventDefault();
-			}
-		});
-		// Start collapsed
-		answers[idx].style.display = 'none';
-	});
-});
-</script>
-
