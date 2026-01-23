@@ -7,6 +7,7 @@ bin/
 docs/
 rules/
 vendor/
+.wordpress-org/
 
 # Development files
 .gitignore
