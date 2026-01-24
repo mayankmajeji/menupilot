@@ -117,13 +117,6 @@ Multisite support is not currently available, but may be added in future version
 
 No. MenuPilot supports JSON format only and exports one menu at a time.
 
-## Screenshots
-
-1. Menu export screen
-2. Import preview and mapping screen
-3. Warning panel for missing or unmatched items
-4. Import progress and completion notice
-
 ## Changelog
 
 ### 1.0.0
