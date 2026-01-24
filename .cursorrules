@@ -1,0 +1,5 @@
+# MenuPilot Plugin Rules
+
+## Documentation
+
+- **README.md Sync**: Whenever `readme.txt` is updated, `README.md` must also be updated to match. The README.md should contain the same content as readme.txt, converted to Markdown format, but exclude the Screenshots section.
