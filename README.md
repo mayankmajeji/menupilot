@@ -1,327 +1,156 @@
-# Maverick Plugin Boilerplate
-
-A modern, production-ready WordPress plugin boilerplate with enterprise-grade architecture, comprehensive testing suite, and automated tooling.
-
-## 🚀 Features
-
-- **Modern PHP Architecture** - PSR-4 autoloading, namespaces, type declarations
-- **Complete Testing Suite** - Codeception with unit, integration, and acceptance tests
-- **Build Tooling** - Gulp for asset compilation, Composer for PHP dependencies
-- **Code Quality** - ESLint, PHPCS, PHPStan, Stylelint pre-configured
-- **WordPress.org Ready** - Includes blueprint, readme.txt, proper i18n setup
-- **Asset Pipeline** - SCSS compilation with modern CSS architecture
-- **Developer-Friendly** - Comprehensive documentation and API reference structure
-- **Settings Framework** - Flexible tab-based settings system with field renderer
-- **Admin UI Templates** - Modular admin interface with icon system
-- **Integration Ready** - Structure for plugin integrations (forms, e-commerce, etc.)
-
-## 📋 Requirements
-
-- WordPress 5.8+
-- PHP 7.4+
-- Node.js 18+
-- Composer 2.0+
-
-## 🎯 Quick Start
-
-### Option 1: Automated Setup (Recommended)
-
-```bash
-# Run the setup script
-bash setup.sh
-
-# Follow the prompts to configure your plugin
-```
-
-### Option 2: Manual Setup
-
-1. **Copy the boilerplate**
-   ```bash
-   cp -r maverick-plugin-boilerplate /path/to/wordpress/wp-content/plugins/your-plugin-name
-   cd /path/to/wordpress/wp-content/plugins/your-plugin-name
-   ```
-
-2. **Find and replace the following placeholders:**
-
-   | Placeholder | Example | Description |
-   |------------|---------|-------------|
-   | `MenuPilot` | `My Awesome Plugin` | Full plugin name |
-   | `https://mayankmajeji.com/menupilot` | `https://example.com/my-plugin` | Plugin homepage URL |
-   | `Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.` | `A powerful WordPress plugin` | Short description |
-   | `1.0.0` | `1.0.0` | Initial version |
-   | `Mayank Majeji` | `John Doe` | Your name |
-   | `` | `https://example.com` | Your website |
-   | `menupilot` | `my-plugin` | WordPress text domain (slug) |
-   | `MenuPilot` | `MyPlugin` | PHP package name (PascalCase) |
-   | `MenuPilot` | `MyPlugin` | PHP namespace |
-   | `MENUPILOT` | `MY_PLUGIN` | Constant prefix (UPPER_SNAKE_CASE) |
-   | `menupilot` | `my_plugin` | Function prefix (snake_case) |
-   | `MenuPilot` | `My_Plugin` | Class prefix (Pascal_Snake_Case) |
-
-3. **Rename the main plugin file**
-   ```bash
-   mv plugin-name.php your-plugin-slug.php
-   ```
-
-4. **Install dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
-
-5. **Build assets**
-   ```bash
-   npm run gulp:styles
-   ```
-
-6. **Activate the plugin** in WordPress admin
-
-## 📁 Directory Structure
-
-```
-your-plugin/
-├── plugin-name.php          # Main plugin file
-├── uninstall.php            # Cleanup on uninstall
-├── includes/                # Core plugin classes
-│   ├── class-init.php       # Main initialization class
-│   ├── class-loader.php     # Autoloader
-│   ├── class-settings.php   # Settings API
-│   ├── functions-common.php # Helper functions
-│   ├── admin/               # Admin-specific code
-│   │   ├── templates/       # Admin templates
-│   │   └── views/           # Admin view files
-│   ├── settings/            # Settings framework
-│   │   ├── class-settings-page.php
-│   │   ├── class-tab.php
-│   │   └── field-renderer.php
-│   └── integrations/        # Third-party integrations
-│       ├── core/            # WordPress core integrations
-│       ├── forms/           # Form plugin integrations
-│       └── ecommerce/       # E-commerce integrations
-├── assets/                  # Frontend assets
-│   ├── css/                 # Compiled CSS
-│   ├── js/                  # JavaScript files
-│   └── images/              # Images and icons
-├── i18n/                    # Internationalization
-│   └── languages/           # Translation files
-├── tests/                   # Test suites
-│   ├── unit/                # Unit tests
-│   ├── integration/         # Integration tests
-│   └── acceptance/          # Acceptance tests
-├── docs/                    # Documentation
-├── bin/                     # Build scripts
-├── .wordpress-org/          # WordPress.org assets
-├── composer.json            # PHP dependencies
-├── package.json             # Node dependencies
-├── gulpfile.js              # Gulp configuration
-├── codeception.yml          # Codeception config
-├── phpcs.xml.dist           # PHP CodeSniffer rules
-├── phpstan.neon             # PHPStan configuration
-├── .eslintrc.js             # ESLint configuration
-└── README.md                # This file
-```
+# MenuPilot – Preview-First Menu Import & Export
+
+Safely import and export WordPress navigation menus with a preview-first workflow. Review and map menus before importing.
 
-## 🛠️ Development
+## Description
 
-### Build Tools
+MenuPilot is a focused menu import and export plugin designed to help you move **one menu at a time** between WordPress sites with confidence.
 
-```bash
-# Compile SCSS to CSS
-npm run gulp:styles
+Unlike basic import tools, MenuPilot shows you exactly what will happen **before anything is imported**. You can review the menu structure, see which items match existing content, resolve missing items, and proceed only when everything is clear.
 
-# Watch for changes (auto-compile)
-npm run gulp:watch
+This makes MenuPilot ideal for moving menus from **staging to production**, local development to live sites, or between similar environments — without overwriting existing menus or breaking links silently.
 
-# Migrate SCSS @import to @use
-npm run gulp:migrate-scss
-```
+### What MenuPilot Does
 
-### Code Quality
+- Exports a single navigation menu as a JSON file
+- Imports a menu as a **new menu** (never overwrites existing menus)
+- Provides a full **preview and mapping screen before import**
+- Intelligently matches menu items to existing content
+- Preserves menu hierarchy, order, and metadata
+- Replaces source site URLs with destination site URLs automatically
 
-```bash
-# Run all tests
-composer test
+## Features
 
-# PHP linting
-composer lint
-composer format      # Auto-fix issues
+* Export individual menus (JSON format)
+* Import one menu at a time as a new menu
+* Preview screen before import showing:
+  * Menu name
+  * Total menu items
+  * Source site URL
+  * Export timestamp
+  * Matched and unmatched items
+* Intelligent auto-matching of menu items using:
+  * Post type + slug
+  * Taxonomy + slug
+  * Normalized custom links
+* Manual mapping override per menu item
+* Clear warnings for:
+  * Missing pages, posts, or taxonomies
+  * Items converted to custom links
+  * Theme location availability
+* Automatic home URL replacement during import
+* Preserves:
+  * Menu hierarchy
+  * Menu order
+  * CSS classes
+  * Link attributes (target, rel)
+  * Descriptions
+* Visual import progress and clear success/error messages
+* Native WordPress admin UI (no custom frameworks)
 
-# JavaScript linting
-npm run lint:js
-npm run fix:js       # Auto-fix issues
+## Requirements
 
-# CSS linting
-npm run lint:css
-npm run fix:css      # Auto-fix issues
+* WordPress 5.8 or higher
+* PHP 7.4 or higher
+* Classic WordPress menu system
 
-# Run all linters
-npm run lint:all
-```
+## Installation
 
-### Testing
+1. Upload the plugin files to `/wp-content/plugins/menupilot`, or install via the WordPress Plugins screen.
+2. Activate the plugin through the "Plugins" screen.
+3. Go to **MenuPilot** in the WordPress admin menu to access the plugin.
 
-```bash
-# Run all tests
-npm test
+## Configuration
 
-# Unit tests
-npm run test:unit
-codecept run unit
+MenuPilot requires no configuration to start using. Once activated, you can immediately export and import menus.
 
-# Integration tests
-npm run test:integration
-composer run test:integration
+## Usage
 
-# Acceptance tests
-npm run test:acceptance
-composer run test:acceptance
+### Exporting a Menu
 
-# Start test environment
-composer run test:start
+1. Navigate to **MenuPilot → Export Menu** in the WordPress admin.
+2. Select the menu you want to export from the dropdown.
+3. Click the "Export Menu" button.
+4. A JSON file will be downloaded to your computer.
+5. Save this file for importing to another site.
 
-# Stop test environment
-composer run test:stop
+### Importing a Menu
 
-# Destroy test environment
-composer run test:destroy
-```
+1. Navigate to **MenuPilot → Import Menu** in the WordPress admin.
+2. Click "Choose File" and select a previously exported JSON file.
+3. Click "Upload & Preview" to see what will be imported.
+4. Review the preview screen:
+   * Check menu name (you can edit it)
+   * Review matched and unmatched items
+   * Manually map items if needed
+   * Remove items you don't want to import
+   * Optionally assign the menu to a theme location
+5. Click "Import Menu" to complete the import.
+6. The menu will be created as a new menu (existing menus are never overwritten).
 
-### PHPStan Analysis
+### Important Notes
 
-```bash
-composer run test:phpstan
-```
+* MenuPilot always imports menus as **new menus** - it never overwrites existing menus.
+* Always review the preview screen before importing to ensure items are matched correctly.
+* Unmatched items will be converted to custom links automatically.
+* You can manually map items to different content using the "Map To" dropdown in the preview.
 
-## 🏗️ Architecture
+## Frequently Asked Questions
 
-### Singleton Pattern
+### Does MenuPilot overwrite existing menus?
 
-The main `Init` class uses the singleton pattern:
+No. MenuPilot always imports menus as new menus. Existing menus are never overwritten.
 
-```php
-\MenuPilot\Init::get_instance()->init();
-```
+### Can I preview changes before importing?
 
-### PSR-4 Autoloading
+Yes. MenuPilot shows a detailed preview screen before import, including matched and unmatched items. Nothing is imported until you confirm.
 
-Classes are autoloaded based on namespace:
+### What happens if a menu item cannot be matched?
 
-```php
-namespace MenuPilot;
+Unmatched items are clearly shown in the preview. You can manually map them to existing content or explicitly keep them as custom links.
 
-class Example {
-    // Automatically loaded from includes/class-example.php
-}
-```
+### Does MenuPilot support multisite?
 
-### Settings Framework
+Multisite support is not currently available, but may be added in future versions.
 
-The boilerplate includes a flexible settings system:
+### Does MenuPilot support XML imports or bulk exports?
 
-1. Create a settings tab by extending `Settings\Tab`
-2. Define fields in your tab class
-3. Register the tab with the settings page
-4. Fields are automatically rendered and saved
+No. MenuPilot supports JSON format only and exports one menu at a time.
 
-### Hook System
+## Screenshots
 
-Use the loader class to register hooks cleanly:
+1. Menu export screen
+2. Import preview and mapping screen
+3. Warning panel for missing or unmatched items
+4. Import progress and completion notice
 
-```php
-$this->loader->add_action('init', $this, 'method_name');
-$this->loader->add_filter('the_content', $this, 'filter_content');
-```
+## Changelog
 
-## 🎨 Asset Management
+### 1.0.0
+* Initial release
+* Menu export (JSON)
+* Preview-first menu import with intelligent matching
+* Manual mapping and clear import feedback
 
-### SCSS Architecture
+## Upgrade Notice
 
-```scss
-assets/css/
-├── main.scss                # Main stylesheet
-├── admin.scss               # Admin styles
-└── modules/                 # Modular SCSS
-    ├── _variables.scss      # Variables
-    ├── _mixins.scss         # Mixins
-    ├── _base.scss           # Base styles
-    └── _*.scss              # Feature modules
-```
+### 1.0.0
+Initial release.
 
-### JavaScript
-
-- Place JS files in `assets/js/`
-- Enqueue via `class-init.php` or respective admin classes
-- Use `wp_localize_script()` for passing data from PHP to JS
-
-## 📚 Documentation
-
-After setup, customize these documentation files:
-
-- `docs/API-REFERENCE.md` - Document your plugin's API, hooks, and filters
-- `docs/TESTING.md` - Update testing guidelines for your plugin
-- `docs/CONTRIBUTING.md` - Customize contribution guidelines
-- `docs/WORDPRESS-ORG.md` - WordPress.org submission checklist
-- `CHANGELOG.md` - Document version changes
-
-## 🔌 Integrations
-
-The boilerplate includes structure for common integrations:
-
-### Core WordPress
-- Login/Registration forms
-- Comment forms
-- Password reset
-
-### Form Plugins
-- Contact Form 7
-- WPForms
-- Ninja Forms
-- Forminator
-- Gravity Forms (add as needed)
-
-### E-commerce
-- WooCommerce
-- Easy Digital Downloads (add as needed)
-
-Add your own integrations in `includes/integrations/`
-
-## 🚢 Deployment
-
-### WordPress.org
-
-1. Update `readme.txt` with your plugin details
-2. Add screenshots to `.wordpress-org/`
-3. Follow the checklist in `docs/WORDPRESS-ORG.md`
-4. Use `.distignore` to exclude dev files from distribution
-
-### Version Bumping
-
-```bash
-npm run bump:patch  # 1.0.0 -> 1.0.1
-npm run bump:minor  # 1.0.0 -> 1.1.0
-npm run bump:major  # 1.0.0 -> 2.0.0
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Follow the coding standards
-4. Add tests for new features
-5. Submit a pull request
-
-## 📝 License
+## License
 
 GPL v2 or later - https://www.gnu.org/licenses/gpl-2.0.html
 
-## 🙏 Credits
+## Credits
 
-Built with love by the WordPress community.
+**Contributors:** mayankmajeji
 
-Based on modern WordPress development best practices and inspired by leading WordPress plugins.
+**Tags:** menus, navigation, import export, migration
 
----
+**Requires at least:** WordPress 5.8
 
-**Ready to build something amazing?** 🚀
+**Tested up to:** WordPress 6.9
 
-For questions or support, please open an issue or visit our documentation.
+**Requires PHP:** 7.4
+
+**Stable tag:** 1.0.2
