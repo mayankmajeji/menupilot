@@ -10,7 +10,10 @@
 .specify/
 Wordpress/
 .rules/
-.docs/
+docs/
+
+# Documentation files
+.cursorrules
 
 # Tests
 /tests/_output/
