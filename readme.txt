@@ -4,7 +4,7 @@ Tags: menus, navigation, import export, migration
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,12 +126,18 @@ No. MenuPilot supports JSON format only and exports one menu at a time.
 
 == Screenshots ==
 
-1. Menu export screen
-2. Import preview and mapping screen
-3. Warning panel for missing or unmatched items
-4. Import progress and completion notice
+1. Menu import screen
+2. Menu export screen
+3. Main Settings screen
+4. Import preview and mapping screen
 
 == Changelog ==
+
+= 1.0.3 =
+* Asset updates
+
+= 1.0.2 =
+* UI improvements and bug fixes
 
 = 1.0.0 =
 * Initial release
