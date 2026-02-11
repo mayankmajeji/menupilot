@@ -35,6 +35,8 @@ class Settings {
 		// Export Settings
 		'export_filename_pattern' => 'menu-{slug}-{date}-{time}',
 		'export_filename_pattern_custom' => '',
+		// Backup
+		'backup_limit' => 5,
 	);
 
 	/**
@@ -159,6 +161,7 @@ class Settings {
 			'default_menu_name_pattern_custom' => 'text',
 			'export_filename_pattern' => 'text',
 			'export_filename_pattern_custom' => 'text',
+			'backup_limit' => 'number',
 		);
 
 		// Sanitize each known field
@@ -183,6 +186,9 @@ class Settings {
 						break;
 					case 'number':
 						$sanitized[ $field_id ] = intval($value);
+						if ( $field_id === 'backup_limit' ) {
+							$sanitized[ $field_id ] = max(1, min(20, $sanitized[ $field_id ]));
+						}
 						break;
 					case 'email':
 						$sanitized[ $field_id ] = sanitize_email($value);

@@ -18,9 +18,22 @@ This makes MenuPilot ideal for moving menus from **staging to production**, loca
 - Intelligently matches menu items to existing content
 - Preserves menu hierarchy, order, and metadata
 - Replaces source site URLs with destination site URLs automatically
+- Creates automatic backups before menu updates and imports
+- Logs all import and export actions for accountability
 
 ## Features
 
+* Backup & Restore:
+  * Automatic backups before every menu update and import
+  * Manual backup creation from the Menus page
+  * One-click restore to any previous backup
+  * Export backups as JSON for portability
+  * Configurable backup limit (Backup Settings tab)
+* Import/Export History Logs:
+  * Dedicated History page under MenuPilot menu
+  * Logs who, when, and what for every import/export
+  * Download logs as JSON or plain text
+  * Clear history with confirmation
 * Export individual menus (JSON format)
 * Import one menu at a time as a new menu
 * Preview screen before import showing:
@@ -64,7 +77,24 @@ This makes MenuPilot ideal for moving menus from **staging to production**, loca
 
 MenuPilot requires no configuration to start using. Once activated, you can immediately export and import menus.
 
+Optional: Go to **MenuPilot → Settings** and open the **Backup** tab to configure the maximum number of backups to keep per menu (default: 5).
+
 ## Usage
+
+### Backup & Restore
+
+1. When editing a menu, scroll to the **MenuPilot Backup** section below the menu form.
+2. Use the **Backup** tab to create manual backups, restore previous versions, or export backups as JSON.
+3. Use the **Import** tab to import a previously exported backup JSON file.
+4. Backups are also created automatically before every menu save and before every import.
+
+### History Logs
+
+1. Navigate to **MenuPilot → History** in the WordPress admin.
+2. View all import and export actions with user, timestamp, menu name, and outcome.
+3. Use the **Filter** button to narrow results by date range or user.
+4. Download logs as JSON or plain text for record-keeping or auditing.
+5. Use **Clear History** to remove all log entries (with confirmation). Export first if you need a backup.
 
 ### Exporting a Menu
 
@@ -117,7 +147,26 @@ Multisite support is not currently available, but may be added in future version
 
 No. MenuPilot supports JSON format only and exports one menu at a time.
 
+### When are backups created?
+
+Backups are created automatically before every menu update (including native menu edits) and before every import. You can also create manual backups from the Backup section on the Menus page.
+
+### Where can I view import and export history?
+
+Go to **MenuPilot → History** to view all import and export actions. You can filter by date and user, and download logs as JSON or plain text.
+
 ## Changelog
+
+### 1.0.3
+* Backup & Restore: automatic backups before menu updates and imports
+* Manual backup creation, one-click restore, and export backups as JSON
+* Backup Settings tab to configure maximum backups per menu
+* Import/Export History Logs: dedicated History page with filter and download (JSON/plain text)
+* Backup UI: brand styling for buttons, active tab, and consistent button sizing
+* Code quality: PHPCS, ESLint, and Stylelint configuration
+
+### 1.0.2
+* UI improvements and bug fixes
 
 ### 1.0.0
 * Initial release
@@ -126,6 +175,9 @@ No. MenuPilot supports JSON format only and exports one menu at a time.
 * Manual mapping and clear import feedback
 
 ## Upgrade Notice
+
+### 1.0.3
+Backup & Restore, Import/Export History Logs, and UI improvements.
 
 ### 1.0.0
 Initial release.
@@ -146,4 +198,4 @@ GPL v2 or later - https://www.gnu.org/licenses/gpl-2.0.html
 
 **Requires PHP:** 7.4
 
-**Stable tag:** 1.0.2
+**Stable tag:** 1.0.3

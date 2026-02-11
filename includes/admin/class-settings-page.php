@@ -123,6 +123,22 @@ class Settings_Page
 			'menupilot_export_settings'
 		);
 
+		// Backup Section
+		add_settings_section(
+			'menupilot_backup_settings',
+			__('Backup', 'menupilot'),
+			array($this, 'render_backup_section_description'),
+			'menupilot_settings'
+		);
+
+		add_settings_field(
+			'backup_limit',
+			__('Maximum Backups per Menu', 'menupilot'),
+			array($this, 'render_backup_limit_field'),
+			'menupilot_settings',
+			'menupilot_backup_settings'
+		);
+
 		self::$settings_registered = true;
 	}
 
@@ -144,6 +160,45 @@ class Settings_Page
 	public function render_export_section_description(): void
 	{
 		echo '<p>' . esc_html__('Configure default behaviors for exporting menus.', 'menupilot') . '</p>';
+	}
+
+	/**
+	 * Render backup section description
+	 *
+	 * @return void
+	 */
+	public function render_backup_section_description(): void
+	{
+		echo '<p>' . esc_html__('Configure backup and restore behavior.', 'menupilot') . '</p>';
+	}
+
+	/**
+	 * Render backup limit field
+	 *
+	 * @return void
+	 */
+	public function render_backup_limit_field(): void
+	{
+		$value = (int) $this->settings->get_option('backup_limit', 5);
+		$value = max(1, min(20, $value));
+		$field_id = 'backup_limit';
+	?>
+		<div class="mp-field mp-field-type-number">
+			<div class="mp-label">
+				<label for="<?php echo esc_attr($field_id); ?>">
+					<strong><?php esc_html_e('Maximum Backups per Menu', 'menupilot'); ?></strong>
+				</label>
+			</div>
+			<div class="mp-option">
+				<div class="mp-input">
+					<input type="number" id="<?php echo esc_attr($field_id); ?>" name="menupilot_settings[<?php echo esc_attr($field_id); ?>]" value="<?php echo esc_attr((string) $value); ?>" min="1" max="20" class="small-text" />
+				</div>
+				<div class="mp-description">
+					<p><?php esc_html_e('Maximum number of backups to keep per menu. Oldest backups are removed when the limit is exceeded. (1–20)', 'menupilot'); ?></p>
+				</div>
+			</div>
+		</div>
+	<?php
 	}
 
 	/**
@@ -400,6 +455,7 @@ class Settings_Page
 		// Define tabs
 		$tabs = array(
 			'general' => __('General', 'menupilot'),
+			'backup'  => __('Backup', 'menupilot'),
 		);
 
 		// Get current tab (default to general)
@@ -467,6 +523,22 @@ class Settings_Page
 
 											// Export Settings Group
 											$this->render_settings_group('menupilot_export_settings', __('Export Settings', 'menupilot'));
+											?>
+
+											<div class="mp-actions" style="margin-top:16px;">
+												<?php submit_button(__('Save Settings', 'menupilot')); ?>
+											</div>
+										</form>
+									</div>
+								</div>
+							<?php elseif ($current_tab === 'backup') : ?>
+								<div class="mp-section" id="section-menupilot_backup">
+									<div class="mp-sub-section">
+										<form method="post" action="options.php">
+											<?php settings_fields('menupilot_settings'); ?>
+
+											<?php
+											$this->render_settings_group('menupilot_backup_settings', __('Backup Settings', 'menupilot'));
 											?>
 
 											<div class="mp-actions" style="margin-top:16px;">

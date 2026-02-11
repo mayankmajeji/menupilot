@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use MenuPilot\History;
 use MenuPilot\Menu_Exporter;
 use MenuPilot\Menu_Importer;
 use MenuPilot\Settings;
@@ -120,6 +121,31 @@ class REST_Controller extends WP_REST_Controller
 			)
 		);
 
+		// Restore menu (replace existing with import data)
+		register_rest_route(
+			$this->namespace,
+			'/menus/restore',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array($this, 'restore_menu'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
+				'args'                => array(
+					'menu_id'   => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'validate_callback' => function ( $param ) {
+							return is_numeric($param) && $param > 0;
+						},
+						'sanitize_callback' => 'absint',
+					),
+					'menu_data' => array(
+						'required' => true,
+						'type'     => 'object',
+					),
+				),
+			)
+		);
+
 		// Mapping options endpoint
 		register_rest_route(
 			$this->namespace,
@@ -128,6 +154,58 @@ class REST_Controller extends WP_REST_Controller
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array($this, 'get_mapping_options'),
 				'permission_callback' => array($this, 'check_admin_permissions'),
+			)
+		);
+
+		// History list endpoint
+		register_rest_route(
+			$this->namespace,
+			'/history',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array($this, 'get_history'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
+				'args'                => array(
+					'page'        => array(
+						'type'    => 'integer',
+						'default' => 1,
+						'minimum' => 1,
+					),
+					'per_page'    => array(
+						'type'    => 'integer',
+						'default' => 50,
+						'minimum' => 1,
+						'maximum' => 100,
+					),
+					'action_type' => array(
+						'type' => 'string',
+						'enum' => array( 'import', 'export' ),
+					),
+					'menu_id'     => array(
+						'type' => 'integer',
+					),
+					'user_id'     => array(
+						'type' => 'integer',
+					),
+				),
+			)
+		);
+
+		// History download endpoint
+		register_rest_route(
+			$this->namespace,
+			'/history/download',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array($this, 'download_history'),
+				'permission_callback' => array($this, 'check_admin_permissions'),
+				'args'                => array(
+					'format' => array(
+						'type'    => 'string',
+						'default' => 'json',
+						'enum'    => array( 'json', 'text' ),
+					),
+				),
 			)
 		);
 	}
@@ -207,6 +285,14 @@ class REST_Controller extends WP_REST_Controller
 			);
 		}
 
+		// Log export to history
+		History::log(
+			'export',
+			$menu_id,
+			$menu->name ?? ( $export_data['menu']['name'] ?? null ),
+			'success'
+		);
+
 		// Generate filename
 		$filename = $this->exporter->generate_filename($menu_id);
 
@@ -270,6 +356,7 @@ class REST_Controller extends WP_REST_Controller
 		$menu_id = $this->importer->import($menu_data, $menu_name, $location);
 
 		if (! $menu_id) {
+			do_action('menupilot_import_failed', $menu_data, __('Failed to import menu. Please check the menu data and try again.', 'menupilot'));
 			return new WP_Error(
 				'import_failed',
 				__('Failed to import menu. Please check the menu data and try again.', 'menupilot'),
@@ -298,6 +385,57 @@ class REST_Controller extends WP_REST_Controller
 			'success'  => true,
 			'menu_id'  => $menu_id,
 			'message'  => $message,
+			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
+		));
+	}
+
+	/**
+	 * Restore menu (replace existing with import data)
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function restore_menu( \WP_REST_Request $request ) {
+		$menu_id  = $request->get_param('menu_id');
+		$menu_data = $request->get_param('menu_data');
+
+		if ( ! is_array($menu_data) || ! isset($menu_data['menu']) ) {
+			return new WP_Error(
+				'invalid_data',
+				__('Invalid menu data format.', 'menupilot'),
+				array('status' => 400)
+			);
+		}
+
+		$menu = wp_get_nav_menu_object($menu_id);
+		if ( ! $menu ) {
+			return new WP_Error(
+				'menu_not_found',
+				__('Menu not found.', 'menupilot'),
+				array('status' => 404)
+			);
+		}
+
+		$ok = $this->importer->restore($menu_id, $menu_data);
+		if ( ! $ok ) {
+			do_action('menupilot_import_failed', $menu_data, __('Failed to restore menu.', 'menupilot'));
+			return new WP_Error(
+				'restore_failed',
+				__('Failed to restore menu. Please check the menu data and try again.', 'menupilot'),
+				array('status' => 500)
+			);
+		}
+
+		do_action('menupilot_after_import', $menu_id, $menu_data, array());
+
+		return rest_ensure_response(array(
+			'success'  => true,
+			'menu_id'  => $menu_id,
+			'message'  => sprintf(
+				/* translators: %s: menu name */
+				__('Menu "%s" has been replaced successfully.', 'menupilot'),
+				$menu->name
+			),
 			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
 		));
 	}
@@ -367,6 +505,61 @@ class REST_Controller extends WP_REST_Controller
 			'success' => true,
 			'options' => $options,
 		));
+	}
+
+	/**
+	 * Get history entries
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function get_history( \WP_REST_Request $request ): \WP_REST_Response {
+		$page = (int) $request->get_param('page');
+		$per_page = (int) $request->get_param('per_page');
+		$action_type = $request->get_param('action_type');
+		$menu_id = $request->get_param('menu_id');
+		$user_id = $request->get_param('user_id');
+
+		$result = History::get_entries(
+			$page,
+			$per_page,
+			$action_type ?: null,
+			$menu_id !== null ? (int) $menu_id : null,
+			$user_id !== null ? (int) $user_id : null
+		);
+
+		return rest_ensure_response($result);
+	}
+
+	/**
+	 * Download history
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function download_history( \WP_REST_Request $request ): \WP_REST_Response {
+		$format = $request->get_param('format') ?: 'json';
+		$data = History::get_all_for_download($format);
+
+		if ( $format === 'text' ) {
+			return new \WP_REST_Response(
+				$data,
+				200,
+				array(
+					'Content-Type'       => 'text/plain; charset=utf-8',
+					'Content-Disposition' => 'attachment; filename="menupilot-history-' . gmdate('Y-m-d') . '.txt"',
+				)
+			);
+		}
+
+		return new \WP_REST_Response(
+			$data,
+			200,
+			array(
+				'Content-Type'       => 'application/json; charset=utf-8',
+				'Content-Disposition' => 'attachment; filename="menupilot-history-' . gmdate('Y-m-d') . '.json"',
+			)
+		);
 	}
 
 	/**
