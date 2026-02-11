@@ -8,6 +8,10 @@
 # Directories 
 .vscode/
 .specify/
+.specs/
+.specstory/
+specs/
+.cursor/
 Wordpress/
 .rules/
 docs/
@@ -28,3 +32,4 @@ __MACOSX
 **/__MACOSX
 Thumbs.db
 .DS_Store
+.cursorindexingignore

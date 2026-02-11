@@ -30,7 +30,7 @@ $border-color: $color-border;
 $background-color: #f5f6fa;
 
 // Typography
-$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+$font-family: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, oxygen-sans, ubuntu, cantarell, 'Helvetica Neue', sans-serif;
 $font-size-base: 16px;
 $line-height-base: 1.5;
 
@@ -46,8 +46,8 @@ $radius: 6px;
 $radius-lg: 10px;
 
 // Shadows
-$shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-$shadow-lg: 0 2px 8px rgba(60, 60, 60, 0.06);
+$shadow: 0 1px 4px rgb(0, 0, 0, 0.04);
+$shadow-lg: 0 2px 8px rgb(60, 60, 60, 0.06);
 
 // Card padding
 $card-padding: 32px 32px 24px 32px;

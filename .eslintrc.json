@@ -1,0 +1,28 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "script"
+  },
+  "globals": {
+    "jQuery": "readonly",
+    "menupilot": "readonly",
+    "menupilotAdmin": "readonly",
+    "wp": "readonly"
+  },
+  "rules": {
+    "no-redeclare": "off",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "vendor/",
+    "*.min.js"
+  ]
+}

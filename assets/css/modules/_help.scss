@@ -6,10 +6,12 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
     max-width: 1200px;
-    @media (max-width: 1100px) {
+
+    @media (width <= 1100px) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    @media (max-width: 720px) {
+
+    @media (width <= 720px) {
       grid-template-columns: 1fr;
     }
   }
@@ -155,7 +157,7 @@
     }
 
     &:focus {
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      box-shadow: 0 0 0 2px rgb(37, 99, 235, 0.2);
       z-index: 1;
     }
   }
@@ -196,7 +198,7 @@
     }
   }
 
-  @media (max-width: 600px) {
+  @media (width <= 600px) {
     .faq-question,
     .faq-answer {
       padding-left: 1em;

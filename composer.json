@@ -1,12 +1,12 @@
 {
-	"name": "MenuPilot",
+	"name": "menupilot/menupilot",
 	"description": "Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.",
 	"license": "GPL-2.0-or-later",
 	"type": "wordpress-plugin",
 	"authors": [
 		{
 			"name": "Mayank Majeji",
-			"homepage": ""
+			"homepage": "https://mayankmajeji.com"
 		}
 	],
 	"homepage": "https://mayankmajeji.com/menupilot",
