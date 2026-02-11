@@ -1,0 +1,62 @@
+/**
+ * History Page Styles
+ *
+ * @package MenuPilot
+ */
+
+.mp-toolbar-left,
+.mp-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-toolbar-label {
+  font-size: 13px;
+  color: #50575e;
+  margin-right: 4px;
+}
+
+.mp-inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mp-pagination {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mp-outcome-success {
+  color: #46b450;
+}
+
+.mp-outcome-failure {
+  color: #dc3232;
+}
+
+.mp-clear-history-form {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid #c3c4c7;
+
+  .button-link-delete {
+    color: #b32d2e !important; /* stylelint-disable-line */
+    border-color: #b32d2e !important; /* stylelint-disable-line */
+    background: transparent;
+
+    &:hover:not(:disabled),
+    &:focus:not(:disabled) {
+      border-color: #8a2424 !important; /* stylelint-disable-line */
+      color: #fff !important;
+      background: #8a2424 !important; /* stylelint-disable-line */
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

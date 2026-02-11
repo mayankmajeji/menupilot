@@ -9,7 +9,7 @@
 
   &:hover {
     border-color: var(--mp-color-primary);
-    background: rgba(83, 68, 244, 0.02);
+    background: rgb(83, 68, 244, 0.02);
   }
 
   input[type="file"] {
@@ -42,7 +42,7 @@
 
   &.has-file {
     border-color: #1e8c1e;
-    background: rgba(30, 140, 30, 0.05);
+    background: rgb(30, 140, 30, 0.05);
   }
 }
 
@@ -84,7 +84,7 @@
 
   // File info display
   #mp-file-info {
-    background: rgba(83, 68, 244, 0.05);
+    background: rgb(83, 68, 244, 0.05);
     border: 1px solid var(--mp-color-primary);
     border-radius: 6px;
     padding: 12px;
@@ -193,6 +193,7 @@
 
   .mp-sub-section {
     background-color: #fcfcfd;
+
     // border: solid 1px #d8d8d8;
     border-top: none;
     padding: 0 0 1rem 0;
@@ -263,7 +264,7 @@
     position: relative;
     padding: 32px;
     min-width: 255px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 1px rgb(0, 0, 0, 0.04);
     background: #fff;
 
     &:last-child {

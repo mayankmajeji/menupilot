@@ -206,7 +206,10 @@ jQuery(document).ready(function ($) {
   });
 
   // Generate import preview HTML with manual mapping
-  function generateImportPreviewWithMapping(importData, mappingOptions) {
+  function generateImportPreviewWithMapping(importData, mappingOptions, options) {
+    options = options || {};
+    const replaceMode = !!options.replaceMode;
+    const targetMenuId = options.targetMenuId || 0;
     const menu = importData.menu || {};
     const context = importData.export_context || {};
 
@@ -243,7 +246,11 @@ jQuery(document).ready(function ($) {
     });
 
     let html = '<div class="notice notice-info" style="margin: 0 0 20px 0;">';
-    html += "<p><strong>Review the import details below before proceeding.</strong> The menu will be created as a new menu.</p>";
+    if (replaceMode) {
+      html += "<p><strong>Review the import details below before proceeding.</strong> This will replace the current menu with the imported data.</p>";
+    } else {
+      html += "<p><strong>Review the import details below before proceeding.</strong> The menu will be created as a new menu.</p>";
+    }
     html += "</div>";
 
     html += '<div class="mp-card">';
@@ -298,20 +305,25 @@ jQuery(document).ready(function ($) {
     html += '<div class="mp-card" style="margin-top:20px;">';
     html += "<h3>Import Configuration</h3>";
     html += '<div id="mp-import-execute-form">';
-    html += '<table class="form-table"><tbody>';
-    html += '<tr><th scope="row"><label for="mp-import-menu-name">Menu Name:</label></th>';
-    html += '<td><input type="text" id="mp-import-menu-name" name="menu_name" value="' + escapeHtml(menuName) + '" class="regular-text" required />';
-    html += '<p class="description">Enter a name for the imported menu. The default pattern from Settings has been applied, but you can change it.</p></td></tr>';
-    html += '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
-    html += '<td><select id="mp-import-location" name="location"><option value="">— Do not assign —</option>';
+    if (replaceMode) {
+      html += '<input type="hidden" id="mp-import-replace-mode" value="1" />';
+      html += '<input type="hidden" id="mp-import-target-menu-id" value="' + targetMenuId + '" />';
+    } else {
+      html += '<table class="form-table"><tbody>';
+      html += '<tr><th scope="row"><label for="mp-import-menu-name">Menu Name:</label></th>';
+      html += '<td><input type="text" id="mp-import-menu-name" name="menu_name" value="' + escapeHtml(menuName) + '" class="regular-text" required />';
+      html += '<p class="description">Enter a name for the imported menu. The default pattern from Settings has been applied, but you can change it.</p></td></tr>';
+      html += '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
+      html += '<td><select id="mp-import-location" name="location"><option value="">— Do not assign —</option>';
 
-    for (const [locationId, locationName] of Object.entries(registeredLocations)) {
-      html += '<option value="' + escapeHtml(locationId) + '">' + escapeHtml(locationName) + "</option>";
+      for (const [locationId, locationName] of Object.entries(registeredLocations)) {
+        html += '<option value="' + escapeHtml(locationId) + '">' + escapeHtml(locationName) + "</option>";
+      }
+
+      html += "</select>";
+      html += '<p class="description">Optionally assign this menu to a theme location.</p></td></tr>';
+      html += "</tbody></table>";
     }
-
-    html += "</select>";
-    html += '<p class="description">Optionally assign this menu to a theme location.</p></td></tr>';
-    html += "</tbody></table>";
     html += '<input type="hidden" id="mp-import-data" name="import_data" value="" />';
     html += "</div></div>";
 
@@ -604,12 +616,17 @@ jQuery(document).ready(function ($) {
     // Update modal content
     $("#mp-import-modal .mp-modal-body").html(html);
 
-    // Store import data (wait for DOM to be ready)
+    // Store import data and update button text (wait for DOM to be ready)
     setTimeout(function () {
       if ($("#mp-import-data").length) {
         $("#mp-import-data").val(JSON.stringify(data));
       } else {
         console.error("Import data field not found");
+      }
+      if ($("#mp-import-replace-mode").length && $("#mp-import-replace-mode").val() === "1") {
+        $("#mp-modal-import").text("Replace Menu");
+      } else {
+        $("#mp-modal-import").text("Import Menu");
       }
     }, 100);
 
@@ -779,20 +796,16 @@ jQuery(document).ready(function ($) {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log("Import button clicked");
-
     const $button = $(this);
     const $spinner = $("#mp-import-modal .mp-modal-footer .spinner");
-    const $result = $("#mp-import-result");
+    const replaceMode = $("#mp-import-replace-mode").length && $("#mp-import-replace-mode").val() === "1";
+    const targetMenuId = replaceMode ? parseInt($("#mp-import-target-menu-id").val(), 10) : 0;
+    const $result = replaceMode ? $("#mp-backup-import-result") : $("#mp-import-result");
     const menuName = $("#mp-import-menu-name").val();
     const location = $("#mp-import-location").val();
     const importData = $("#mp-import-data").val();
 
-    console.log("Menu name:", menuName);
-    console.log("Location:", location);
-    console.log("Import data length:", importData ? importData.length : 0);
-
-    if (!menuName) {
+    if (!replaceMode && !menuName) {
       alert("Please enter a menu name.");
       return false;
     }
@@ -879,41 +892,46 @@ jQuery(document).ready(function ($) {
       return false;
     }
 
+    const apiUrl = replaceMode
+      ? menupilot.restUrl + "/menus/restore"
+      : menupilot.restUrl + "/menus/import";
+    const apiPayload = replaceMode
+      ? { menu_id: targetMenuId, menu_data: menuData }
+      : { menu_name: menuName, menu_data: menuData, location: location };
+
     // Make REST API request
     $.ajax({
-      url: menupilot.restUrl + "/menus/import",
+      url: apiUrl,
       type: "POST",
       beforeSend: function (xhr) {
         xhr.setRequestHeader("X-WP-Nonce", menupilot.nonce);
       },
       contentType: "application/json",
-      data: JSON.stringify({
-        menu_name: menuName,
-        menu_data: menuData,
-        location: location,
-      }),
+      data: JSON.stringify(apiPayload),
       success(response) {
         if (response.success) {
           closeImportModal();
-          $result.html(
-            '<div class="notice notice-success"><p>' +
-              response.message +
-              ' <a href="' +
-              response.edit_url +
-              '">Edit menu</a></p></div>'
-          );
-          // Reset form
-          $("#mp-menu-file").val("");
-          $("#mp-file-info").hide();
-          $("#mp-import-btn").prop("disabled", true);
-          $(".mp-upload-area").removeClass("has-file");
-
-          // Scroll to result
-          $("html, body").animate(
-            { scrollTop: $result.offset().top - 100 },
-            300
-          );
+          if (replaceMode) {
+            window.location.reload();
+          } else {
+            $result.html(
+              '<div class="notice notice-success"><p>' +
+                response.message +
+                ' <a href="' +
+                response.edit_url +
+                '">Edit menu</a></p></div>'
+            );
+            $("#mp-menu-file").val("");
+            $("#mp-file-info").hide();
+            $("#mp-import-btn").prop("disabled", true);
+            $(".mp-upload-area").removeClass("has-file");
+            $("html, body").animate(
+              { scrollTop: $result.offset().top - 100 },
+              300
+            );
+          }
         } else {
+          closeImportModal();
           $result.html(
             '<div class="notice notice-error"><p>' +
               (response.message || "Import failed. Please try again.") +
@@ -922,6 +940,7 @@ jQuery(document).ready(function ($) {
         }
       },
       error(xhr) {
+        closeImportModal();
         let message = "An error occurred during import. Please try again.";
         if (xhr.responseJSON && xhr.responseJSON.message) {
           message = xhr.responseJSON.message;
@@ -938,32 +957,35 @@ jQuery(document).ready(function ($) {
     });
   });
 
-  // Drag and drop support for file upload
-  const $uploadArea = $(".mp-upload-area");
-  if ($uploadArea.length) {
-    $uploadArea
-      .on("dragover", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $(this).addClass("dragover");
-      })
-      .on("dragleave", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $(this).removeClass("dragover");
-      })
-      .on("drop", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $(this).removeClass("dragover");
+  // Drag and drop support for file upload (works for Import page and Backup Import)
+  $(document)
+    .on("dragover", ".mp-upload-area", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).addClass("dragover");
+    })
+    .on("dragleave", ".mp-upload-area", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).removeClass("dragover");
+    })
+    .on("drop", ".mp-upload-area", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $(this).removeClass("dragover");
 
-        const files = e.originalEvent.dataTransfer.files;
-        if (files.length > 0) {
-          document.getElementById("mp-menu-file").files = files;
-          $("#mp-menu-file").trigger("change");
+      const files = e.originalEvent.dataTransfer.files;
+      const $area = $(this);
+      const $fileInput = $area.find('input[type="file"]');
+      if ($fileInput.length && files.length > 0) {
+        const dt = new DataTransfer();
+        for (let i = 0; i < files.length; i++) {
+          dt.items.add(files[i]);
         }
-      });
-  }
+        $fileInput[0].files = dt.files;
+        $fileInput.trigger("change");
+      }
+    });
 
   // Settings Page - Menu Name Pattern Field Handler
   function initMenuNamePatternField(fieldId, customFieldId) {
@@ -1129,6 +1151,274 @@ jQuery(document).ready(function ($) {
       }
     });
   }
+
+  // MenuPilot Backup - Tab switching
+  $(document).on("click", ".menupilot-backup-tab", function () {
+    const tab = $(this).data("tab");
+    $(".menupilot-backup-tab").removeClass("is-active");
+    $(this).addClass("is-active");
+    $(".menupilot-backup-tab-content").hide();
+    const $footer = $("#menupilot-backup-section .menupilot-backup-footer");
+    if (tab === "backup-restore") {
+      $("#menupilot-backup-restore-panel").show();
+      $footer.show();
+    } else if (tab === "import") {
+      $("#menupilot-backup-import-panel").show();
+      $footer.hide();
+    }
+  });
+
+  // Backup import - file input change (enable/disable Upload & Preview)
+  $(document).on("change", "#mp-backup-menu-file", function () {
+    const hasFile = $(this).val() && $(this)[0].files.length > 0;
+    $("#mp-backup-import-btn").prop("disabled", !hasFile);
+    const $area = $(this).closest(".mp-upload-area");
+    if (hasFile) {
+      $area.addClass("has-file");
+      $("#mp-backup-file-info").show();
+      $("#mp-backup-file-name").text($(this)[0].files[0].name);
+    } else {
+      $area.removeClass("has-file");
+      $("#mp-backup-file-info").hide();
+      $("#mp-backup-file-name").text("");
+    }
+  });
+
+  // Backup import - form submit (Upload & Preview)
+  $(document).on("submit", "#mp-backup-import-form", function (e) {
+    e.preventDefault();
+    const fileInput = document.getElementById("mp-backup-menu-file");
+    const $result = $("#mp-backup-import-result");
+    const $button = $("#mp-backup-import-btn");
+    const $spinner = $("#mp-backup-import-spinner");
+    const $ui = $("#menupilot-backup-ui");
+    const menuId = $ui.data("menu-id");
+
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+      $result.html(
+        '<div class="notice notice-error"><p>Please select a JSON file.</p></div>'
+      );
+      return;
+    }
+
+    if (!menuId || menuId === "0") {
+      $result.html(
+        '<div class="notice notice-error"><p>Please select a menu above to import into.</p></div>'
+      );
+      return;
+    }
+
+    $button.prop("disabled", true);
+    $spinner.addClass("is-active");
+    $result.html("");
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      try {
+        const importData = JSON.parse(event.target.result);
+        if (!importData.menu || !importData.menu.name) {
+          throw new Error("Invalid menu data structure");
+        }
+
+        $.ajax({
+          url: menupilot.restUrl + "/menus/mapping-options",
+          type: "GET",
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-WP-Nonce", menupilot.nonce);
+          },
+          success: function (mappingResponse) {
+            if (mappingResponse.success) {
+              const previewHtml = generateImportPreviewWithMapping(
+                importData,
+                mappingResponse.options,
+                { replaceMode: true, targetMenuId: parseInt(menuId, 10) }
+              );
+              showImportModal(previewHtml, importData);
+              $result.html("");
+            } else {
+              throw new Error("Failed to fetch mapping options");
+            }
+          },
+          error: function () {
+            $result.html(
+              '<div class="notice notice-error"><p>Failed to fetch mapping options.</p></div>'
+            );
+          },
+          complete: function () {
+            $spinner.removeClass("is-active");
+            $button.prop("disabled", false);
+          },
+        });
+      } catch (error) {
+        $result.html(
+          '<div class="notice notice-error"><p>Invalid JSON file. Please check the file format.</p></div>'
+        );
+        $spinner.removeClass("is-active");
+        $button.prop("disabled", false);
+      }
+    };
+
+    reader.onerror = function () {
+      $result.html(
+        '<div class="notice notice-error"><p>Failed to read the file.</p></div>'
+      );
+      $spinner.removeClass("is-active");
+      $button.prop("disabled", false);
+    };
+
+    reader.readAsText(fileInput.files[0]);
+  });
+
+  // MenuPilot Backup - nav-menus meta box
+  function getBackupNonce() {
+    const $ui = $("#menupilot-backup-ui");
+    return $ui.data("nonce") || (typeof menupilot !== "undefined" ? menupilot.adminNonce : "");
+  }
+
+  $(document).on("click", "#menupilot-create-backup", function () {
+    const $ui = $("#menupilot-backup-ui");
+    const menuId = $ui.data("menu-id");
+    const nonce = getBackupNonce();
+    if (!menuId || !nonce) return;
+    const $btn = $(this);
+    $btn.prop("disabled", true);
+    $.post(menupilot.ajaxurl, {
+      action: "menupilot_create_backup",
+      nonce: nonce,
+      menu_id: menuId,
+    })
+      .done(function (r) {
+        if (r.success) {
+          location.reload();
+        } else {
+          alert(r.data && r.data.message ? r.data.message : "Failed to create backup.");
+        }
+      })
+      .fail(function () {
+        alert("Failed to create backup.");
+      })
+      .always(function () {
+        $btn.prop("disabled", false);
+      });
+  });
+
+  $(document).on("click", ".menupilot-restore-backup", function () {
+    const $row = $(this).closest("tr");
+    const menuId = $row.data("menu-id");
+    const backupId = $row.data("backup-id");
+    const nonce = getBackupNonce();
+    if (!menuId || !nonce || !backupId) return;
+    if (!confirm("Restore this backup? The current menu will be replaced.")) return;
+    const $btn = $(this);
+    $btn.prop("disabled", true);
+    $.post(menupilot.ajaxurl, {
+      action: "menupilot_restore_backup",
+      nonce: nonce,
+      menu_id: menuId,
+      backup_id: backupId,
+    })
+      .done(function (r) {
+        if (r.success && r.data.edit_url) {
+          window.location.href = r.data.edit_url;
+        } else {
+          alert(r.data && r.data.message ? r.data.message : "Failed to restore.");
+          $btn.prop("disabled", false);
+        }
+      })
+      .fail(function () {
+        alert("Failed to restore backup.");
+        $btn.prop("disabled", false);
+      });
+  });
+
+  $(document).on("click", ".menupilot-export-backup", function () {
+    const $row = $(this).closest("tr");
+    const menuId = $row.data("menu-id");
+    const backupId = $row.data("backup-id");
+    const nonce = getBackupNonce();
+    if (!menuId || !nonce || !backupId) return;
+    const $btn = $(this);
+    $btn.prop("disabled", true);
+    $.post(menupilot.ajaxurl, {
+      action: "menupilot_export_backup",
+      nonce: nonce,
+      menu_id: menuId,
+      backup_id: backupId,
+    })
+      .done(function (r) {
+        if (r.success && r.data && r.data.data) {
+          const jsonString = JSON.stringify(r.data.data, null, 2);
+          const blob = new Blob([jsonString], { type: "application/json" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = r.data.filename || "menupilot-backup.json";
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          alert("Failed to export backup.");
+        }
+      })
+      .fail(function () {
+        alert("Failed to export backup.");
+      })
+      .always(function () {
+        $btn.prop("disabled", false);
+      });
+  });
+
+  $(document).on("click", ".menupilot-delete-backup", function () {
+    const $row = $(this).closest("tr");
+    const backupId = $row.data("backup-id");
+    const nonce = getBackupNonce();
+    if (!backupId || !nonce) return;
+    if (!confirm("Delete this backup?")) return;
+    const $btn = $(this);
+    $btn.prop("disabled", true);
+    $.post(menupilot.ajaxurl, {
+      action: "menupilot_delete_backup",
+      nonce: nonce,
+      backup_id: backupId,
+    })
+      .done(function (r) {
+        if (r.success) {
+          $row.remove();
+        } else {
+          alert(r.data && r.data.message ? r.data.message : "Failed to delete.");
+          $btn.prop("disabled", false);
+        }
+      })
+      .fail(function () {
+        alert("Failed to delete backup.");
+        $btn.prop("disabled", false);
+      });
+  });
+
+  $(document).on("click", "#menupilot-delete-all-backups", function () {
+    const nonce = getBackupNonce();
+    if (!nonce) return;
+    if (!confirm("Delete all backups? This cannot be undone.")) return;
+    const $btn = $(this);
+    $btn.prop("disabled", true);
+    $.post(menupilot.ajaxurl, {
+      action: "menupilot_delete_all_backups",
+      nonce: nonce,
+    })
+      .done(function (r) {
+        if (r.success) {
+          location.reload();
+        } else {
+          alert(r.data && r.data.message ? r.data.message : "Failed to delete all.");
+          $btn.prop("disabled", false);
+        }
+      })
+      .fail(function () {
+        alert("Failed to delete backups.");
+        $btn.prop("disabled", false);
+      });
+  });
 
   // Initialize functions based on data attributes or page context
   if (typeof menupilot !== 'undefined' && menupilot.initFunctions) {

@@ -97,6 +97,55 @@ class Menu_Importer {
 	}
 
 	/**
+	 * Restore a menu from backup data (deletes existing items, re-imports from export data)
+	 *
+	 * @param int   $menu_id     Menu term ID to restore into.
+	 * @param array<string,mixed> $import_data Export/backup data (same structure as export).
+	 * @return bool True on success.
+	 */
+	public function restore( int $menu_id, array $import_data ): bool {
+		$menu = wp_get_nav_menu_object($menu_id);
+		if ( ! $menu ) {
+			return false;
+		}
+		if ( ! isset($import_data['menu']) || ! is_array($import_data['menu']) ) {
+			return false;
+		}
+
+		$items = isset($import_data['menu']['items']) && is_array($import_data['menu']['items']) ? $import_data['menu']['items'] : array();
+
+		// Delete existing menu items
+		$existing_items = wp_get_nav_menu_items($menu_id);
+		if ( is_array($existing_items) ) {
+			foreach ( $existing_items as $item ) {
+				wp_delete_post($item->ID, true);
+			}
+		}
+
+		$this->source_url = isset($import_data['export_context']['site_url'])
+			? trailingslashit($import_data['export_context']['site_url'])
+			: '';
+		$this->destination_url = trailingslashit(get_site_url());
+
+		$item_map = array();
+		$items_by_parent = $this->group_items_by_parent($items);
+		$this->import_items_recursive($menu_id, $items_by_parent, 0, 0, $item_map);
+
+		// Restore theme locations
+		if ( isset($import_data['menu']['locations']) && is_array($import_data['menu']['locations']) ) {
+			$locations = get_theme_mod('nav_menu_locations', array());
+			foreach ( $import_data['menu']['locations'] as $loc ) {
+				if ( is_string($loc) ) {
+					$locations[ $loc ] = $menu_id;
+				}
+			}
+			set_theme_mod('nav_menu_locations', $locations);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Group items by parent ID
 	 *
 	 * @param array<array<string,mixed>> $items Menu items array.

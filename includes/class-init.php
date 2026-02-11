@@ -55,6 +55,8 @@ class Init
 		'menupilot_page_menupilot-import',
 		'menupilot_page_menupilot-tools',
 		'menupilot_page_menupilot-help',
+		'menupilot_page_menupilot-history',
+		'nav-menus',
 	);
 
 	/**
@@ -118,6 +120,9 @@ class Init
 		// Initialize integrations
 		$this->init_integrations();
 
+		// Initialize History logging
+		History::init();
+
 		// Hook into WordPress
 		$this->init_hooks();
 	}
@@ -142,8 +147,14 @@ class Init
 	{
 		// Admin hooks
 		if (is_admin() && ! self::$admin_hooks_registered) {
+			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-backup-manager.php';
 			add_action('admin_menu', array($this, 'add_admin_menu'));
 			add_action('admin_init', array($this->settings, 'register_settings'));
+			add_action('admin_init', array(\MenuPilot\Admin\Backup_Manager::class, 'maybe_backup_before_nav_menu_save'), 1);
+			add_action('load-nav-menus.php', array(\MenuPilot\Admin\Backup_Manager::class, 'register_meta_box'));
+			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-history-page.php';
+			add_action('admin_post_menupilot_download_history', array(\MenuPilot\Admin\History_Page::class, 'handle_download'));
+			add_action('admin_post_menupilot_clear_history', array(\MenuPilot\Admin\History_Page::class, 'handle_clear_history'));
 			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
 			add_filter('admin_body_class', array($this, 'add_admin_body_class'));
 			
@@ -207,6 +218,7 @@ class Init
 			'ajaxurl' => admin_url('admin-ajax.php'),
 			'restUrl' => rest_url('menupilot/v1'),
 			'nonce' => wp_create_nonce('wp_rest'),
+			'adminNonce' => wp_create_nonce('menupilot_admin'),
 			'siteUrl' => get_site_url(),
 			'registeredLocations' => get_registered_nav_menus(),
 			'previewColumns' => Column_Manager::get_columns_for_js(),
@@ -335,6 +347,28 @@ class Init
 		// Add default options
 		$this->settings->add_default_options();
 
+		// Create history table (use $wpdb->prefix—never hardcode wp_)
+		global $wpdb;
+		$table = $wpdb->prefix . 'menupilot_history';
+		$charset = $wpdb->get_charset_collate();
+		$sql = "CREATE TABLE $table (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			action_type varchar(20) NOT NULL,
+			menu_id bigint(20) unsigned DEFAULT NULL,
+			menu_name varchar(255) DEFAULT NULL,
+			user_id bigint(20) unsigned DEFAULT NULL,
+			outcome varchar(20) NOT NULL,
+			details text DEFAULT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY action_type (action_type),
+			KEY menu_id (menu_id),
+			KEY user_id (user_id),
+			KEY created_at (created_at)
+		) $charset;";
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta($sql);
+
 		/**
 		 * Fires on plugin activation
 		 *
@@ -408,7 +442,17 @@ class Init
 			array($this, 'render_export_page')
 		);
 
-		// Tools submenu (4)
+		// History submenu (4)
+		add_submenu_page(
+			'menupilot-settings',
+			__('History', 'menupilot'),
+			__('History', 'menupilot'),
+			'manage_options',
+			'menupilot-history',
+			array($this, 'render_history_page')
+		);
+
+		// Tools submenu (5)
 		add_submenu_page(
 			'menupilot-settings',
 			__('Tools', 'menupilot'),
@@ -418,7 +462,7 @@ class Init
 			array($this, 'render_tools_page')
 		);
 
-		// Help submenu (5)
+		// Help submenu (6)
 		add_submenu_page(
 			'menupilot-settings',
 			__('Help', 'menupilot'),
@@ -491,6 +535,18 @@ class Init
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-help-page.php';
 		$help_page = new \MenuPilot\Admin\Help_Page();
 		$help_page->render();
+	}
+
+	/**
+	 * Render history page
+	 *
+	 * @return void
+	 */
+	public function render_history_page(): void
+	{
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-history-page.php';
+		$history_page = new \MenuPilot\Admin\History_Page();
+		$history_page->render();
 	}
 
 	/**

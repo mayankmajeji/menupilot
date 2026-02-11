@@ -22,8 +22,11 @@ dist/
 assets/*.map
 
 # Configuration files
+.eslintignore
+.eslintrc.json
 .eslintrc.js
 .htmlhintrc
+.stylelintignore
 .npmrc
 .nvmrc
 .prettierrc

@@ -13,6 +13,8 @@
 @use "modules/forms";
 @use "modules/modal";
 @use "modules/help";
+@use "modules/backup";
+@use "modules/history";
 
 /* Brand color variables (scoped via CSS variables for easy theming) */
 :root {

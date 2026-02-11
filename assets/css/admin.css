@@ -30,7 +30,7 @@
  */
 .menupilot-wrapper {
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-family: -apple-system, blinkmacsystemfont, "Segoe UI", roboto, oxygen-sans, ubuntu, cantarell, "Helvetica Neue", sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: #14101f;
@@ -165,14 +165,12 @@
 }
 
 .mp-vtab {
-  display: block;
   padding: 12px 20px 13px 12px;
   background: transparent;
   border-width: 1px 0;
   border-style: solid;
   border-bottom-color: #e5e7eb;
   border-top: none;
-  color: var(--mp-color-text-secondary);
   font-weight: 400;
   text-decoration: none;
   font-size: 13px;
@@ -671,10 +669,7 @@
 .mp-modal-overlay {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0 0 0 0;
   background: rgba(0, 0, 0, 0.7);
   z-index: 100000;
   align-items: center;
@@ -814,7 +809,7 @@
   margin: 0;
 }
 
-@media screen and (max-width: 782px) {
+@media screen and (width <= 782px) {
   .mp-modal {
     width: 95%;
     max-height: 95vh;
@@ -828,10 +823,7 @@
 .mp-confirm-overlay {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0 0 0 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 100001;
   align-items: center;
@@ -897,7 +889,7 @@
   margin: 0;
 }
 
-@media screen and (max-width: 782px) {
+@media screen and (width <= 782px) {
   .mp-confirm-dialog {
     width: 95%;
     max-width: 340px;
@@ -914,12 +906,12 @@
   gap: 24px;
   max-width: 1200px;
 }
-@media (max-width: 1100px) {
+@media (width <= 1100px) {
   .menupilot-page--help .mp-support-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 720px) {
+@media (width <= 720px) {
   .menupilot-page--help .mp-support-cards {
     grid-template-columns: 1fr;
   }
@@ -1074,7 +1066,7 @@
 .menupilot-page--help .faq-answer ul {
   margin: 0.5em 0 0 1.2em;
 }
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .menupilot-page--help .faq-question,
   .menupilot-page--help .faq-answer {
     padding-left: 1em;
@@ -1086,6 +1078,209 @@
 }
 .turnstilewp-buttons {
   margin-top: 16px;
+}
+
+/**
+ * Backup Meta Box Styles
+ *
+ * @package MenuPilot
+ */
+/* Main content placement (outside menu form, below Save/Delete) */
+.menupilot-backup-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #dcdcde; /* stylelint-disable-line */
+}
+.menupilot-backup-section .postbox {
+  margin-bottom: 0;
+}
+.menupilot-backup-section .hndle {
+  padding: 12px 16px;
+  background: #f6f7f7;
+  margin: 0;
+}
+.menupilot-backup-section .inside {
+  padding: 16px !important;
+}
+
+#menupilot-backup-ui p {
+  margin: 0 0 12px;
+}
+#menupilot-backup-ui p:last-child {
+  margin-bottom: 0;
+}
+#menupilot-backup-ui .button + .button {
+  margin-left: 8px;
+}
+#menupilot-backup-ui #mp-backup-import-btn {
+  margin-top: 12px;
+}
+
+.menupilot-backup-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #dcdcde; /* stylelint-disable-line */
+}
+
+.menupilot-backup-tab {
+  padding: 8px 16px;
+  background: #f6f7f7; /* stylelint-disable-line */
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  font-size: 13px;
+}
+.menupilot-backup-tab:hover {
+  background: #fff;
+}
+.menupilot-backup-tab.is-active {
+  background: var(--mp-color-primary);
+  color: #fff;
+  font-weight: 600;
+  border-bottom-color: var(--mp-color-primary);
+}
+
+.menupilot-backup-limit {
+  margin-bottom: 12px !important;
+  font-size: 12px;
+  color: #50575e; /* stylelint-disable-line */
+}
+.menupilot-backup-limit a {
+  color: var(--mp-color-primary, #2271b1);
+}
+
+.menupilot-backup-table {
+  margin: 12px 0;
+  font-size: 12px;
+}
+.menupilot-backup-table th,
+.menupilot-backup-table td {
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+.menupilot-backup-table td a {
+  color: var(--mp-color-primary, #5344f4);
+  text-decoration: none;
+}
+.menupilot-backup-table td a:hover {
+  color: var(--mp-color-accent, #9b51e0);
+}
+.menupilot-backup-table .menupilot-backup-actions {
+  white-space: nowrap;
+  /* stylelint-disable-next-line no-descending-specificity -- Nested .button is intentionally more specific for actions column */
+}
+.menupilot-backup-table .menupilot-backup-actions .button {
+  margin: 0 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  line-height: 1;
+}
+.menupilot-backup-table .menupilot-backup-actions .menupilot-restore-backup,
+.menupilot-backup-table .menupilot-backup-actions .menupilot-export-backup {
+  border-color: var(--mp-color-primary, #5344f4);
+  color: var(--mp-color-primary, #5344f4);
+  background: transparent;
+}
+.menupilot-backup-table .menupilot-backup-actions .menupilot-restore-backup:hover, .menupilot-backup-table .menupilot-backup-actions .menupilot-restore-backup:focus,
+.menupilot-backup-table .menupilot-backup-actions .menupilot-export-backup:hover,
+.menupilot-backup-table .menupilot-backup-actions .menupilot-export-backup:focus {
+  border-color: var(--mp-color-accent, #9b51e0);
+  color: #fff;
+  background: var(--mp-color-accent, #9b51e0);
+}
+
+.menupilot-backup-footer {
+  margin: 0 !important;
+  padding: 12px 16px;
+  text-align: right;
+  background: #f6f7f7;
+  border-top: 1px solid #dcdcde; /* stylelint-disable-line */
+}
+.menupilot-backup-footer #menupilot-delete-all-backups {
+  color: #b32d2e !important; /* stylelint-disable-line */
+  border-color: #b32d2e !important; /* stylelint-disable-line */
+  background: transparent;
+}
+.menupilot-backup-footer #menupilot-delete-all-backups:hover, .menupilot-backup-footer #menupilot-delete-all-backups:focus {
+  border-color: #8a2424 !important; /* stylelint-disable-line */
+  color: #fff !important;
+  background: #8a2424 !important; /* stylelint-disable-line */
+}
+
+.menupilot-backup-actions .menupilot-delete-backup {
+  color: #b32d2e !important; /* stylelint-disable-line */
+  border-color: #b32d2e !important; /* stylelint-disable-line */
+  background: transparent;
+}
+.menupilot-backup-actions .menupilot-delete-backup:hover, .menupilot-backup-actions .menupilot-delete-backup:focus {
+  border-color: #8a2424 !important; /* stylelint-disable-line */
+  color: #fff !important;
+  background: #8a2424 !important; /* stylelint-disable-line */
+}
+
+.button-link-delete {
+  color: #b32d2e !important; /* stylelint-disable-line */
+}
+
+/**
+ * History Page Styles
+ *
+ * @package MenuPilot
+ */
+.mp-toolbar-left,
+.mp-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-toolbar-label {
+  font-size: 13px;
+  color: #50575e;
+  margin-right: 4px;
+}
+
+.mp-inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mp-pagination {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mp-outcome-success {
+  color: #46b450;
+}
+
+.mp-outcome-failure {
+  color: #dc3232;
+}
+
+.mp-clear-history-form {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid #c3c4c7;
+}
+.mp-clear-history-form .button-link-delete {
+  color: #b32d2e !important; /* stylelint-disable-line */
+  border-color: #b32d2e !important; /* stylelint-disable-line */
+  background: transparent;
+}
+.mp-clear-history-form .button-link-delete:hover:not(:disabled), .mp-clear-history-form .button-link-delete:focus:not(:disabled) {
+  border-color: #8a2424 !important; /* stylelint-disable-line */
+  color: #fff !important;
+  background: #8a2424 !important; /* stylelint-disable-line */
+}
+.mp-clear-history-form .button-link-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Brand color variables (scoped via CSS variables for easy theming) */
