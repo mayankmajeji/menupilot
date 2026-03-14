@@ -42,7 +42,7 @@ class Settings {
 	/**
 	 * Centralized settings fields array
 	 *
-	 * @var array
+	 * @var array<string, mixed>
 	 */
 	private array $fields = array();
 
@@ -121,7 +121,7 @@ class Settings {
 	 * Sanitize settings
 	 *
 	 * @param mixed $input Settings input.
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function sanitize_settings( $input ): array {
 		if ( ! is_array( $input ) ) {
@@ -344,8 +344,8 @@ class Settings {
 	/**
 	 * Organize fields by tab, section, and priority
 	 *
-	 * @param array $fields Fields array.
-	 * @return array
+	 * @param array<string, mixed> $fields Fields array.
+	 * @return array<string, mixed>
 	 */
 	private function organize_fields( array $fields ): array {
 		$organized = array();
@@ -378,7 +378,7 @@ class Settings {
 	/**
 	 * Get the full, organized fields structure for rendering
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function get_fields_structure(): array {
 		return $this->fields;
