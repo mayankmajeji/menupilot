@@ -321,15 +321,27 @@ class Backup_Manager {
 			return array();
 		}
 
+		// Batch-fetch user data to avoid N+1 queries.
+		$user_ids = array_values( array_unique( array_filter(
+			array_column( $rows, 'user_id' ),
+			fn( $id ) => (int) $id > 0
+		) ) );
+		$user_map = array();
+		if ( ! empty( $user_ids ) ) {
+			$users = get_users( array(
+				'include' => $user_ids,
+				'fields'  => array( 'ID', 'user_login' ),
+			) );
+			foreach ( $users as $u ) {
+				$user_map[ (int) $u->ID ] = $u->user_login;
+			}
+		}
+
 		$result = array();
 		foreach ( $rows as $row ) {
-			$user_id = isset($row['user_id']) ? (int) $row['user_id'] : 0;
-			$user_login = '';
-			if ( $user_id > 0 ) {
-				$user = get_userdata($user_id);
-				$user_login = $user ? $user->user_login : '';
-			}
-			$result[] = array(
+			$user_id    = isset( $row['user_id'] ) ? (int) $row['user_id'] : 0;
+			$user_login = $user_map[ $user_id ] ?? '';
+			$result[]   = array(
 				'id'         => $row['backup_id'] ?? '',
 				'menu_id'    => (int) ( $row['menu_id'] ?? 0 ),
 				'created_at' => $row['created_at'] ?? '',
@@ -412,16 +424,25 @@ class Backup_Manager {
 	/**
 	 * Get backup count and limit
 	 *
+	 * @param int $menu_id Menu term ID to scope the count. 0 returns the total across all menus.
 	 * @return array{count: int, limit: int}
 	 */
-	public static function get_backup_stats(): array {
+	public static function get_backup_stats( int $menu_id = 0 ): array {
 		self::maybe_create_table();
 
 		global $wpdb;
 		$table = self::get_table();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix.
-		$count = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
+		if ( $menu_id > 0 ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted).
+			$count = (int) $wpdb->get_var(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+				$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE menu_id = %d", $menu_id )
+			);
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix.
+			$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table" );
+		}
 
 		$settings = new Settings();
 		$limit = (int) $settings->get_option('backup_limit', 5);
@@ -506,8 +527,8 @@ class Backup_Manager {
 		$menu_id = isset($nav_menu_selected_id) && is_nav_menu($nav_menu_selected_id)
 			? (int) $nav_menu_selected_id
 			: 0;
-		$backups = self::list_backups(0);
-		$stats = self::get_backup_stats();
+		$backups = self::list_backups($menu_id);
+		$stats = self::get_backup_stats($menu_id);
 		$nonce = wp_create_nonce('menupilot_admin');
 		$settings_url = admin_url('admin.php?page=menupilot-settings&settings_tab=backup');
 		?>
@@ -527,13 +548,23 @@ class Backup_Manager {
 			<div class="menupilot-backup-tab-content" id="menupilot-backup-restore-panel">
 				<p class="menupilot-backup-limit">
 					<?php
-					printf(
-						/* translators: 1: current count, 2: limit, 3: Settings link */
-						esc_html__('You have %1$s of %2$s allowed backups. Limit can be changed in %3$s.', 'menupilot'),
-						'<strong>' . (int) $stats['count'] . '</strong>',
-						'<strong>' . (int) $stats['limit'] . '</strong>',
-						'<a href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'menupilot') . '</a>'
-					);
+					if ( $menu_id > 0 ) {
+						printf(
+							/* translators: 1: backup count for this menu, 2: per-menu limit, 3: Settings link */
+							esc_html__('This menu has %1$s of %2$s allowed backups. Limit can be changed in %3$s.', 'menupilot'),
+							'<strong>' . (int) $stats['count'] . '</strong>',
+							'<strong>' . (int) $stats['limit'] . '</strong>',
+							'<a href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'menupilot') . '</a>'
+						);
+					} else {
+						printf(
+							/* translators: 1: total backup count across all menus, 2: per-menu limit, 3: Settings link */
+							esc_html__('%1$s total backups across all menus (per-menu limit: %2$s). Manage in %3$s.', 'menupilot'),
+							'<strong>' . (int) $stats['count'] . '</strong>',
+							'<strong>' . (int) $stats['limit'] . '</strong>',
+							'<a href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'menupilot') . '</a>'
+						);
+					}
 					?>
 				</p>
 				<?php if ( $menu_id > 0 ) : ?>
