@@ -2,9 +2,11 @@
 (function ($) {
 	'use strict';
 
-	$(document).ready(function () {
-		console.log('MenuPilot admin loaded');
+	$( document ).ready(
+		function () {
+			console.log( 'MenuPilot admin loaded' );
 
-		// Add your admin JavaScript here
-	});
-})(jQuery);
+			// Add your admin JavaScript here
+		}
+	);
+})( jQuery );

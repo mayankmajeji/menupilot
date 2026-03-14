@@ -22,9 +22,9 @@ class Loader {
 	 * @return void
 	 */
 	public static function register(): void {
-		spl_autoload_register(array( self::class, 'autoload' ));
+		spl_autoload_register( array( self::class, 'autoload' ) );
 
-		// Load all integration files automatically
+		// Load all integration files automatically.
 		self::load_integrations();
 	}
 
@@ -35,39 +35,39 @@ class Loader {
 	 * @return void
 	 */
 	public static function autoload( string $class ): void {
-		// Only handle classes in our namespace
-		if ( strpos($class, 'MenuPilot\\') !== 0 ) {
+		// Only handle classes in our namespace.
+		if ( 0 !== strpos( $class, 'MenuPilot\\' ) ) {
 			return;
 		}
 
-		// Remove namespace from class name
-		$class = str_replace('MenuPilot\\', '', $class);
+		// Remove namespace from class name.
+		$class = str_replace( 'MenuPilot\\', '', $class );
 
-		// Convert class name to file path (PascalCase -> kebab-case)
+		// Convert class name to file path (PascalCase -> kebab-case).
 		$file = MENUPILOT_PLUGIN_DIR . 'includes/class-' .
-			strtolower(str_replace('_', '-', $class)) . '.php';
+			strtolower( str_replace( '_', '-', $class ) ) . '.php';
 
-		// Load the file if it exists
-		if ( file_exists($file) ) {
+		// Load the file if it exists.
+		if ( file_exists( $file ) ) {
 			require_once $file;
 			return;
 		}
 
-		// Check integrations directory
+		// Check integrations directory.
 		$file = MENUPILOT_PLUGIN_DIR . 'includes/integrations/class-' .
-			strtolower(str_replace('_', '-', $class)) . '.php';
+			strtolower( str_replace( '_', '-', $class ) ) . '.php';
 
-		if ( file_exists($file) ) {
+		if ( file_exists( $file ) ) {
 			require_once $file;
 			return;
 		}
 
-		// Check categorized integration subdirectories
+		// Check categorized integration subdirectories.
 		$categories = array( 'core', 'ecommerce', 'forms', 'others', 'community', 'membership' );
 		foreach ( $categories as $category ) {
 			$file = MENUPILOT_PLUGIN_DIR . 'includes/integrations/' . $category . '/class-' .
-				strtolower(str_replace('_', '-', $class)) . '.php';
-			if ( file_exists($file) ) {
+				strtolower( str_replace( '_', '-', $class ) ) . '.php';
+			if ( file_exists( $file ) ) {
 				require_once $file;
 				return;
 			}
@@ -81,24 +81,25 @@ class Loader {
 	 */
 	public static function load_integrations(): void {
 		$integrations_dir = MENUPILOT_PLUGIN_DIR . 'includes/integrations/';
-		$categories = array( '.', 'core', 'ecommerce', 'forms', 'others', 'community', 'membership' );
+		$categories       = array( '.', 'core', 'ecommerce', 'forms', 'others', 'community', 'membership' );
 
-		if ( ! is_dir($integrations_dir) ) {
+		if ( ! is_dir( $integrations_dir ) ) {
 			return;
 		}
 
 		$files = array();
 		foreach ( $categories as $category ) {
-			$dir = rtrim($integrations_dir . ( $category === '.' ? '' : $category . '/' ), '/');
-			if ( is_dir($dir) ) {
-				$found = glob($dir . '/class-*.php') ?: array();
+			$dir = rtrim( $integrations_dir . ( '.' === $category ? '' : $category . '/' ), '/' );
+			if ( is_dir( $dir ) ) {
+				$found = glob( $dir . '/class-*.php' );
+				$found = $found ? $found : array();
 				if ( $found ) {
-					$files = array_merge($files, $found);
+					$files = array_merge( $files, $found );
 				}
 			}
 		}
 
-		if ( empty($files) ) {
+		if ( empty( $files ) ) {
 			return;
 		}
 
@@ -108,5 +109,5 @@ class Loader {
 	}
 }
 
-// Register the autoloader
+// Register the autoloader.
 Loader::register();

@@ -27,12 +27,12 @@ class SettingsTest extends Unit {
 
 	// Test example
 	public function testSettingsClassExists() {
-		$this->assertTrue(class_exists(Settings::class));
+		$this->assertTrue( class_exists( Settings::class ) );
 	}
 
 	public function testGetSettings() {
 		$settings = new Settings();
-		$result = $settings->get_settings();
-		$this->assertIsArray($result);
+		$result   = $settings->get_settings();
+		$this->assertIsArray( $result );
 	}
 }

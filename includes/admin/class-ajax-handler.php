@@ -1,13 +1,13 @@
 <?php
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
-
 /**
- * AJAX Handler Class
+ * AJAX Handler class for the MenuPilot plugin.
  *
  * @package MenuPilot
  */
+
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -54,16 +54,16 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		add_action('wp_ajax_menupilot_export_menu', array( $this, 'export_menu' ));
-		add_action('wp_ajax_menupilot_preview_import', array( $this, 'preview_import' ));
-		add_action('wp_ajax_menupilot_import_menu', array( $this, 'import_menu' ));
-		add_action('wp_ajax_menupilot_export_settings', array( $this, 'export_settings' ));
-		add_action('wp_ajax_menupilot_create_backup', array( $this, 'create_backup' ));
-		add_action('wp_ajax_menupilot_restore_backup', array( $this, 'restore_backup' ));
-		add_action('wp_ajax_menupilot_list_backups', array( $this, 'list_backups' ));
-		add_action('wp_ajax_menupilot_export_backup', array( $this, 'export_backup' ));
-		add_action('wp_ajax_menupilot_delete_backup', array( $this, 'delete_backup' ));
-		add_action('wp_ajax_menupilot_delete_all_backups', array( $this, 'delete_all_backups' ));
+		add_action( 'wp_ajax_menupilot_export_menu', array( $this, 'export_menu' ) );
+		add_action( 'wp_ajax_menupilot_preview_import', array( $this, 'preview_import' ) );
+		add_action( 'wp_ajax_menupilot_import_menu', array( $this, 'import_menu' ) );
+		add_action( 'wp_ajax_menupilot_export_settings', array( $this, 'export_settings' ) );
+		add_action( 'wp_ajax_menupilot_create_backup', array( $this, 'create_backup' ) );
+		add_action( 'wp_ajax_menupilot_restore_backup', array( $this, 'restore_backup' ) );
+		add_action( 'wp_ajax_menupilot_list_backups', array( $this, 'list_backups' ) );
+		add_action( 'wp_ajax_menupilot_export_backup', array( $this, 'export_backup' ) );
+		add_action( 'wp_ajax_menupilot_delete_backup', array( $this, 'delete_backup' ) );
+		add_action( 'wp_ajax_menupilot_delete_all_backups', array( $this, 'delete_all_backups' ) );
 	}
 
 	/**
@@ -72,63 +72,80 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function export_menu(): void {
-		// Verify nonce
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array(
-				'message' => __('Security check failed. Please refresh the page and try again.', 'menupilot'),
-			), 403);
+		// Verify nonce.
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Security check failed. Please refresh the page and try again.', 'menupilot' ),
+				),
+				403
+			);
 			return;
 		}
 
-		// Check capabilities
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array(
-				'message' => __('You do not have permission to export menus.', 'menupilot'),
-			), 403);
+		// Check capabilities.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to export menus.', 'menupilot' ),
+				),
+				403
+			);
 			return;
 		}
 
-		// Get menu ID
-		$menu_id = isset($_POST['menu_id']) ? (int) $_POST['menu_id'] : 0;
+		// Get menu ID.
+		$menu_id = isset( $_POST['menu_id'] ) ? (int) $_POST['menu_id'] : 0;
 		if ( $menu_id <= 0 ) {
-			wp_send_json_error(array(
-				'message' => __('Invalid menu ID provided.', 'menupilot'),
-			), 400);
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid menu ID provided.', 'menupilot' ),
+				),
+				400
+			);
 			return;
 		}
 
-		// Verify menu exists
-		$menu = wp_get_nav_menu_object($menu_id);
+		// Verify menu exists.
+		$menu = wp_get_nav_menu_object( $menu_id );
 		if ( ! $menu ) {
-			wp_send_json_error(array(
-				'message' => __('Menu not found.', 'menupilot'),
-			), 404);
+			wp_send_json_error(
+				array(
+					'message' => __( 'Menu not found.', 'menupilot' ),
+				),
+				404
+			);
 			return;
 		}
 
-		// Export menu
-		$json = $this->exporter->export_to_json($menu_id);
+		// Export menu.
+		$json = $this->exporter->export_to_json( $menu_id );
 		if ( ! $json ) {
-			wp_send_json_error(array(
-				'message' => __('Failed to export menu. The menu may be empty or corrupted.', 'menupilot'),
-			), 500);
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to export menu. The menu may be empty or corrupted.', 'menupilot' ),
+				),
+				500
+			);
 			return;
 		}
 
-		// Generate filename
-		$filename = $this->exporter->generate_filename($menu_id);
+		// Generate filename.
+		$filename = $this->exporter->generate_filename( $menu_id );
 
-		// Send success response with JSON data
-		wp_send_json_success(array(
-			'message' => sprintf(
-				/* translators: %s: menu name */
-				__('Menu "%s" exported successfully!', 'menupilot'),
-				$menu->name
-			),
-			'json'     => $json,
-			'filename' => $filename,
-			'menu_name' => $menu->name,
-		));
+		// Send success response with JSON data.
+		wp_send_json_success(
+			array(
+				'message'   => sprintf(
+					/* translators: %s: menu name */
+					__( 'Menu "%s" exported successfully!', 'menupilot' ),
+					$menu->name
+				),
+				'json'      => $json,
+				'filename'  => $filename,
+				'menu_name' => $menu->name,
+			)
+		);
 	}
 
 	/**
@@ -137,44 +154,44 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function export_settings(): void {
-		// Verify nonce
-		$nonce = isset($_GET['_wpnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_wpnonce'])) : '';
-		if ( ! $nonce || ! wp_verify_nonce($nonce, 'menupilot_tools_export') ) {
-			wp_die(esc_html__('Security check failed.', 'menupilot'), 403);
+		// Verify nonce.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) ) : '';
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'menupilot_tools_export' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'menupilot' ), 403 );
 		}
 
-		// Check capabilities
-		if ( ! current_user_can('manage_options') ) {
-			wp_die(esc_html__('You do not have permission to export settings.', 'menupilot'), 403);
+		// Check capabilities.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to export settings.', 'menupilot' ), 403 );
 		}
 
-		// Get all plugin settings
-		$settings = get_option('menupilot_settings', array());
+		// Get all plugin settings.
+		$settings = get_option( 'menupilot_settings', array() );
 
-		// Build export data
+		// Build export data.
 		$export_data = array(
 			'schema_version' => '1.0',
 			'plugin'         => array(
 				'name'    => 'MenuPilot',
 				'version' => MENUPILOT_VERSION,
 			),
-			'exported_at'    => current_time('c'),
+			'exported_at'    => current_time( 'c' ),
 			'settings'       => $settings,
 		);
 
-		// Generate JSON
-		$json = wp_json_encode($export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+		// Generate JSON.
+		$json = wp_json_encode( $export_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		if ( ! $json ) {
-			wp_die(esc_html__('Failed to export settings.', 'menupilot'), 500);
+			wp_die( esc_html__( 'Failed to export settings.', 'menupilot' ), 500 );
 		}
 
-		// Send download headers
-		$filename = 'menupilot-settings-' . gmdate('Y-m-d-His') . '.json';
-		header('Content-Type: application/json; charset=utf-8');
-		header('Content-Disposition: attachment; filename="' . esc_attr($filename) . '"');
-		header('Cache-Control: no-cache, no-store, must-revalidate');
-		header('Pragma: no-cache');
-		header('Expires: 0');
+		// Send download headers.
+		$filename = 'menupilot-settings-' . gmdate( 'Y-m-d-His' ) . '.json';
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . esc_attr( $filename ) . '"' );
+		header( 'Cache-Control: no-cache, no-store, must-revalidate' );
+		header( 'Pragma: no-cache' );
+		header( 'Expires: 0' );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() already properly encodes JSON output
 		echo $json;
@@ -187,56 +204,73 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function preview_import(): void {
-		// Verify nonce
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array(
-				'message' => __('Security check failed. Please refresh the page and try again.', 'menupilot'),
-			), 403);
+		// Verify nonce.
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Security check failed. Please refresh the page and try again.', 'menupilot' ),
+				),
+				403
+			);
 			return;
 		}
 
-		// Check capabilities
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array(
-				'message' => __('You do not have permission to import menus.', 'menupilot'),
-			), 403);
+		// Check capabilities.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to import menus.', 'menupilot' ),
+				),
+				403
+			);
 			return;
 		}
 
-		// Get JSON data
-		$json_data = isset($_POST['json_data']) ? sanitize_textarea_field(wp_unslash((string) $_POST['json_data'])) : '';
-		if ( empty($json_data) ) {
-			wp_send_json_error(array(
-				'message' => __('No import data received.', 'menupilot'),
-			), 400);
+		// Get JSON data.
+		$json_data = isset( $_POST['json_data'] ) ? sanitize_textarea_field( wp_unslash( (string) $_POST['json_data'] ) ) : '';
+		if ( empty( $json_data ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'No import data received.', 'menupilot' ),
+				),
+				400
+			);
 			return;
 		}
 
-		// Parse JSON
-		$import_data = json_decode($json_data, true);
+		// Parse JSON.
+		$import_data = json_decode( $json_data, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			wp_send_json_error(array(
-				'message' => __('Invalid JSON file. Please check the file format.', 'menupilot'),
-			), 400);
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid JSON file. Please check the file format.', 'menupilot' ),
+				),
+				400
+			);
 			return;
 		}
 
-		// Validate schema
-		if ( ! isset($import_data['menu']) || ! is_array($import_data['menu']) ) {
-			wp_send_json_error(array(
-				'message' => __('Invalid menu data structure.', 'menupilot'),
-			), 400);
+		// Validate schema.
+		if ( ! isset( $import_data['menu'] ) || ! is_array( $import_data['menu'] ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid menu data structure.', 'menupilot' ),
+				),
+				400
+			);
 			return;
 		}
 
-		// Generate preview HTML
-		$html = $this->generate_preview_html($import_data);
+		// Generate preview HTML.
+		$html = $this->generate_preview_html( $import_data );
 
-		wp_send_json_success(array(
-			'message' => __('Preview generated successfully.', 'menupilot'),
-			'html'    => $html,
-			'data'    => $import_data,
-		));
+		wp_send_json_success(
+			array(
+				'message' => __( 'Preview generated successfully.', 'menupilot' ),
+				'html'    => $html,
+				'data'    => $import_data,
+			)
+		);
 	}
 
 	/**
@@ -246,56 +280,56 @@ class Ajax_Handler {
 	 * @return string
 	 */
 	private function generate_preview_html( array $import_data ): string {
-		$menu = $import_data['menu'];
-		$context = isset($import_data['export_context']) ? $import_data['export_context'] : array();
-		
-		$menu_name = isset($menu['name']) ? $menu['name'] : 'Untitled Menu';
-		$menu_slug = isset($menu['slug']) ? $menu['slug'] : '';
-		$items = isset($menu['items']) && is_array($menu['items']) ? $menu['items'] : array();
-		$locations = isset($menu['locations']) && is_array($menu['locations']) ? $menu['locations'] : array();
-		
-		$source_url = isset($context['site_url']) ? $context['site_url'] : '';
-		$exported_at = isset($context['exported_at']) ? $context['exported_at'] : '';
-		
+		$menu    = $import_data['menu'];
+		$context = isset( $import_data['export_context'] ) ? $import_data['export_context'] : array();
+
+		$menu_name = isset( $menu['name'] ) ? $menu['name'] : 'Untitled Menu';
+		$menu_slug = isset( $menu['slug'] ) ? $menu['slug'] : '';
+		$items     = isset( $menu['items'] ) && is_array( $menu['items'] ) ? $menu['items'] : array();
+		$locations = isset( $menu['locations'] ) && is_array( $menu['locations'] ) ? $menu['locations'] : array();
+
+		$source_url  = isset( $context['site_url'] ) ? $context['site_url'] : '';
+		$exported_at = isset( $context['exported_at'] ) ? $context['exported_at'] : '';
+
 		ob_start();
 		?>
 			<div class="mp-card">
-				<h3><?php esc_html_e('Import Preview', 'menupilot'); ?></h3>
+				<h3><?php esc_html_e( 'Import Preview', 'menupilot' ); ?></h3>
 				
 				<table class="widefat">
 					<tbody>
 						<tr>
-							<th><?php esc_html_e('Menu Name:', 'menupilot'); ?></th>
-							<td><strong><?php echo esc_html($menu_name); ?></strong></td>
+							<th><?php esc_html_e( 'Menu Name:', 'menupilot' ); ?></th>
+							<td><strong><?php echo esc_html( $menu_name ); ?></strong></td>
 						</tr>
 						<tr>
-							<th><?php esc_html_e('Menu Slug:', 'menupilot'); ?></th>
-							<td><code><?php echo esc_html($menu_slug); ?></code></td>
+							<th><?php esc_html_e( 'Menu Slug:', 'menupilot' ); ?></th>
+							<td><code><?php echo esc_html( $menu_slug ); ?></code></td>
 						</tr>
 						<tr>
-							<th><?php esc_html_e('Total Items:', 'menupilot'); ?></th>
-							<td><?php echo esc_html(count($items)); ?></td>
+							<th><?php esc_html_e( 'Total Items:', 'menupilot' ); ?></th>
+							<td><?php echo esc_html( count( $items ) ); ?></td>
 						</tr>
-						<?php if ( ! empty($source_url) ) : ?>
+						<?php if ( ! empty( $source_url ) ) : ?>
 						<tr>
-							<th><?php esc_html_e('Source Site:', 'menupilot'); ?></th>
-							<td><code><?php echo esc_html($source_url); ?></code></td>
-						</tr>
-						<?php endif; ?>
-						<tr>
-							<th><?php esc_html_e('Destination Site:', 'menupilot'); ?></th>
-							<td><code><?php echo esc_html(get_site_url()); ?></code></td>
-						</tr>
-						<?php if ( ! empty($exported_at) ) : ?>
-						<tr>
-							<th><?php esc_html_e('Exported At:', 'menupilot'); ?></th>
-							<td><?php echo esc_html(gmdate('F j, Y g:i a', strtotime($exported_at))); ?></td>
+							<th><?php esc_html_e( 'Source Site:', 'menupilot' ); ?></th>
+							<td><code><?php echo esc_html( $source_url ); ?></code></td>
 						</tr>
 						<?php endif; ?>
-						<?php if ( ! empty($locations) ) : ?>
 						<tr>
-							<th><?php esc_html_e('Source Locations:', 'menupilot'); ?></th>
-							<td><code><?php echo esc_html(implode(', ', $locations)); ?></code></td>
+							<th><?php esc_html_e( 'Destination Site:', 'menupilot' ); ?></th>
+							<td><code><?php echo esc_html( get_site_url() ); ?></code></td>
+						</tr>
+						<?php if ( ! empty( $exported_at ) ) : ?>
+						<tr>
+							<th><?php esc_html_e( 'Exported At:', 'menupilot' ); ?></th>
+							<td><?php echo esc_html( gmdate( 'F j, Y g:i a', strtotime( $exported_at ) ) ); ?></td>
+						</tr>
+						<?php endif; ?>
+						<?php if ( ! empty( $locations ) ) : ?>
+						<tr>
+							<th><?php esc_html_e( 'Source Locations:', 'menupilot' ); ?></th>
+							<td><code><?php echo esc_html( implode( ', ', $locations ) ); ?></code></td>
 						</tr>
 						<?php endif; ?>
 					</tbody>
@@ -303,42 +337,42 @@ class Ajax_Handler {
 			</div>
 
 			<div class="mp-card" style="margin-top:20px;">
-				<h3><?php esc_html_e('Import Configuration', 'menupilot'); ?></h3>
-				<p><?php esc_html_e('Configure how this menu will be imported:', 'menupilot'); ?></p>
+				<h3><?php esc_html_e( 'Import Configuration', 'menupilot' ); ?></h3>
+				<p><?php esc_html_e( 'Configure how this menu will be imported:', 'menupilot' ); ?></p>
 				
 				<div id="mp-import-execute-form">
 					<table class="form-table">
 						<tr>
 							<th scope="row">
-								<label for="mp-import-menu-name"><?php esc_html_e('Menu Name:', 'menupilot'); ?></label>
+								<label for="mp-import-menu-name"><?php esc_html_e( 'Menu Name:', 'menupilot' ); ?></label>
 							</th>
 							<td>
 								<input type="text" 
 									id="mp-import-menu-name" 
 									name="menu_name" 
-									value="<?php echo esc_attr($menu_name); ?>" 
+									value="<?php echo esc_attr( $menu_name ); ?>" 
 									class="regular-text" 
 									required />
-								<p class="description"><?php esc_html_e('Enter a name for the imported menu.', 'menupilot'); ?></p>
+								<p class="description"><?php esc_html_e( 'Enter a name for the imported menu.', 'menupilot' ); ?></p>
 							</td>
 						</tr>
 						<tr>
 							<th scope="row">
-								<label for="mp-import-location"><?php esc_html_e('Assign to Location:', 'menupilot'); ?></label>
+								<label for="mp-import-location"><?php esc_html_e( 'Assign to Location:', 'menupilot' ); ?></label>
 							</th>
 							<td>
 								<select id="mp-import-location" name="location">
-									<option value=""><?php esc_html_e('— Do not assign —', 'menupilot'); ?></option>
+									<option value=""><?php esc_html_e( '— Do not assign —', 'menupilot' ); ?></option>
 									<?php
 									$registered_locations = get_registered_nav_menus();
 									foreach ( $registered_locations as $location_id => $location_name ) :
-									?>
-										<option value="<?php echo esc_attr($location_id); ?>">
-											<?php echo esc_html($location_name); ?>
+										?>
+										<option value="<?php echo esc_attr( $location_id ); ?>">
+											<?php echo esc_html( $location_name ); ?>
 										</option>
 									<?php endforeach; ?>
 								</select>
-								<p class="description"><?php esc_html_e('Optionally assign this menu to a theme location.', 'menupilot'); ?></p>
+								<p class="description"><?php esc_html_e( 'Optionally assign this menu to a theme location.', 'menupilot' ); ?></p>
 							</td>
 						</tr>
 					</table>
@@ -348,30 +382,30 @@ class Ajax_Handler {
 		</div>
 
 			<div class="mp-card" style="margin-top:20px;">
-				<h3><?php esc_html_e('Menu Items Preview', 'menupilot'); ?></h3>
+				<h3><?php esc_html_e( 'Menu Items Preview', 'menupilot' ); ?></h3>
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e('Title', 'menupilot'); ?></th>
-							<th><?php esc_html_e('Type', 'menupilot'); ?></th>
-							<th><?php esc_html_e('Object', 'menupilot'); ?></th>
-							<th><?php esc_html_e('URL', 'menupilot'); ?></th>
+							<th><?php esc_html_e( 'Title', 'menupilot' ); ?></th>
+							<th><?php esc_html_e( 'Type', 'menupilot' ); ?></th>
+							<th><?php esc_html_e( 'Object', 'menupilot' ); ?></th>
+							<th><?php esc_html_e( 'URL', 'menupilot' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php foreach ( $items as $item ) : ?>
 							<?php
-							$indent = isset($item['parent_id']) && $item['parent_id'] > 0 ? '— ' : '';
-							$title = isset($item['title']) ? $item['title'] : '';
-							$type = isset($item['type']) ? $item['type'] : '';
-							$object = isset($item['object']) ? $item['object'] : '';
-							$url = isset($item['url']) ? $item['url'] : '';
+							$indent = isset( $item['parent_id'] ) && $item['parent_id'] > 0 ? '— ' : '';
+							$title  = isset( $item['title'] ) ? $item['title'] : '';
+							$type   = isset( $item['type'] ) ? $item['type'] : '';
+							$object = isset( $item['object'] ) ? $item['object'] : '';
+							$url    = isset( $item['url'] ) ? $item['url'] : '';
 							?>
 							<tr>
-								<td><?php echo esc_html($indent . $title); ?></td>
-								<td><code><?php echo esc_html($type); ?></code></td>
-								<td><code><?php echo esc_html($object); ?></code></td>
-								<td><small><?php echo esc_html($url); ?></small></td>
+								<td><?php echo esc_html( $indent . $title ); ?></td>
+								<td><code><?php echo esc_html( $type ); ?></code></td>
+								<td><code><?php echo esc_html( $object ); ?></code></td>
+								<td><small><?php echo esc_html( $url ); ?></small></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -387,98 +421,121 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function import_menu(): void {
-		// Verify nonce
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array(
-				'message' => __('Security check failed. Please refresh the page and try again.', 'menupilot'),
-			), 403);
-			return;
-		}
-
-		// Check capabilities
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array(
-				'message' => __('You do not have permission to import menus.', 'menupilot'),
-			), 403);
-			return;
-		}
-
-		// Get parameters
-		$menu_name = isset($_POST['menu_name']) ? sanitize_text_field(wp_unslash((string) $_POST['menu_name'])) : '';
-		$location = isset($_POST['location']) ? sanitize_text_field(wp_unslash((string) $_POST['location'])) : '';
-		$json_data = isset($_POST['json_data']) ? sanitize_textarea_field(wp_unslash((string) $_POST['json_data'])) : '';
-
-		// Validate menu name
-		if ( empty($menu_name) ) {
-			wp_send_json_error(array(
-				'message' => __('Menu name is required.', 'menupilot'),
-			), 400);
-			return;
-		}
-
-		// Validate JSON data
-		if ( empty($json_data) ) {
-			wp_send_json_error(array(
-				'message' => __('No import data received.', 'menupilot'),
-			), 400);
-			return;
-		}
-
-		// Parse JSON
-		$import_data = json_decode($json_data, true);
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			wp_send_json_error(array(
-				'message' => __('Invalid import data format.', 'menupilot'),
-			), 400);
-			return;
-		}
-
-		// Check if menu with same name already exists
-		$existing_menu = wp_get_nav_menu_object($menu_name);
-		if ( $existing_menu ) {
-			wp_send_json_error(array(
-				'message' => sprintf(
-					/* translators: %s: menu name */
-					__('A menu with the name "%s" already exists. Please choose a different name.', 'menupilot'),
-					$menu_name
+		// Verify nonce.
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Security check failed. Please refresh the page and try again.', 'menupilot' ),
 				),
-			), 409);
+				403
+			);
 			return;
 		}
 
-		// Import menu
-		$menu_id = $this->importer->import($import_data, $menu_name, $location);
+		// Check capabilities.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'You do not have permission to import menus.', 'menupilot' ),
+				),
+				403
+			);
+			return;
+		}
+
+		// Get parameters.
+		$menu_name = isset( $_POST['menu_name'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['menu_name'] ) ) : '';
+		$location  = isset( $_POST['location'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['location'] ) ) : '';
+		$json_data = isset( $_POST['json_data'] ) ? sanitize_textarea_field( wp_unslash( (string) $_POST['json_data'] ) ) : '';
+
+		// Validate menu name.
+		if ( empty( $menu_name ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Menu name is required.', 'menupilot' ),
+				),
+				400
+			);
+			return;
+		}
+
+		// Validate JSON data.
+		if ( empty( $json_data ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'No import data received.', 'menupilot' ),
+				),
+				400
+			);
+			return;
+		}
+
+		// Parse JSON.
+		$import_data = json_decode( $json_data, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid import data format.', 'menupilot' ),
+				),
+				400
+			);
+			return;
+		}
+
+		// Check if menu with same name already exists.
+		$existing_menu = wp_get_nav_menu_object( $menu_name );
+		if ( $existing_menu ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: menu name */
+						__( 'A menu with the name "%s" already exists. Please choose a different name.', 'menupilot' ),
+						$menu_name
+					),
+				),
+				409
+			);
+			return;
+		}
+
+		// Import menu.
+		$menu_id = $this->importer->import( $import_data, $menu_name, $location );
 
 		if ( ! $menu_id ) {
-			do_action('menupilot_import_failed', $import_data, __('Failed to import menu. Please check the import data and try again.', 'menupilot'));
-			wp_send_json_error(array(
-				'message' => __('Failed to import menu. Please check the import data and try again.', 'menupilot'),
-			), 500);
+			do_action( 'menupilot_import_failed', $import_data, __( 'Failed to import menu. Please check the import data and try again.', 'menupilot' ) );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Failed to import menu. Please check the import data and try again.', 'menupilot' ),
+				),
+				500
+			);
 			return;
 		}
 
-		// Build success message
+		// Build success message.
 		$message = sprintf(
 			/* translators: %s: menu name */
-			__('Menu "%s" imported successfully!', 'menupilot'),
+			__( 'Menu "%s" imported successfully!', 'menupilot' ),
 			$menu_name
 		);
 
-		if ( ! empty($location) ) {
+		if ( ! empty( $location ) ) {
 			$registered_locations = get_registered_nav_menus();
-			$location_name = isset($registered_locations[ $location ]) ? $registered_locations[ $location ] : $location;
-			$message .= ' ' . sprintf(
+			$location_name        = isset( $registered_locations[ $location ] ) ? $registered_locations[ $location ] : $location;
+			$message             .= ' ' . sprintf(
 				/* translators: %s: theme location name */
-				__('It has been assigned to the "%s" location.', 'menupilot'),
+				__( 'It has been assigned to the "%s" location.', 'menupilot' ),
 				$location_name
 			);
 		}
 
-		wp_send_json_success(array(
-			'message' => $message,
-			'menu_id' => $menu_id,
-			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
-		));
+		wp_send_json_success(
+			array(
+				'message'  => $message,
+				'menu_id'  => $menu_id,
+				'edit_url' => admin_url( 'nav-menus.php?action=edit&menu=' . $menu_id ),
+			)
+		);
 	}
 
 	/**
@@ -487,29 +544,31 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function create_backup(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
-		$menu_id = isset($_POST['menu_id']) ? (int) $_POST['menu_id'] : 0;
+		$menu_id = isset( $_POST['menu_id'] ) ? (int) $_POST['menu_id'] : 0;
 		if ( $menu_id <= 0 ) {
-			wp_send_json_error(array( 'message' => __('Invalid menu ID.', 'menupilot') ), 400);
+			wp_send_json_error( array( 'message' => __( 'Invalid menu ID.', 'menupilot' ) ), 400 );
 			return;
 		}
-		$result = Backup_Manager::create_backup($menu_id);
+		$result = Backup_Manager::create_backup( $menu_id );
 		if ( ! $result ) {
-			wp_send_json_error(array( 'message' => __('Failed to create backup.', 'menupilot') ), 500);
+			wp_send_json_error( array( 'message' => __( 'Failed to create backup.', 'menupilot' ) ), 500 );
 			return;
 		}
-		wp_send_json_success(array(
-			'message' => __('Backup created successfully.', 'menupilot'),
-			'backup_id' => $result['id'],
-			'created_at' => $result['created_at'],
-		));
+		wp_send_json_success(
+			array(
+				'message'    => __( 'Backup created successfully.', 'menupilot' ),
+				'backup_id'  => $result['id'],
+				'created_at' => $result['created_at'],
+			)
+		);
 	}
 
 	/**
@@ -518,29 +577,31 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function restore_backup(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
-		$menu_id = isset($_POST['menu_id']) ? (int) $_POST['menu_id'] : 0;
-		$backup_id = isset($_POST['backup_id']) ? sanitize_text_field(wp_unslash((string) $_POST['backup_id'])) : '';
-		if ( $menu_id <= 0 || empty($backup_id) ) {
-			wp_send_json_error(array( 'message' => __('Invalid parameters.', 'menupilot') ), 400);
+		$menu_id   = isset( $_POST['menu_id'] ) ? (int) $_POST['menu_id'] : 0;
+		$backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['backup_id'] ) ) : '';
+		if ( $menu_id <= 0 || empty( $backup_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'menupilot' ) ), 400 );
 			return;
 		}
-		$ok = Backup_Manager::restore($menu_id, $backup_id);
+		$ok = Backup_Manager::restore( $menu_id, $backup_id );
 		if ( ! $ok ) {
-			wp_send_json_error(array( 'message' => __('Failed to restore backup.', 'menupilot') ), 500);
+			wp_send_json_error( array( 'message' => __( 'Failed to restore backup.', 'menupilot' ) ), 500 );
 			return;
 		}
-		wp_send_json_success(array(
-			'message' => __('Menu restored successfully.', 'menupilot'),
-			'edit_url' => admin_url('nav-menus.php?action=edit&menu=' . $menu_id),
-		));
+		wp_send_json_success(
+			array(
+				'message'  => __( 'Menu restored successfully.', 'menupilot' ),
+				'edit_url' => admin_url( 'nav-menus.php?action=edit&menu=' . $menu_id ),
+			)
+		);
 	}
 
 	/**
@@ -549,17 +610,17 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function list_backups(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
-		$menu_id = isset($_POST['menu_id']) ? (int) $_POST['menu_id'] : 0;
-		$backups = Backup_Manager::list_backups($menu_id);
-		wp_send_json_success(array( 'backups' => $backups ));
+		$menu_id = isset( $_POST['menu_id'] ) ? (int) $_POST['menu_id'] : 0;
+		$backups = Backup_Manager::list_backups( $menu_id );
+		wp_send_json_success( array( 'backups' => $backups ) );
 	}
 
 	/**
@@ -568,31 +629,33 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function export_backup(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
-		$menu_id = isset($_POST['menu_id']) ? (int) $_POST['menu_id'] : 0;
-		$backup_id = isset($_POST['backup_id']) ? sanitize_text_field(wp_unslash((string) $_POST['backup_id'])) : '';
-		if ( $menu_id <= 0 || empty($backup_id) ) {
-			wp_send_json_error(array( 'message' => __('Invalid parameters.', 'menupilot') ), 400);
+		$menu_id   = isset( $_POST['menu_id'] ) ? (int) $_POST['menu_id'] : 0;
+		$backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['backup_id'] ) ) : '';
+		if ( $menu_id <= 0 || empty( $backup_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'menupilot' ) ), 400 );
 			return;
 		}
-		$data = Backup_Manager::export_backup($menu_id, $backup_id);
+		$data = Backup_Manager::export_backup( $menu_id, $backup_id );
 		if ( ! $data ) {
-			wp_send_json_error(array( 'message' => __('Backup not found.', 'menupilot') ), 404);
+			wp_send_json_error( array( 'message' => __( 'Backup not found.', 'menupilot' ) ), 404 );
 			return;
 		}
-		$menu_name = isset($data['menu']['name']) ? (string) $data['menu']['name'] : null;
-		History::log('export', $menu_id, $menu_name, 'success');
-		wp_send_json_success(array(
-			'data' => $data,
-			'filename' => 'menupilot-backup-' . gmdate('Y-m-d-His') . '.json',
-		));
+		$menu_name = isset( $data['menu']['name'] ) ? (string) $data['menu']['name'] : null;
+		History::log( 'export', $menu_id, $menu_name, 'success' );
+		wp_send_json_success(
+			array(
+				'data'     => $data,
+				'filename' => 'menupilot-backup-' . gmdate( 'Y-m-d-His' ) . '.json',
+			)
+		);
 	}
 
 	/**
@@ -601,25 +664,25 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function delete_backup(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
-		$backup_id = isset($_POST['backup_id']) ? sanitize_text_field(wp_unslash((string) $_POST['backup_id'])) : '';
-		if ( empty($backup_id) ) {
-			wp_send_json_error(array( 'message' => __('Invalid parameters.', 'menupilot') ), 400);
+		$backup_id = isset( $_POST['backup_id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['backup_id'] ) ) : '';
+		if ( empty( $backup_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'menupilot' ) ), 400 );
 			return;
 		}
-		$ok = Backup_Manager::delete_backup($backup_id);
+		$ok = Backup_Manager::delete_backup( $backup_id );
 		if ( ! $ok ) {
-			wp_send_json_error(array( 'message' => __('Backup not found.', 'menupilot') ), 404);
+			wp_send_json_error( array( 'message' => __( 'Backup not found.', 'menupilot' ) ), 404 );
 			return;
 		}
-		wp_send_json_success(array( 'message' => __('Backup deleted.', 'menupilot') ));
+		wp_send_json_success( array( 'message' => __( 'Backup deleted.', 'menupilot' ) ) );
 	}
 
 	/**
@@ -628,16 +691,16 @@ class Ajax_Handler {
 	 * @return void
 	 */
 	public function delete_all_backups(): void {
-		if ( ! check_ajax_referer('menupilot_admin', 'nonce', false) ) {
-			wp_send_json_error(array( 'message' => __('Security check failed.', 'menupilot') ), 403);
+		if ( ! check_ajax_referer( 'menupilot_admin', 'nonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Security check failed.', 'menupilot' ) ), 403 );
 			return;
 		}
-		if ( ! current_user_can('manage_options') ) {
-			wp_send_json_error(array( 'message' => __('You do not have permission.', 'menupilot') ), 403);
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission.', 'menupilot' ) ), 403 );
 			return;
 		}
 		Backup_Manager::delete_all_backups();
-		wp_send_json_success(array( 'message' => __('All backups deleted.', 'menupilot') ));
+		wp_send_json_success( array( 'message' => __( 'All backups deleted.', 'menupilot' ) ) );
 	}
 }
 

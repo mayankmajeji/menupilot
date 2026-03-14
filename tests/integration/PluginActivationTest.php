@@ -22,11 +22,11 @@ class PluginActivationTest extends WPTestCase {
 	}
 
 	public function testPluginIsActivated() {
-		$this->assertTrue(defined('MENUPILOT_VERSION'));
+		$this->assertTrue( defined( 'MENUPILOT_VERSION' ) );
 	}
 
 	public function testSettingsOptionExists() {
-		$settings = get_option('menupilot_settings');
-		$this->assertNotFalse($settings);
+		$settings = get_option( 'menupilot_settings' );
+		$this->assertNotFalse( $settings );
 	}
 }
