@@ -37,14 +37,6 @@
 	<config name="testVersion" value="7.4-"/>
 	<rule ref="PHPCompatibilityWP"/>
 
-	<!-- Enforce strict types -->
-	<rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
-		<properties>
-			<property name="declareOnFirstLine" value="false"/>
-			<property name="spacesCountAroundEqualsSign" value="0"/>
-		</properties>
-	</rule>
-
 	<!-- Text domain check -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
