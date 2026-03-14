@@ -2,8 +2,6 @@ parameters:
 	level: 8
 	paths:
 		- includes
-	bootstrapFiles:
-		- tests/_support/_bootstrap.php
 	excludePaths:
 		- tests/_support/_generated
 	ignoreErrors:
