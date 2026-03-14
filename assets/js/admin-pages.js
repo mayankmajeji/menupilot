@@ -29,7 +29,6 @@ jQuery(document).ready(function ($) {
   $(document).on("submit", "#mp-export-form", function (e) {
     e.preventDefault();
 
-    const $form = $(this);
     const $button = $("#mp-export-btn");
     const $spinner = $("#mp-export-spinner");
     const $result = $("#mp-export-result");
@@ -125,7 +124,6 @@ jQuery(document).ready(function ($) {
   $(document).on("submit", "#mp-import-form", function (e) {
     e.preventDefault();
 
-    const $form = $(this);
     const $button = $("#mp-import-btn");
     const $spinner = $("#mp-import-spinner");
     const $result = $("#mp-import-result");
@@ -214,13 +212,13 @@ jQuery(document).ready(function ($) {
     const context = importData.export_context || {};
 
     const originalMenuName = menu.name || "Untitled Menu";
-    const menuSlug = menu.slug || "";
+    const _menuSlug = menu.slug || "";
     const items = menu.items || [];
-    const locations = menu.locations || [];
+    const _locations = menu.locations || [];
 
     const sourceUrl = context.site_url || "";
     const exportedAt = context.exported_at || "";
-    const exportedBy = context.exported_by || "";
+    const _exportedBy = context.exported_by || "";
     const registeredLocations = menupilot.registeredLocations || {};
     const sameSize = sourceUrl === menupilot.siteUrl;
     
@@ -433,124 +431,6 @@ jQuery(document).ready(function ($) {
     } else {
       html += '<br><small style="color:#666;font-style:italic;">Originally a custom link - you can map it to content if needed</small>';
     }
-
-    return html;
-  }
-
-  // Generate import preview HTML client-side (old function - keeping for backward compatibility)
-  function generateImportPreview(importData) {
-    const menu = importData.menu || {};
-    const context = importData.export_context || {};
-
-    const originalMenuName = menu.name || "Untitled Menu";
-    const menuSlug = menu.slug || "";
-    const items = menu.items || [];
-    
-    // Apply default menu name pattern
-    const defaultPattern = menupilot.defaultMenuNamePattern || '{original_name}';
-    const menuName = applyMenuNamePattern(defaultPattern, originalMenuName);
-    const locations = menu.locations || [];
-
-    const sourceUrl = context.site_url || "";
-    const exportedAt = context.exported_at || "";
-    const registeredLocations = menupilot.registeredLocations || {};
-
-    let html = '<div class="mp-card">';
-    html += "<h3>Import Preview</h3>";
-    html += '<table class="widefat"><tbody>';
-    html +=
-      "<tr><th>Menu Name:</th><td><strong>" +
-      escapeHtml(menuName) +
-      "</strong></td></tr>";
-    html +=
-      "<tr><th>Menu Slug:</th><td><code>" +
-      escapeHtml(menuSlug) +
-      "</code></td></tr>";
-    html += "<tr><th>Total Items:</th><td>" + items.length + "</td></tr>";
-
-    if (sourceUrl) {
-      html +=
-        "<tr><th>Source Site:</th><td><code>" +
-        escapeHtml(sourceUrl) +
-        "</code></td></tr>";
-    }
-
-    html +=
-      "<tr><th>Destination Site:</th><td><code>" +
-      menupilot.siteUrl +
-      "</code></td></tr>";
-
-    if (exportedAt) {
-      const date = new Date(exportedAt);
-      html +=
-        "<tr><th>Exported At:</th><td>" + date.toLocaleString() + "</td></tr>";
-    }
-
-    if (locations.length > 0) {
-      html +=
-        "<tr><th>Source Locations:</th><td><code>" +
-        locations.join(", ") +
-        "</code></td></tr>";
-    }
-
-    html += "</tbody></table></div>";
-
-    // Import configuration
-    html += '<div class="mp-card" style="margin-top:20px;">';
-    html += "<h3>Import Configuration</h3>";
-    html += "<p>Configure how this menu will be imported:</p>";
-    html += '<div id="mp-import-execute-form">';
-    html += '<table class="form-table"><tbody>';
-    html +=
-      '<tr><th scope="row"><label for="mp-import-menu-name">Menu Name:</label></th>';
-    html +=
-      '<td><input type="text" id="mp-import-menu-name" name="menu_name" value="' +
-      escapeHtml(menuName) +
-      '" class="regular-text" required />';
-    html +=
-      '<p class="description">Enter a name for the imported menu. The default pattern from Settings has been applied, but you can change it.</p></td></tr>';
-    html +=
-      '<tr><th scope="row"><label for="mp-import-location">Assign to Location:</label></th>';
-    html +=
-      '<td><select id="mp-import-location" name="location"><option value="">— Do not assign —</option>';
-
-    for (const [locationId, locationName] of Object.entries(
-      registeredLocations
-    )) {
-      html +=
-        '<option value="' +
-        escapeHtml(locationId) +
-        '">' +
-        escapeHtml(locationName) +
-        "</option>";
-    }
-
-    html += "</select>";
-    html +=
-      '<p class="description">Optionally assign this menu to a theme location.</p></td></tr>';
-    html += "</tbody></table>";
-    html +=
-      '<input type="hidden" id="mp-import-data" name="import_data" value="" />';
-    html += "</div></div>";
-
-    // Menu items preview
-    html += '<div class="mp-card" style="margin-top:20px;">';
-    html += "<h3>Menu Items Preview</h3>";
-    html += '<table class="widefat striped"><thead><tr>';
-    html += "<th>Title</th><th>Type</th><th>Object</th><th>URL</th>";
-    html += "</tr></thead><tbody>";
-
-    items.forEach(function (item) {
-      const indent = item.parent_id > 0 ? "— " : "";
-      html += "<tr>";
-      html += "<td>" + escapeHtml(indent + item.title) + "</td>";
-      html += "<td><code>" + escapeHtml(item.type) + "</code></td>";
-      html += "<td><code>" + escapeHtml(item.object) + "</code></td>";
-      html += "<td><small>" + escapeHtml(item.url) + "</small></td>";
-      html += "</tr>";
-    });
-
-    html += "</tbody></table></div>";
 
     return html;
   }
@@ -868,7 +748,7 @@ jQuery(document).ready(function ($) {
         });
         
         // Apply custom mappings to remaining items (adjust indices)
-        menuData.menu.items.forEach(function(item, newIndex) {
+        menuData.menu.items.forEach(function(item, _newIndex) {
           // Find original index
           const originalIndex = originalItems.indexOf(item);
           
