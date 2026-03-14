@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-03-15
+
+### Fixed
+- Backup tab now correctly shows only backups for the currently selected menu (previously showed all menus' backups combined)
+- Backup stats bar now reflects the count for the current menu only, eliminating misleading totals like "15 of 5"
+- Restore, delete, and delete-all backup actions now use the plugin's confirm modal instead of the browser's native `confirm()` dialog
+
+### Improved
+- Backup list batch-fetches user display names in a single query instead of one query per row (eliminates N+1 database queries)
+- Deploy workflow now runs PHPCS, PHPStan, and ESLint + Stylelint checks as gates before deploying to WordPress.org
+- Deploy workflow sends a Slack notification on success, failure, or skipped deploy
+
 ## [1.0.4] - 2026-03-14
 
 ### Changed
@@ -30,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Testing infrastructure
 - Documentation
 
-[Unreleased]: https://github.com/mayankmajeji/menupilot/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/mayankmajeji/menupilot/compare/v1.0.5...HEAD
+[1.0.5]: https://github.com/mayankmajeji/menupilot/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/mayankmajeji/menupilot/compare/v1.0.0...v1.0.4
 [1.0.0]: https://github.com/mayankmajeji/menupilot/releases/tag/v1.0.0

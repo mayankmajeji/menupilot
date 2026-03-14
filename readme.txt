@@ -183,6 +183,12 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 
 == Changelog ==
 
+= 1.0.5 =
+* Fixed: backup tab now correctly shows only backups for the selected menu (was showing all menus' backups combined)
+* Fixed: backup stats now reflect the current menu's count only, not the total across all menus
+* Fixed: restore, delete, and delete-all backup actions now use the plugin's confirm modal instead of the browser's native confirm dialog
+* Improved: backup list now loads user data in a single batch query (eliminates N+1 database queries)
+
 = 1.0.4 =
 * Backups are now stored in a dedicated `wp_menupilot_backups` database table instead of `wp_options`, eliminating serialized blob bloat and improving query performance
 * Auto-backup on menu save now correctly captures the state after WordPress finishes processing all item changes (adds, updates, deletes)
@@ -206,6 +212,9 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 * Manual mapping and clear import feedback
 
 == Upgrade Notice ==
+
+= 1.0.5 =
+Fixes the backup tab showing all menus' backups combined, misleading stats counts, and native browser confirm dialogs in the backup panel.
 
 = 1.0.4 =
 Backups are now stored in a dedicated database table for better performance. Existing backups in `wp_options` are automatically migrated on first admin page load after updating.
