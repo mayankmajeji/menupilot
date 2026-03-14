@@ -24,9 +24,9 @@
     "version-bump-prompt": "^6.1.0"
   },
   "scripts": {
-    "bump:patch": "bump patch --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
-    "bump:minor": "bump minor --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
-    "bump:major": "bump major --commit 'Version %s.' menupilot.php package.json package-lock.json readme.txt",
+    "bump:patch": "bump patch --commit 'Version %s.' --tag --push menupilot.php package.json package-lock.json readme.txt",
+    "bump:minor": "bump minor --commit 'Version %s.' --tag --push menupilot.php package.json package-lock.json readme.txt",
+    "bump:major": "bump major --commit 'Version %s.' --tag --push menupilot.php package.json package-lock.json readme.txt",
     "build": "gulp styles",
     "build:admin": "sass --no-source-map assets/css/admin.scss assets/css/admin.css",
     "watch": "gulp watch",
