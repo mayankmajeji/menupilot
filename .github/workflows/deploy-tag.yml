@@ -122,6 +122,9 @@ jobs:
             - name: Install Composer dependencies (production)
               run: composer install --no-dev --no-interaction --prefer-dist --ignore-platform-reqs
 
+            - name: Install SVN
+              run: sudo apt-get update -qq && sudo apt-get install -y subversion
+
             - name: WordPress Plugin Deploy
               id: deploy
               uses: 10up/action-wordpress-plugin-deploy@2.2.2
