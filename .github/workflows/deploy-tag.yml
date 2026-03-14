@@ -120,7 +120,7 @@ jobs:
               run: npm run build
 
             - name: Install Composer dependencies (production)
-              run: composer install --no-dev --no-interaction --prefer-dist
+              run: composer install --no-dev --no-interaction --prefer-dist --ignore-platform-reqs
 
             - name: WordPress Plugin Deploy
               id: deploy
