@@ -27,7 +27,7 @@ jobs:
                   coverage: none
 
             - name: Install Composer dependencies
-              run: composer install --prefer-dist --no-progress --no-interaction
+              run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
             - name: Run PHPCS
               run: composer run test:phpcs
@@ -52,7 +52,7 @@ jobs:
                   coverage: none
 
             - name: Install Composer dependencies
-              run: composer install --prefer-dist --no-progress --no-interaction
+              run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
 
             - name: Run PHPStan
               run: composer run test:phpstan
