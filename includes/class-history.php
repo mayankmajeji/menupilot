@@ -253,7 +253,8 @@ class History {
 		// Add user_login to each entry.
 		foreach ( $entries as $entry ) {
 			if ( ! empty( $entry->user_id ) ) {
-				$user              = get_userdata( (int) $entry->user_id );
+				$user = get_userdata( (int) $entry->user_id );
+				// @phpstan-ignore-next-line
 				$entry->user_login = $user ? $user->user_login : '';
 			} else {
 				$entry->user_login = '';
@@ -281,9 +282,11 @@ class History {
 
 		foreach ( $entries as $entry ) {
 			if ( ! empty( $entry->user_id ) ) {
-				$user              = get_userdata( (int) $entry->user_id );
+				$user = get_userdata( (int) $entry->user_id );
+				// @phpstan-ignore-next-line
 				$entry->user_login = $user ? $user->user_login : '';
 			} else {
+				// @phpstan-ignore-next-line
 				$entry->user_login = '';
 			}
 		}

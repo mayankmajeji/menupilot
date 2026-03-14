@@ -161,7 +161,7 @@ class Backup_Manager {
 		$user_id = get_current_user_id();
 		if ( $user_id <= 0 ) {
 			$current_user = wp_get_current_user();
-			$user_id      = $current_user && $current_user->ID ? (int) $current_user->ID : 0;
+			$user_id      = $current_user->ID ? (int) $current_user->ID : 0;
 		}
 
 		global $wpdb;
@@ -364,7 +364,7 @@ class Backup_Manager {
 	 * Get backup by ID across all menus
 	 *
 	 * @param string $backup_id Backup identifier.
-	 * @return array{backup: array, menu_id: int}|null
+	 * @return array{backup: array<string,mixed>, menu_id: int}|null
 	 */
 	public static function get_backup_by_id( string $backup_id ): ?array {
 		self::maybe_create_table();
@@ -604,7 +604,7 @@ class Backup_Manager {
 									<td>
 										<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $b['menu_name'] ); ?></a>
 									</td>
-									<td><?php echo esc_html( gmdate( 'M j, Y g:i:s', strtotime( $b['created_at'] ) ) ); ?></td>
+									<td><?php echo esc_html( gmdate( 'M j, Y g:i:s', strtotime( $b['created_at'] ) ?: 0 ) ); ?></td>
 									<td>
 										<?php
 										$user_display = ! empty( $b['user_login'] ) ? esc_html( $b['user_login'] ) : esc_html__( '—', 'menupilot' );

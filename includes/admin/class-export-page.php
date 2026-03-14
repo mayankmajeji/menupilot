@@ -91,15 +91,15 @@ class Export_Page {
 												?>
 												<tr>
 													<th class="check-column">
-														<input type="radio" name="menu_id" value="<?php echo esc_attr( $menu->term_id ); ?>" id="menu-<?php echo esc_attr( $menu->term_id ); ?>" />
+														<input type="radio" name="menu_id" value="<?php echo esc_attr( (string) $menu->term_id ); ?>" id="menu-<?php echo esc_attr( (string) $menu->term_id ); ?>" />
 													</th>
 													<td>
-														<label for="menu-<?php echo esc_attr( $menu->term_id ); ?>">
+														<label for="menu-<?php echo esc_attr( (string) $menu->term_id ); ?>">
 															<strong><?php echo esc_html( $menu->name ); ?></strong>
 														</label>
 													</td>
 													<td><?php echo esc_html( $menu->slug ); ?></td>
-													<td><?php echo esc_html( $item_count ); ?></td>
+													<td><?php echo esc_html( (string) $item_count ); ?></td>
 													<td>
 														<?php if ( ! empty( $assigned_locations ) ) : ?>
 															<code><?php echo esc_html( implode( ', ', $assigned_locations ) ); ?></code>

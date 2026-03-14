@@ -160,6 +160,7 @@ class Menu_Exporter {
 	 */
 	private function build_menu_item_data( \WP_Post $item ): array {
 		// Get item meta.
+		$parent_id   = (int) get_post_meta( $item->ID, '_menu_item_menu_item_parent', true );
 		$object_id   = (int) get_post_meta( $item->ID, '_menu_item_object_id', true );
 		$object      = get_post_meta( $item->ID, '_menu_item_object', true );
 		$type        = get_post_meta( $item->ID, '_menu_item_type', true );
@@ -202,14 +203,14 @@ class Menu_Exporter {
 
 		$item_data = array(
 			'id'        => $item->ID,
-			'parent_id' => (int) $item->menu_item_parent,
+			'parent_id' => $parent_id,
 			'order'     => (int) $item->menu_order,
 			'type'      => $type,
 			'object'    => $object,
 			'object_id' => $object_id,
 			'slug'      => $slug,
-			'title'     => $item->title,
-			'url'       => $url ? $url : $item->url,
+			'title'     => $item->post_title,
+			'url'       => (string) $url,
 			'status'    => $status,
 			'meta'      => array(
 				'css_classes' => is_array( $classes ) ? $classes : array(),

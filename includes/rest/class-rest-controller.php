@@ -211,8 +211,8 @@ class REST_Controller extends WP_REST_Controller {
 	/**
 	 * Restrict namespace index to admins only
 	 *
-	 * @param array $endpoints Registered endpoints.
-	 * @return array
+	 * @param array<string, mixed> $endpoints Registered endpoints.
+	 * @return array<string, mixed>
 	 */
 	public function restrict_namespace_index( $endpoints ) {
 		// Remove namespace index for non-admins.
@@ -284,7 +284,7 @@ class REST_Controller extends WP_REST_Controller {
 		History::log(
 			'export',
 			$menu_id,
-			$menu->name ?? ( $export_data['menu']['name'] ?? null ),
+			$menu->name,
 			'success'
 		);
 
