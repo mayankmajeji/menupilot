@@ -4,7 +4,7 @@ Tags: menus, navigation, import export, migration
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,16 @@ This makes MenuPilot ideal for moving menus from **staging to production**, loca
 - Replaces source site URLs with destination site URLs automatically
 - Creates automatic backups before menu updates and imports
 - Logs all import and export actions for accountability
+
+### What MenuPilot Does Not Support
+
+* **Multisite** — Each subsite is managed independently; cross-site menu copying is not supported
+* **Bulk export/import** — MenuPilot handles one menu at a time by design
+* **Mega menu metadata** — Custom fields added by mega menu plugins are not preserved
+* **WP-CLI** — No command-line interface; all operations are performed in the admin UI
+* **Scheduled/automated imports** — Imports are triggered manually; no cron or automation support
+* **Media files** — Images referenced in menu items are not bundled in exports
+* **Non-standard menu item types** — Only core WordPress types (post, page, taxonomy, custom link) are supported
 
 == Features ==
 
@@ -173,6 +183,13 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 
 == Changelog ==
 
+= 1.0.4 =
+* Backups are now stored in a dedicated `wp_menupilot_backups` database table instead of `wp_options`, eliminating serialized blob bloat and improving query performance
+* Auto-backup on menu save now correctly captures the state after WordPress finishes processing all item changes (adds, updates, deletes)
+* Fixed: restoring an older backup after restoring a newer one now correctly removes items that were deleted between saves
+* Removed unused frontend stylesheet and script — MenuPilot is admin-only and ships no frontend assets
+* Existing backups stored in `wp_options` are automatically migrated to the new table on first admin page load after update
+
 = 1.0.3 =
 * Backup & Restore: automatic backups before menu updates and imports
 * Manual backup creation, one-click restore, and export backups as JSON
@@ -189,6 +206,9 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 * Manual mapping and clear import feedback
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Backups are now stored in a dedicated database table for better performance. Existing backups in `wp_options` are automatically migrated on first admin page load after updating.
 
 = 1.0.3 =
 Backup & Restore, Import/Export History Logs, and UI improvements.
