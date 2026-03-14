@@ -349,7 +349,7 @@ class Menu_Importer {
 	 */
 	private function find_term_by_slug( string $slug, string $taxonomy ): int {
 		$term = get_term_by( 'slug', $slug, $taxonomy );
-		return $term && ! is_wp_error( $term ) ? $term->term_id : 0;
+		return $term ? $term->term_id : 0;
 	}
 
 	/**

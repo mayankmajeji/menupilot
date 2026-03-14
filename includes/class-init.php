@@ -33,6 +33,7 @@ class Init {
 	 * AJAX handler instance
 	 *
 	 * @var \MenuPilot\Admin\Ajax_Handler|null
+	 * @phpstan-ignore-next-line
 	 */
 	private ?\MenuPilot\Admin\Ajax_Handler $ajax_handler = null;
 
@@ -46,7 +47,7 @@ class Init {
 	/**
 	 * Plugin admin screen IDs
 	 *
-	 * @var array
+	 * @var array<int, string>
 	 */
 	private const PLUGIN_SCREEN_IDS = array(
 		'toplevel_page_menupilot-settings',
@@ -169,7 +170,7 @@ class Init {
 		 *
 		 * @since 1.0.0
 		 *
-		 * @param Init $this Plugin instance
+		 * @param Init $instance Plugin instance
 		 */
 		do_action( 'menupilot_init', $this );
 	}
@@ -379,7 +380,7 @@ class Init {
 	public function add_admin_menu(): void {
 		// Main menu page (Settings).
 		// Use base64-encoded SVG favicon for menu icon.
-		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg' ) );
+		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg' ) ?: '' );
 		add_menu_page(
 			__( 'MenuPilot', 'menupilot' ),
 			__( 'MenuPilot', 'menupilot' ),

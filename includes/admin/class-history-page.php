@@ -62,7 +62,7 @@ class History_Page {
 			header( 'Content-Type: text/plain; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Intentionally outputting plain text
-			echo $data;
+			echo is_string( $data ) ? $data : '';
 		} else {
 			header( 'Content-Type: application/json; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
