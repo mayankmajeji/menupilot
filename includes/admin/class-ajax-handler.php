@@ -402,7 +402,8 @@ class Ajax_Handler {
 				</table>
 			</div>
 		<?php
-		return ob_get_clean() ?: '';
+		$output = ob_get_clean();
+		return false !== $output ? $output : '';
 	}
 
 	/**
