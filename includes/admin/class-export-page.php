@@ -22,11 +22,11 @@ class Export_Page {
 	 * @return void
 	 */
 	public function render(): void {
-		if ( ! current_user_can('manage_options') ) {
-			wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'menupilot'));
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'menupilot' ) );
 		}
 
-		// Get all registered menus
+		// Get all registered menus.
 		$menus = wp_get_nav_menus();
 
 		?>
@@ -34,12 +34,12 @@ class Export_Page {
 			<?php require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/header.php'; ?>
 			<div class="menupilot-body">
 				<?php
-				$mp_title = __('Export Menu', 'menupilot');
-				$mp_desc  = __('Select a menu to export as JSON. The export file will include all menu items, structure, and metadata.', 'menupilot');
+				$mp_title = __( 'Export Menu', 'menupilot' );
+				$mp_desc  = __( 'Select a menu to export as JSON. The export file will include all menu items, structure, and metadata.', 'menupilot' );
 				require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/body-header.php';
 				?>
 
-				<?php settings_errors('menupilot_settings'); ?>
+				<?php settings_errors( 'menupilot_settings' ); ?>
 
 				<div class="mp-2col mp-2col--no-sidebar">
 					<section class="mp-2col-content">
@@ -50,38 +50,38 @@ class Export_Page {
 
 						<div class="mp-content-inner">
 							<div class="mp-card">
-							<h2><?php esc_html_e('Export Menu', 'menupilot'); ?></h2>
-							<p><?php esc_html_e('Select a menu to export as JSON. The export file will include all menu items, structure, and metadata.', 'menupilot'); ?></p>
+							<h2><?php esc_html_e( 'Export Menu', 'menupilot' ); ?></h2>
+							<p><?php esc_html_e( 'Select a menu to export as JSON. The export file will include all menu items, structure, and metadata.', 'menupilot' ); ?></p>
 							
-							<?php if ( empty($menus) ) : ?>
+							<?php if ( empty( $menus ) ) : ?>
 								<div class="notice notice-warning inline">
-									<p><?php esc_html_e('No menus found. Create a menu first in Appearance → Menus.', 'menupilot'); ?></p>
+									<p><?php esc_html_e( 'No menus found. Create a menu first in Appearance → Menus.', 'menupilot' ); ?></p>
 								</div>
 								<p>
-									<a href="<?php echo esc_url(admin_url('nav-menus.php')); ?>" class="button button-primary">
-										<?php esc_html_e('Create a Menu', 'menupilot'); ?>
+									<a href="<?php echo esc_url( admin_url( 'nav-menus.php' ) ); ?>" class="button button-primary">
+										<?php esc_html_e( 'Create a Menu', 'menupilot' ); ?>
 									</a>
 								</p>
 							<?php else : ?>
 								<form id="mp-export-form" method="post">
-									<?php wp_nonce_field('menupilot_export', 'menupilot_export_nonce'); ?>
+									<?php wp_nonce_field( 'menupilot_export', 'menupilot_export_nonce' ); ?>
 									
 									<table class="widefat fixed striped">
 										<thead>
 											<tr>
 												<th class="check-column"><input type="radio" disabled /></th>
-												<th><?php esc_html_e('Menu Name', 'menupilot'); ?></th>
-												<th><?php esc_html_e('Slug', 'menupilot'); ?></th>
-												<th><?php esc_html_e('Items', 'menupilot'); ?></th>
-												<th><?php esc_html_e('Locations', 'menupilot'); ?></th>
+												<th><?php esc_html_e( 'Menu Name', 'menupilot' ); ?></th>
+												<th><?php esc_html_e( 'Slug', 'menupilot' ); ?></th>
+												<th><?php esc_html_e( 'Items', 'menupilot' ); ?></th>
+												<th><?php esc_html_e( 'Locations', 'menupilot' ); ?></th>
 											</tr>
 										</thead>
 										<tbody>
 											<?php foreach ( $menus as $menu ) : ?>
 												<?php
-												$menu_items = wp_get_nav_menu_items($menu->term_id);
-												$item_count = is_array($menu_items) ? count($menu_items) : 0;
-												$locations = get_nav_menu_locations();
+												$menu_items         = wp_get_nav_menu_items( $menu->term_id );
+												$item_count         = is_array( $menu_items ) ? count( $menu_items ) : 0;
+												$locations          = get_nav_menu_locations();
 												$assigned_locations = array();
 												foreach ( $locations as $location => $menu_id ) {
 													if ( $menu_id === $menu->term_id ) {
@@ -91,20 +91,20 @@ class Export_Page {
 												?>
 												<tr>
 													<th class="check-column">
-														<input type="radio" name="menu_id" value="<?php echo esc_attr($menu->term_id); ?>" id="menu-<?php echo esc_attr($menu->term_id); ?>" />
+														<input type="radio" name="menu_id" value="<?php echo esc_attr( $menu->term_id ); ?>" id="menu-<?php echo esc_attr( $menu->term_id ); ?>" />
 													</th>
 													<td>
-														<label for="menu-<?php echo esc_attr($menu->term_id); ?>">
-															<strong><?php echo esc_html($menu->name); ?></strong>
+														<label for="menu-<?php echo esc_attr( $menu->term_id ); ?>">
+															<strong><?php echo esc_html( $menu->name ); ?></strong>
 														</label>
 													</td>
-													<td><?php echo esc_html($menu->slug); ?></td>
-													<td><?php echo esc_html($item_count); ?></td>
+													<td><?php echo esc_html( $menu->slug ); ?></td>
+													<td><?php echo esc_html( $item_count ); ?></td>
 													<td>
-														<?php if ( ! empty($assigned_locations) ) : ?>
-															<code><?php echo esc_html(implode(', ', $assigned_locations)); ?></code>
+														<?php if ( ! empty( $assigned_locations ) ) : ?>
+															<code><?php echo esc_html( implode( ', ', $assigned_locations ) ); ?></code>
 														<?php else : ?>
-															<span class="description"><?php esc_html_e('Not assigned', 'menupilot'); ?></span>
+															<span class="description"><?php esc_html_e( 'Not assigned', 'menupilot' ); ?></span>
 														<?php endif; ?>
 													</td>
 												</tr>
@@ -114,7 +114,7 @@ class Export_Page {
 
 									<p class="submit">
 										<button type="submit" class="button button-primary button-hero" id="mp-export-btn" disabled>
-											<?php esc_html_e('Export Selected Menu', 'menupilot'); ?>
+											<?php esc_html_e( 'Export Selected Menu', 'menupilot' ); ?>
 										</button>
 										<span class="spinner" id="mp-export-spinner" style="float:none;margin:0 10px;"></span>
 									</p>
