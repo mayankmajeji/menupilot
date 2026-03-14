@@ -22,11 +22,117 @@ use MenuPilot\Settings;
 /**
  * Class Backup_Manager
  *
- * Manages menu backups stored in options table.
+ * Manages menu backups stored in the wp_menupilot_backups custom database table.
+ * Backups are created automatically after each nav menu save and can also be
+ * created manually. On upgrade from earlier versions, existing backups are
+ * migrated from the menupilot_backups wp_options entry.
  */
 class Backup_Manager {
 
-	private const OPTION_KEY = 'menupilot_backups';
+	/**
+	 * Table name (with prefix)
+	 *
+	 * @var string|null
+	 */
+	private static ?string $table = null;
+
+	/**
+	 * Get the backups table name
+	 *
+	 * @return string
+	 */
+	public static function get_table(): string {
+		if ( self::$table === null ) {
+			global $wpdb;
+			self::$table = $wpdb->prefix . 'menupilot_backups';
+		}
+		return self::$table;
+	}
+
+	/**
+	 * Ensure the backups table exists
+	 *
+	 * @return void
+	 */
+	public static function maybe_create_table(): void {
+		static $checked = false;
+		if ( $checked ) {
+			return;
+		}
+		$checked = true;
+
+		global $wpdb;
+		$table = self::get_table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table ) {
+			self::maybe_migrate_from_options();
+			return;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		$charset = $wpdb->get_charset_collate();
+		$sql = "CREATE TABLE $table (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			backup_id varchar(50) NOT NULL,
+			menu_id bigint(20) unsigned NOT NULL,
+			menu_name varchar(255) NOT NULL DEFAULT '',
+			user_id bigint(20) unsigned DEFAULT 0,
+			data longtext NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY backup_id (backup_id),
+			KEY menu_id (menu_id),
+			KEY created_at (created_at)
+		) $charset;";
+		dbDelta($sql);
+
+		self::maybe_migrate_from_options();
+	}
+
+	/**
+	 * Migrate existing backups from wp_options to custom table
+	 *
+	 * Provides backward compatibility for upgrades from versions
+	 * that stored backups in the menupilot_backups option.
+	 *
+	 * @return void
+	 */
+	private static function maybe_migrate_from_options(): void {
+		$old = get_option('menupilot_backups');
+		if ( ! is_array($old) || empty($old) ) {
+			return;
+		}
+
+		global $wpdb;
+		$table = self::get_table();
+
+		foreach ( $old as $menu_id => $backups ) {
+			if ( ! is_array($backups) ) {
+				continue;
+			}
+			foreach ( $backups as $b ) {
+				if ( ! isset($b['id']) ) {
+					continue;
+				}
+				$created_at = isset($b['created_at']) ? gmdate('Y-m-d H:i:s', strtotime($b['created_at'])) : current_time('mysql', true);
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom table; no WordPress API.
+				$wpdb->insert(
+					$table,
+					array(
+						'backup_id'  => $b['id'],
+						'menu_id'    => (int) $menu_id,
+						'menu_name'  => $b['menu_name'] ?? '',
+						'user_id'    => $b['user_id'] ?? 0,
+						'data'       => wp_json_encode($b['data'] ?? array()),
+						'created_at' => $created_at,
+					),
+					array( '%s', '%d', '%s', '%d', '%s', '%s' )
+				);
+			}
+		}
+
+		delete_option('menupilot_backups');
+	}
 
 	/**
 	 * Create a backup of a menu
@@ -46,43 +152,84 @@ class Backup_Manager {
 			return false;
 		}
 
+		self::maybe_create_table();
+
 		$backup_id = uniqid('backup_', true);
 		$created_at = current_time('c');
+		$created_at_mysql = current_time('mysql', true);
 
 		$user_id = get_current_user_id();
 		if ( $user_id <= 0 ) {
 			$current_user = wp_get_current_user();
 			$user_id = $current_user && $current_user->ID ? (int) $current_user->ID : 0;
 		}
-		$backup = array(
-			'id'         => $backup_id,
-			'menu_id'    => $menu_id,
-			'menu_name'  => $menu->name,
-			'created_at' => $created_at,
-			'user_id'    => $user_id,
-			'data'       => $export_data,
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom table; no WordPress API.
+		$result = $wpdb->insert(
+			$table,
+			array(
+				'backup_id'  => $backup_id,
+				'menu_id'    => $menu_id,
+				'menu_name'  => $menu->name,
+				'user_id'    => $user_id,
+				'data'       => wp_json_encode($export_data),
+				'created_at' => $created_at_mysql,
+			),
+			array( '%s', '%d', '%s', '%d', '%s', '%s' )
 		);
 
-		$all = get_option(self::OPTION_KEY, array());
-		if ( ! is_array($all) ) {
-			$all = array();
-		}
-		if ( ! isset($all[ $menu_id ]) || ! is_array($all[ $menu_id ]) ) {
-			$all[ $menu_id ] = array();
+		if ( $result === false ) {
+			return false;
 		}
 
-		array_unshift($all[ $menu_id ], $backup);
-
+		// Enforce backup limit per menu.
 		$settings = new Settings();
 		$limit = (int) $settings->get_option('backup_limit', 5);
 		$limit = max(1, min(20, $limit));
 
-		$all[ $menu_id ] = array_slice($all[ $menu_id ], 0, $limit);
-		update_option(self::OPTION_KEY, $all);
+		self::enforce_backup_limit($menu_id, $limit);
 
 		return array(
 			'id'         => $backup_id,
 			'created_at' => $created_at,
+		);
+	}
+
+	/**
+	 * Enforce backup limit for a menu by deleting oldest backups
+	 *
+	 * @param int $menu_id Menu term ID.
+	 * @param int $limit   Maximum number of backups to keep.
+	 * @return void
+	 */
+	private static function enforce_backup_limit( int $menu_id, int $limit ): void {
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from get_table() uses $wpdb->prefix (trusted).
+		$count = (int) $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+			$wpdb->prepare("SELECT COUNT(*) FROM $table WHERE menu_id = %d", $menu_id)
+		);
+
+		if ( $count <= $limit ) {
+			return;
+		}
+
+		$to_delete = $count - $limit;
+
+		// Delete the oldest backups beyond the limit.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted); no WordPress API.
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+				"DELETE FROM $table WHERE menu_id = %d ORDER BY created_at ASC LIMIT %d",
+				$menu_id,
+				$to_delete
+			)
 		);
 	}
 
@@ -116,16 +263,27 @@ class Backup_Manager {
 	 * @return array<string,mixed>|null Backup data or null.
 	 */
 	public static function get_backup( int $menu_id, string $backup_id ): ?array {
-		$all = get_option(self::OPTION_KEY, array());
-		if ( ! is_array($all) || ! isset($all[ $menu_id ]) ) {
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted); no WordPress API.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+				"SELECT * FROM $table WHERE menu_id = %d AND backup_id = %s",
+				$menu_id,
+				$backup_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $row ) {
 			return null;
 		}
-		foreach ( $all[ $menu_id ] as $b ) {
-			if ( isset($b['id']) && $b['id'] === $backup_id ) {
-				return $b;
-			}
-		}
-		return null;
+
+		return self::format_backup_row($row);
 	}
 
 	/**
@@ -135,38 +293,52 @@ class Backup_Manager {
 	 * @return array<int, array{id: string, menu_id: int, created_at: string, menu_name: string, user_login: string, user_id: int}>
 	 */
 	public static function list_backups( int $menu_id = 0 ): array {
-		$all = get_option(self::OPTION_KEY, array());
-		if ( ! is_array($all) ) {
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		if ( $menu_id > 0 ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted); no WordPress API.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+					"SELECT backup_id, menu_id, menu_name, user_id, created_at FROM $table WHERE menu_id = %d ORDER BY created_at DESC",
+					$menu_id
+				),
+				ARRAY_A
+			);
+		} else {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted); no WordPress API.
+			$rows = $wpdb->get_results(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+				"SELECT backup_id, menu_id, menu_name, user_id, created_at FROM $table ORDER BY created_at DESC",
+				ARRAY_A
+			);
+		}
+
+		if ( ! is_array($rows) ) {
 			return array();
 		}
+
 		$result = array();
-		foreach ( $all as $mid => $backups ) {
-			if ( isset($menu_id) && $menu_id > 0 && (int) $mid !== $menu_id ) {
-				continue;
+		foreach ( $rows as $row ) {
+			$user_id = isset($row['user_id']) ? (int) $row['user_id'] : 0;
+			$user_login = '';
+			if ( $user_id > 0 ) {
+				$user = get_userdata($user_id);
+				$user_login = $user ? $user->user_login : '';
 			}
-			if ( ! is_array($backups) ) {
-				continue;
-			}
-			foreach ( $backups as $b ) {
-				$user_id = isset($b['user_id']) ? (int) $b['user_id'] : 0;
-				$user_login = '';
-				if ( $user_id > 0 ) {
-					$user = get_userdata($user_id);
-					$user_login = $user ? $user->user_login : '';
-				}
-				$result[] = array(
-					'id'         => $b['id'] ?? '',
-					'menu_id'    => (int) $mid,
-					'created_at' => $b['created_at'] ?? '',
-					'menu_name'  => $b['menu_name'] ?? '',
-					'user_login' => $user_login,
-					'user_id'    => $user_id,
-				);
-			}
+			$result[] = array(
+				'id'         => $row['backup_id'] ?? '',
+				'menu_id'    => (int) ( $row['menu_id'] ?? 0 ),
+				'created_at' => $row['created_at'] ?? '',
+				'menu_name'  => $row['menu_name'] ?? '',
+				'user_login' => $user_login,
+				'user_id'    => $user_id,
+			);
 		}
-		usort($result, function ( $a, $b ) {
-			return strcmp($b['created_at'], $a['created_at']);
-		});
+
 		return $result;
 	}
 
@@ -177,21 +349,26 @@ class Backup_Manager {
 	 * @return array{backup: array, menu_id: int}|null
 	 */
 	public static function get_backup_by_id( string $backup_id ): ?array {
-		$all = get_option(self::OPTION_KEY, array());
-		if ( ! is_array($all) ) {
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix (trusted); no WordPress API.
+		$row = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
+			$wpdb->prepare( "SELECT * FROM $table WHERE backup_id = %s", $backup_id ),
+			ARRAY_A
+		);
+
+		if ( ! $row ) {
 			return null;
 		}
-		foreach ( $all as $menu_id => $backups ) {
-			if ( ! is_array($backups) ) {
-				continue;
-			}
-			foreach ( $backups as $b ) {
-				if ( isset($b['id']) && $b['id'] === $backup_id ) {
-					return array( 'backup' => $b, 'menu_id' => (int) $menu_id );
-				}
-			}
-		}
-		return null;
+
+		return array(
+			'backup'  => self::format_backup_row($row),
+			'menu_id' => (int) $row['menu_id'],
+		);
 	}
 
 	/**
@@ -201,23 +378,19 @@ class Backup_Manager {
 	 * @return bool True on success.
 	 */
 	public static function delete_backup( string $backup_id ): bool {
-		$found = self::get_backup_by_id($backup_id);
-		if ( ! $found ) {
-			return false;
-		}
-		$all = get_option(self::OPTION_KEY, array());
-		$menu_id = $found['menu_id'];
-		if ( ! isset($all[ $menu_id ]) || ! is_array($all[ $menu_id ]) ) {
-			return false;
-		}
-		$all[ $menu_id ] = array_values(array_filter($all[ $menu_id ], function ( $b ) use ( $backup_id ) {
-			return ( $b['id'] ?? '' ) !== $backup_id;
-		}));
-		if ( empty($all[ $menu_id ]) ) {
-			unset($all[ $menu_id ]);
-		}
-		update_option(self::OPTION_KEY, $all);
-		return true;
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table.
+		$deleted = $wpdb->delete(
+			$table,
+			array( 'backup_id' => $backup_id ),
+			array( '%s' )
+		);
+
+		return $deleted !== false && $deleted > 0;
 	}
 
 	/**
@@ -226,7 +399,13 @@ class Backup_Manager {
 	 * @return bool True on success.
 	 */
 	public static function delete_all_backups(): bool {
-		update_option(self::OPTION_KEY, array());
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix; TRUNCATE has no placeholders.
+		$wpdb->query("TRUNCATE TABLE {$table}");
 		return true;
 	}
 
@@ -236,16 +415,18 @@ class Backup_Manager {
 	 * @return array{count: int, limit: int}
 	 */
 	public static function get_backup_stats(): array {
-		$all = get_option(self::OPTION_KEY, array());
-		$count = 0;
-		if ( is_array($all) ) {
-			foreach ( $all as $backups ) {
-				$count += is_array($backups) ? count($backups) : 0;
-			}
-		}
+		self::maybe_create_table();
+
+		global $wpdb;
+		$table = self::get_table();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix.
+		$count = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
+
 		$settings = new Settings();
 		$limit = (int) $settings->get_option('backup_limit', 5);
 		$limit = max(1, min(20, $limit));
+
 		return array( 'count' => $count, 'limit' => $limit );
 	}
 
@@ -262,6 +443,28 @@ class Backup_Manager {
 			return null;
 		}
 		return $backup['data'];
+	}
+
+	/**
+	 * Format a database row into the backup array structure
+	 *
+	 * @param array<string,mixed> $row Database row.
+	 * @return array<string,mixed> Formatted backup.
+	 */
+	private static function format_backup_row( array $row ): array {
+		$data = isset($row['data']) ? json_decode($row['data'], true) : array();
+		if ( ! is_array($data) ) {
+			$data = array();
+		}
+
+		return array(
+			'id'         => $row['backup_id'] ?? '',
+			'menu_id'    => (int) ( $row['menu_id'] ?? 0 ),
+			'menu_name'  => $row['menu_name'] ?? '',
+			'created_at' => $row['created_at'] ?? '',
+			'user_id'    => (int) ( $row['user_id'] ?? 0 ),
+			'data'       => $data,
+		);
 	}
 
 	/**
@@ -448,7 +651,13 @@ class Backup_Manager {
 	}
 
 	/**
-	 * Maybe backup before native menu save (call from admin_init)
+	 * Detect a nav menu save and schedule an auto-backup for after processing
+	 *
+	 * Runs on admin_init (priority 1) to detect the POST, then defers the actual
+	 * backup to admin_head (priority 999). By that point WordPress has fully
+	 * processed all item updates, deletions, and additions — so the backup
+	 * captures the correct saved state. admin_head fires before the backup list
+	 * is rendered in admin_footer, so the new entry is visible immediately.
 	 *
 	 * @return void
 	 */
@@ -472,7 +681,17 @@ class Backup_Manager {
 			return;
 		}
 
-		self::create_backup($menu_id);
+		// Defer to admin_head (priority 999) which fires AFTER WordPress has finished
+		// processing all menu item changes (adds, updates, deletes) in the same
+		// request, but BEFORE the backup section is rendered in admin_footer.
+		// WordPress does not redirect after a nav menu save — it renders the page
+		// in the same request — so wp_redirect never fires here.
+		add_action('admin_head', function () use ( $menu_id ): void {
+			$menu = wp_get_nav_menu_object($menu_id);
+			if ( $menu ) {
+				self::create_backup($menu_id);
+			}
+		}, 999);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }

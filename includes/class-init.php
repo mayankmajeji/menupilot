@@ -149,6 +149,7 @@ class Init
 		if (is_admin() && ! self::$admin_hooks_registered) {
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-backup-manager.php';
 			add_action('admin_menu', array($this, 'add_admin_menu'));
+			add_filter('plugin_action_links_' . MENUPILOT_PLUGIN_BASENAME, array($this, 'add_plugin_action_links'));
 			add_action('admin_init', array($this->settings, 'register_settings'));
 			add_action('admin_init', array(\MenuPilot\Admin\Backup_Manager::class, 'maybe_backup_before_nav_menu_save'), 1);
 			add_action('load-nav-menus.php', array(\MenuPilot\Admin\Backup_Manager::class, 'register_meta_box'));
@@ -165,8 +166,7 @@ class Init
 			self::$admin_hooks_registered = true;
 		}
 
-		// Frontend hooks
-		add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
+		// Frontend hooks intentionally omitted — no frontend assets in this version.
 
 		/**
 		 * Fires after plugin initialization
@@ -281,57 +281,22 @@ class Init
 	}
 
 	/**
-	 * Enqueue frontend assets
+	 * Add plugin action links on the Plugins list page
 	 *
-	 * @return void
-	 */
-	public function enqueue_frontend_assets(): void
-	{
-		// Only enqueue on pages where needed
-		if (! $this->should_load_assets()) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'menupilot-frontend',
-			MENUPILOT_PLUGIN_URL . 'assets/css/main.css',
-			array(),
-			MENUPILOT_VERSION
-		);
-
-		wp_enqueue_script(
-			'menupilot-frontend',
-			MENUPILOT_PLUGIN_URL . 'assets/js/main.js',
-			array('jquery'),
-			MENUPILOT_VERSION,
-			true
-		);
-
-		wp_localize_script(
-			'menupilot-frontend',
-			'menupilot',
-			array(
-				'ajaxurl' => admin_url('admin-ajax.php'),
-				'nonce' => wp_create_nonce('menupilot_frontend'),
-			)
-		);
-	}
-
-	/**
-	 * Check if assets should be loaded on current page
+	 * Prepends "Menus" and "Settings" links before the default "Deactivate" link,
+	 * giving the user quick access to the most common destinations.
 	 *
-	 * @return bool
+	 * @param array<int|string,string> $links Existing action links.
+	 * @return array<int|string,string>
 	 */
-	private function should_load_assets(): bool
+	public function add_plugin_action_links( array $links ): array
 	{
-		/**
-		 * Filter whether to load plugin assets
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param bool $load Whether to load assets
-		 */
-		return apply_filters('menupilot_load_assets', true);
+		$action_links = array(
+			'menus'    => '<a href="' . esc_url(admin_url('nav-menus.php')) . '">' . esc_html__('Menus', 'menupilot') . '</a>',
+			'settings' => '<a href="' . esc_url(admin_url('admin.php?page=menupilot-settings')) . '">' . esc_html__('Settings', 'menupilot') . '</a>',
+		);
+
+		return array_merge($action_links, $links);
 	}
 
 	/**
@@ -347,11 +312,14 @@ class Init
 		// Add default options
 		$this->settings->add_default_options();
 
-		// Create history table (use $wpdb->prefix—never hardcode wp_)
+		// Create custom tables (use $wpdb->prefix—never hardcode wp_)
 		global $wpdb;
-		$table = $wpdb->prefix . 'menupilot_history';
 		$charset = $wpdb->get_charset_collate();
-		$sql = "CREATE TABLE $table (
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		// History table.
+		$history_table = $wpdb->prefix . 'menupilot_history';
+		$history_sql = "CREATE TABLE $history_table (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			action_type varchar(20) NOT NULL,
 			menu_id bigint(20) unsigned DEFAULT NULL,
@@ -366,8 +334,28 @@ class Init
 			KEY user_id (user_id),
 			KEY created_at (created_at)
 		) $charset;";
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-		dbDelta($sql);
+		dbDelta($history_sql);
+
+		// Backups table.
+		$backups_table = $wpdb->prefix . 'menupilot_backups';
+		$backups_sql = "CREATE TABLE $backups_table (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			backup_id varchar(50) NOT NULL,
+			menu_id bigint(20) unsigned NOT NULL,
+			menu_name varchar(255) NOT NULL DEFAULT '',
+			user_id bigint(20) unsigned DEFAULT 0,
+			data longtext NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			UNIQUE KEY backup_id (backup_id),
+			KEY menu_id (menu_id),
+			KEY created_at (created_at)
+		) $charset;";
+		dbDelta($backups_sql);
+
+		// Migrate any existing backups from wp_options to the new table.
+		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-backup-manager.php';
+		\MenuPilot\Admin\Backup_Manager::maybe_create_table();
 
 		/**
 		 * Fires on plugin activation

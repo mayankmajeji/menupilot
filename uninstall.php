@@ -16,13 +16,18 @@ if ( ! defined('WP_UNINSTALL_PLUGIN') ) {
 function menupilot_uninstall() {
 	global $wpdb;
 
-	// Drop history table
-	$table = $wpdb->prefix . 'menupilot_history';
+	// Drop custom tables
+	$history_table = $wpdb->prefix . 'menupilot_history';
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Uninstall: $table from $wpdb->prefix + constant; no API exists.
-	$wpdb->query("DROP TABLE IF EXISTS {$table}");
+	$wpdb->query("DROP TABLE IF EXISTS {$history_table}");
+
+	$backups_table = $wpdb->prefix . 'menupilot_backups';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Uninstall: $table from $wpdb->prefix + constant; no API exists.
+	$wpdb->query("DROP TABLE IF EXISTS {$backups_table}");
 
 	// Delete plugin options
 	delete_option('menupilot_settings');
+	// Legacy: clean up old backups option if migration hadn't run yet.
 	delete_option('menupilot_backups');
 	
 	// Delete any transients
