@@ -4,7 +4,7 @@ Tags: menus, navigation, import export, migration
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -183,6 +183,9 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 
 == Changelog ==
 
+= 1.0.13 =
+*
+
 = 1.0.5 =
 * Fixed: backup tab now correctly shows only backups for the selected menu (was showing all menus' backups combined)
 * Fixed: backup stats now reflect the current menu's count only, not the total across all menus
@@ -212,6 +215,9 @@ Go to **MenuPilot → History** to view all import and export actions. You can f
 * Manual mapping and clear import feedback
 
 == Upgrade Notice ==
+
+= 1.0.13 =
+*
 
 = 1.0.5 =
 Fixes the backup tab showing all menus' backups combined, misleading stats counts, and native browser confirm dialogs in the backup panel.
