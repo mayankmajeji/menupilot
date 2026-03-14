@@ -666,22 +666,26 @@ jQuery(document).ready(function ($) {
     }
   });
 
-  // Show remove confirmation modal
-  function showRemoveConfirmModal(itemTitle, onConfirm) {
+  // Show a generic confirmation modal.
+  // title        — heading text
+  // message      — body HTML (use escapeHtml() for any user-supplied content)
+  // confirmLabel — label for the confirm button
+  // onConfirm    — callback invoked when the user confirms
+  function showConfirmModal(title, message, confirmLabel, onConfirm) {
     // Create modal HTML if it doesn't exist
     if ($("#mp-confirm-modal").length === 0) {
       const modalHtml = `
         <div id="mp-confirm-modal" class="mp-confirm-overlay">
           <div class="mp-confirm-dialog">
             <div class="mp-confirm-header">
-              <h3>Confirm Removal</h3>
+              <h3 class="mp-confirm-title"></h3>
             </div>
             <div class="mp-confirm-body">
               <p class="mp-confirm-message"></p>
             </div>
             <div class="mp-confirm-footer">
               <button type="button" class="button" id="mp-confirm-cancel">Cancel</button>
-              <button type="button" class="button button-primary" id="mp-confirm-yes">Remove</button>
+              <button type="button" class="button button-primary" id="mp-confirm-yes"></button>
             </div>
           </div>
         </div>
@@ -689,49 +693,47 @@ jQuery(document).ready(function ($) {
       $("body").append(modalHtml);
     }
 
-    // Store the callback
+    // Update content and store callback
+    $("#mp-confirm-modal .mp-confirm-title").text(title);
+    $("#mp-confirm-modal .mp-confirm-message").html(message);
+    $("#mp-confirm-yes").text(confirmLabel);
     $("#mp-confirm-modal").data("onConfirm", onConfirm);
-
-    // Set the message
-    $("#mp-confirm-modal .mp-confirm-message").html(
-      'Are you sure you want to remove <strong>"' + escapeHtml(itemTitle) + '"</strong> from the import?'
-    );
 
     // Show modal
     $("#mp-confirm-modal").addClass("is-active");
   }
 
-  // Close remove confirmation modal
-  function closeRemoveConfirmModal() {
+  // Close confirm modal
+  function closeConfirmModal() {
     $("#mp-confirm-modal").removeClass("is-active");
     $("#mp-confirm-modal").removeData("onConfirm");
   }
 
-  // Confirm removal
+  // Confirm action
   $(document).on("click", "#mp-confirm-yes", function () {
     const onConfirm = $("#mp-confirm-modal").data("onConfirm");
     if (typeof onConfirm === "function") {
       onConfirm();
     }
-    closeRemoveConfirmModal();
+    closeConfirmModal();
   });
 
-  // Cancel removal
+  // Cancel action
   $(document).on("click", "#mp-confirm-cancel", function () {
-    closeRemoveConfirmModal();
+    closeConfirmModal();
   });
 
   // Close on overlay click
   $(document).on("click", "#mp-confirm-modal", function (e) {
     if (e.target === this) {
-      closeRemoveConfirmModal();
+      closeConfirmModal();
     }
   });
 
   // Close on Escape key
   $(document).on("keydown", function (e) {
     if (e.key === "Escape" && $("#mp-confirm-modal").hasClass("is-active")) {
-      closeRemoveConfirmModal();
+      closeConfirmModal();
     }
   });
 
@@ -744,7 +746,11 @@ jQuery(document).ready(function ($) {
     const itemTitle = $row.find("td:first").text().trim();
 
     // Show confirmation modal
-    showRemoveConfirmModal(itemTitle, function() {
+    showConfirmModal(
+      "Confirm Removal",
+      'Are you sure you want to remove <strong>"' + escapeHtml(itemTitle) + '"</strong> from the import?',
+      "Remove",
+      function() {
       // User confirmed - proceed with removal
       $row.addClass("mp-item-removed");
       $row.css({
@@ -762,7 +768,8 @@ jQuery(document).ready(function ($) {
       
       // Mark row as removed (will be filtered out during import)
       $row.attr("data-removed", "true");
-    });
+      }
+    );
   });
 
   // Import Modal - Handle undo removal
@@ -1308,27 +1315,33 @@ jQuery(document).ready(function ($) {
     const backupId = $row.data("backup-id");
     const nonce = getBackupNonce();
     if (!menuId || !nonce || !backupId) return;
-    if (!confirm("Restore this backup? The current menu will be replaced.")) return;
     const $btn = $(this);
-    $btn.prop("disabled", true);
-    $.post(menupilot.ajaxurl, {
-      action: "menupilot_restore_backup",
-      nonce: nonce,
-      menu_id: menuId,
-      backup_id: backupId,
-    })
-      .done(function (r) {
-        if (r.success && r.data.edit_url) {
-          window.location.href = r.data.edit_url;
-        } else {
-          alert(r.data && r.data.message ? r.data.message : "Failed to restore.");
-          $btn.prop("disabled", false);
-        }
-      })
-      .fail(function () {
-        alert("Failed to restore backup.");
-        $btn.prop("disabled", false);
-      });
+    showConfirmModal(
+      "Restore Backup",
+      "Restore this backup? The current menu will be replaced.",
+      "Restore",
+      function () {
+        $btn.prop("disabled", true);
+        $.post(menupilot.ajaxurl, {
+          action: "menupilot_restore_backup",
+          nonce: nonce,
+          menu_id: menuId,
+          backup_id: backupId,
+        })
+          .done(function (r) {
+            if (r.success && r.data.edit_url) {
+              window.location.href = r.data.edit_url;
+            } else {
+              alert(r.data && r.data.message ? r.data.message : "Failed to restore.");
+              $btn.prop("disabled", false);
+            }
+          })
+          .fail(function () {
+            alert("Failed to restore backup.");
+            $btn.prop("disabled", false);
+          });
+      }
+    );
   });
 
   $(document).on("click", ".menupilot-export-backup", function () {
@@ -1374,50 +1387,62 @@ jQuery(document).ready(function ($) {
     const backupId = $row.data("backup-id");
     const nonce = getBackupNonce();
     if (!backupId || !nonce) return;
-    if (!confirm("Delete this backup?")) return;
     const $btn = $(this);
-    $btn.prop("disabled", true);
-    $.post(menupilot.ajaxurl, {
-      action: "menupilot_delete_backup",
-      nonce: nonce,
-      backup_id: backupId,
-    })
-      .done(function (r) {
-        if (r.success) {
-          $row.remove();
-        } else {
-          alert(r.data && r.data.message ? r.data.message : "Failed to delete.");
-          $btn.prop("disabled", false);
-        }
-      })
-      .fail(function () {
-        alert("Failed to delete backup.");
-        $btn.prop("disabled", false);
-      });
+    showConfirmModal(
+      "Delete Backup",
+      "Delete this backup? This cannot be undone.",
+      "Delete",
+      function () {
+        $btn.prop("disabled", true);
+        $.post(menupilot.ajaxurl, {
+          action: "menupilot_delete_backup",
+          nonce: nonce,
+          backup_id: backupId,
+        })
+          .done(function (r) {
+            if (r.success) {
+              $row.remove();
+            } else {
+              alert(r.data && r.data.message ? r.data.message : "Failed to delete.");
+              $btn.prop("disabled", false);
+            }
+          })
+          .fail(function () {
+            alert("Failed to delete backup.");
+            $btn.prop("disabled", false);
+          });
+      }
+    );
   });
 
   $(document).on("click", "#menupilot-delete-all-backups", function () {
     const nonce = getBackupNonce();
     if (!nonce) return;
-    if (!confirm("Delete all backups? This cannot be undone.")) return;
     const $btn = $(this);
-    $btn.prop("disabled", true);
-    $.post(menupilot.ajaxurl, {
-      action: "menupilot_delete_all_backups",
-      nonce: nonce,
-    })
-      .done(function (r) {
-        if (r.success) {
-          location.reload();
-        } else {
-          alert(r.data && r.data.message ? r.data.message : "Failed to delete all.");
-          $btn.prop("disabled", false);
-        }
-      })
-      .fail(function () {
-        alert("Failed to delete backups.");
-        $btn.prop("disabled", false);
-      });
+    showConfirmModal(
+      "Delete All Backups",
+      "Delete all backups? This cannot be undone.",
+      "Delete All",
+      function () {
+        $btn.prop("disabled", true);
+        $.post(menupilot.ajaxurl, {
+          action: "menupilot_delete_all_backups",
+          nonce: nonce,
+        })
+          .done(function (r) {
+            if (r.success) {
+              location.reload();
+            } else {
+              alert(r.data && r.data.message ? r.data.message : "Failed to delete all.");
+              $btn.prop("disabled", false);
+            }
+          })
+          .fail(function () {
+            alert("Failed to delete backups.");
+            $btn.prop("disabled", false);
+          });
+      }
+    );
   });
 
   // Initialize functions based on data attributes or page context

@@ -30,6 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Testing infrastructure
 - Documentation
 
-[Unreleased]: https://mayankmajeji.com/menupilot/compare/v1.0.4...HEAD
-[1.0.4]: https://mayankmajeji.com/menupilot/compare/v1.0.0...v1.0.4
-[1.0.0]: https://mayankmajeji.com/menupilot/releases/tag/v1.0.0
+[Unreleased]: https://github.com/mayankmajeji/menupilot/compare/v1.0.4...HEAD
+[1.0.4]: https://github.com/mayankmajeji/menupilot/compare/v1.0.0...v1.0.4
+[1.0.0]: https://github.com/mayankmajeji/menupilot/releases/tag/v1.0.0
