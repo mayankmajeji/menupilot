@@ -1,3 +1,6 @@
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
 parameters:
 	level: 8
 	paths:
@@ -5,6 +8,5 @@ parameters:
 	excludePaths:
 		- tests/_support/_generated
 	ignoreErrors:
-		# WordPress core functions not in stubs — suppress both "not found" and "invoked with" variants
-		- '#Function (add_action|add_filter|remove_action|remove_filter|do_action|apply_filters|wp_enqueue_script|wp_enqueue_style|wp_register_script|wp_register_style|wp_localize_script|get_option|update_option|delete_option|register_activation_hook|register_deactivation_hook|plugin_basename|plugins_url|plugin_dir_path|plugin_dir_url|check_ajax_referer|wp_verify_nonce|wp_nonce_field|wp_create_nonce|current_user_can|wp_die|wp_send_json_success|wp_send_json_error|wp_json_encode|esc_html__|esc_html|esc_url|esc_attr|esc_js|sanitize_text_field|get_terms|get_posts|get_userdata|get_users|dbDelta|add_submenu_page|add_menu_page|wp_get_nav_menus|wp_get_nav_menu_object|wp_get_nav_menu_items|wp_update_nav_menu_object|wp_update_nav_menu_item|wp_delete_nav_menu|wp_set_object_terms) (not found|invoked with)\.?#'
-		- '#Call to an undefined method#'
+		# Plugin-defined constants are declared in menupilot.php, outside the analysed paths.
+		- '#Constant MENUPILOT_[A-Z_]+ not found\.#'
