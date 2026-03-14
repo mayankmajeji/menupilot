@@ -1,13 +1,13 @@
 <?php
-declare(strict_types=1);
-
-namespace MenuPilot\Admin;
-
 /**
  * Help Page Class
  *
  * @package MenuPilot
  */
+
+declare(strict_types=1);
+
+namespace MenuPilot\Admin;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -26,26 +26,26 @@ class Help_Page {
 	 * @return void
 	 */
 	public function render(): void {
-		if ( ! current_user_can('manage_options') ) {
-			wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'menupilot'));
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'menupilot' ) );
 		}
 
-		// Gather environment info
+		// Gather environment info.
 		global $wp_version;
 		$php_version = PHP_VERSION;
-		$plugin_ver = defined('MENUPILOT_VERSION') ? MENUPILOT_VERSION : '1.0.0';
+		$plugin_ver  = defined( 'MENUPILOT_VERSION' ) ? MENUPILOT_VERSION : '1.0.0';
 
-		// Define tabs
+		// Define tabs.
 		$help_tabs = array(
-			'support' => __('Support', 'menupilot'),
-			'faqs'    => __('FAQs', 'menupilot'),
-			'system'  => __('System Info', 'menupilot'),
+			'support' => __( 'Support', 'menupilot' ),
+			'faqs'    => __( 'FAQs', 'menupilot' ),
+			'system'  => __( 'System Info', 'menupilot' ),
 		);
 
-		// Get current tab
+		// Get current tab.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation parameter, not a form submission
-		$current_help_tab = isset($_GET['help_tab']) ? sanitize_text_field(wp_unslash((string) $_GET['help_tab'])) : 'support';
-		if ( ! array_key_exists($current_help_tab, $help_tabs) ) {
+		$current_help_tab = isset( $_GET['help_tab'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['help_tab'] ) ) : 'support';
+		if ( ! array_key_exists( $current_help_tab, $help_tabs ) ) {
 			$current_help_tab = 'support';
 		}
 
@@ -54,8 +54,8 @@ class Help_Page {
 			<?php require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/header.php'; ?>
 			<div class="menupilot-body">
 				<?php
-				$mp_title = __('Help', 'menupilot');
-				$mp_desc  = __('Support resources, FAQs, and system information.', 'menupilot');
+				$mp_title = __( 'Help', 'menupilot' );
+				$mp_desc  = __( 'Support resources, FAQs, and system information.', 'menupilot' );
 				require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/body-header.php';
 				?>
 
@@ -64,23 +64,23 @@ class Help_Page {
 						<?php foreach ( $help_tabs as $tab_id => $tab_label ) : ?>
 							<?php
 							$icon_partial = 'support-icon.php';
-							if ( $tab_id === 'faqs' ) {
+							if ( 'faqs' === $tab_id ) {
 								$icon_partial = 'faq-icon.php';
-							} elseif ( $tab_id === 'system' ) {
+							} elseif ( 'system' === $tab_id ) {
 								$icon_partial = 'info-icon.php';
 							}
 							$icon_path = MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/' . $icon_partial;
 							?>
 							<a class="mp-vtab <?php echo $current_help_tab === $tab_id ? 'is-active' : ''; ?>"
-								href="<?php echo esc_url(admin_url('admin.php?page=menupilot-help&help_tab=' . urlencode($tab_id))); ?>">
+								href="<?php echo esc_url( admin_url( 'admin.php?page=menupilot-help&help_tab=' . urlencode( $tab_id ) ) ); ?>">
 								<span class="mp-vtab-icon">
 									<?php
-									if ( file_exists($icon_path) ) {
+									if ( file_exists( $icon_path ) ) {
 										require $icon_path;
 									}
 									?>
 								</span>
-								<span class="mp-vtab-text"><?php echo esc_html($tab_label); ?></span>
+								<span class="mp-vtab-text"><?php echo esc_html( $tab_label ); ?></span>
 							</a>
 						<?php endforeach; ?>
 					</aside>
@@ -101,7 +101,7 @@ class Help_Page {
 						<div class="mp-content-inner">
 							<div class="mp-section">
 								<div class="mp-sub-section">
-									<?php if ( $current_help_tab === 'support' ) : ?>
+									<?php if ( 'support' === $current_help_tab ) : ?>
 										<!-- Support Tab Content -->
 										<div class="mp-field-group">
 											<div class="mp-field">
@@ -112,12 +112,12 @@ class Help_Page {
 																<div class="mp-support-icon">
 																	<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/wordpress-support-icon.php'; ?>
 																</div>
-																<h3><?php esc_html_e('Support', 'menupilot'); ?></h3>
-																<p><?php esc_html_e('MenuPilot is available on WordPress.org where you can download the plugin, submit a bug ticket, and follow along with updates.', 'menupilot'); ?></p>
+																<h3><?php esc_html_e( 'Support', 'menupilot' ); ?></h3>
+																<p><?php esc_html_e( 'MenuPilot is available on WordPress.org where you can download the plugin, submit a bug ticket, and follow along with updates.', 'menupilot' ); ?></p>
 															</div>
 															<div class="turnstilewp-buttons">
 																<a class="button button-primary" href="https://wordpress.org/plugins/menupilot/" target="_blank" rel="noopener">
-																	<?php esc_html_e('Visit WordPress.org', 'menupilot'); ?>
+																	<?php esc_html_e( 'Visit WordPress.org', 'menupilot' ); ?>
 																</a>
 															</div>
 														</div>
@@ -126,12 +126,12 @@ class Help_Page {
 																<div class="mp-support-icon">
 																	<?php require MENUPILOT_PLUGIN_DIR . 'includes/admin/templates/icons/github-icon.php'; ?>
 																</div>
-																<h3><?php esc_html_e('GitHub', 'menupilot'); ?></h3>
-																<p><?php esc_html_e('MenuPilot is also available on GitHub where you can browse the code, open a bug report, and follow along with development.', 'menupilot'); ?></p>
+																<h3><?php esc_html_e( 'GitHub', 'menupilot' ); ?></h3>
+																<p><?php esc_html_e( 'MenuPilot is also available on GitHub where you can browse the code, open a bug report, and follow along with development.', 'menupilot' ); ?></p>
 															</div>
 															<div class="turnstilewp-buttons">
 																<a class="button button-primary" href="https://github.com/mayankmajeji/menupilot" target="_blank" rel="noopener">
-																	<?php esc_html_e('Visit GitHub', 'menupilot'); ?>
+																	<?php esc_html_e( 'Visit GitHub', 'menupilot' ); ?>
 																</a>
 															</div>
 														</div>
@@ -140,11 +140,11 @@ class Help_Page {
 											</div>
 										</div>
 
-									<?php elseif ( $current_help_tab === 'faqs' ) : ?>
+									<?php elseif ( 'faqs' === $current_help_tab ) : ?>
 										<!-- FAQs Tab Content -->
 										<div class="mp-field-group">
 											<div class="mp-group-title">
-												<h2><?php esc_html_e('Frequently Asked Questions', 'menupilot'); ?></h2>
+												<h2><?php esc_html_e( 'Frequently Asked Questions', 'menupilot' ); ?></h2>
 											</div>
 											<div class="turnstilewp-faqs-wrapper">
 												<div class="inside">
@@ -153,45 +153,51 @@ class Help_Page {
 											</div>
 										</div>
 
-									<?php elseif ( $current_help_tab === 'system' ) : ?>
+									<?php elseif ( 'system' === $current_help_tab ) : ?>
 										<!-- System Info Tab Content -->
 										<div class="mp-field-group">
 											<div class="mp-group-title">
-												<h2><?php esc_html_e('System Info', 'menupilot'); ?></h2>
+												<h2><?php esc_html_e( 'System Info', 'menupilot' ); ?></h2>
 											</div>
 											<div class="mp-field">
 												<div class="inside">
 													<div class="twp-system-info">
 														<ul>
 															<li>
-																<span class="twp-si-label"><?php esc_html_e('Plugin Version', 'menupilot'); ?></span>
-																<span class="twp-si-value"><?php
-																	// translators: %s: Plugin version number
-																	echo esc_html(sprintf(__('v%s', 'menupilot'), $plugin_ver));
-																?></span>
+																<span class="twp-si-label"><?php esc_html_e( 'Plugin Version', 'menupilot' ); ?></span>
+																<span class="twp-si-value">
+																<?php
+																	// translators: %s: Plugin version number.
+																	echo esc_html( sprintf( __( 'v%s', 'menupilot' ), $plugin_ver ) );
+																?>
+																</span>
 															</li>
 															<li>
-																<span class="twp-si-label"><?php esc_html_e('WordPress', 'menupilot'); ?></span>
-																<span class="twp-si-value"><?php
-																	// translators: %s: WordPress version number
-																	echo esc_html(sprintf(__('v%s', 'menupilot'), $wp_version));
-																?></span>
+																<span class="twp-si-label"><?php esc_html_e( 'WordPress', 'menupilot' ); ?></span>
+																<span class="twp-si-value">
+																<?php
+																	// translators: %s: WordPress version number.
+																	echo esc_html( sprintf( __( 'v%s', 'menupilot' ), $wp_version ) );
+																?>
+																</span>
 															</li>
 															<li>
-																<span class="twp-si-label"><?php esc_html_e('PHP', 'menupilot'); ?></span>
-																<span class="twp-si-value"><?php
-																	// translators: %s: PHP version number
-																	echo esc_html(sprintf(__('v%s', 'menupilot'), $php_version));
-																?></span>
+																<span class="twp-si-label"><?php esc_html_e( 'PHP', 'menupilot' ); ?></span>
+																<span class="twp-si-value">
+																<?php
+																	// translators: %s: PHP version number.
+																	echo esc_html( sprintf( __( 'v%s', 'menupilot' ), $php_version ) );
+																?>
+																</span>
 															</li>
 															<li>
-																<span class="twp-si-label"><?php esc_html_e('Memory Limit', 'menupilot'); ?></span>
-																<span class="twp-si-value"><?php echo esc_html((string) ini_get('memory_limit')); ?></span>
+																<span class="twp-si-label"><?php esc_html_e( 'Memory Limit', 'menupilot' ); ?></span>
+																<span class="twp-si-value"><?php echo esc_html( (string) ini_get( 'memory_limit' ) ); ?></span>
 															</li>
 														</ul>
 														<div class="turnstilewp-buttons">
-															<button type="button" class="button button-primary" id="mp-copy-system-info"><?php esc_html_e('Copy System Info', 'menupilot'); ?></button>
-															<span id="mp-copy-system-info-msg" style="margin-left:8px;color:#46b450;display:none;"><?php esc_html_e('Copied!', 'menupilot'); ?></span>
+															<button type="button" class="button button-primary" id="mp-copy-system-info"><?php esc_html_e( 'Copy System Info', 'menupilot' ); ?></button>
+															<span id="mp-copy-system-info-msg" style="margin-left:8px;color:#46b450;display:none;"><?php esc_html_e( 'Copied!', 'menupilot' ); ?></span>
 														</div>
 													</div>
 												</div>

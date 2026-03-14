@@ -14,11 +14,13 @@
 	<!-- Exclude patterns -->
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
-	<exclude-pattern>*/tests/_output/*</exclude-pattern>
-	<exclude-pattern>*/tests/_support/_generated/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
 	<exclude-pattern>*/.wordpress-org/*</exclude-pattern>
 	<exclude-pattern>*/i18n/*</exclude-pattern>
 	<exclude-pattern>*.asset.php</exclude-pattern>
+	<!-- JS and CSS are handled by ESLint/Stylelint -->
+	<exclude-pattern>*.js</exclude-pattern>
+	<exclude-pattern>*.css</exclude-pattern>
 
 	<!-- Use WordPress Coding Standards -->
 	<rule ref="WordPress">
@@ -26,12 +28,6 @@
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
 	</rule>
-
-	<!-- Use WordPress-Extra -->
-	<rule ref="WordPress-Extra"/>
-
-	<!-- Use WordPress-Docs -->
-	<rule ref="WordPress-Docs"/>
 
 	<!-- Check for PHP cross-version compatibility -->
 	<config name="testVersion" value="7.4-"/>

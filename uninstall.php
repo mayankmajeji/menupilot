@@ -5,8 +5,8 @@
  * @package MenuPilot
  */
 
-// If uninstall not called from WordPress, exit
-if ( ! defined('WP_UNINSTALL_PLUGIN') ) {
+// If uninstall not called from WordPress, exit.
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
@@ -16,26 +16,26 @@ if ( ! defined('WP_UNINSTALL_PLUGIN') ) {
 function menupilot_uninstall() {
 	global $wpdb;
 
-	// Drop custom tables
+	// Drop custom tables.
 	$history_table = $wpdb->prefix . 'menupilot_history';
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Uninstall: $table from $wpdb->prefix + constant; no API exists.
-	$wpdb->query("DROP TABLE IF EXISTS {$history_table}");
+	$wpdb->query( "DROP TABLE IF EXISTS {$history_table}" );
 
 	$backups_table = $wpdb->prefix . 'menupilot_backups';
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Uninstall: $table from $wpdb->prefix + constant; no API exists.
-	$wpdb->query("DROP TABLE IF EXISTS {$backups_table}");
+	$wpdb->query( "DROP TABLE IF EXISTS {$backups_table}" );
 
-	// Delete plugin options
-	delete_option('menupilot_settings');
+	// Delete plugin options.
+	delete_option( 'menupilot_settings' );
 	// Legacy: clean up old backups option if migration hadn't run yet.
-	delete_option('menupilot_backups');
-	
-	// Delete any transients
-	delete_transient('menupilot_cache');
-	
-	// Delete any custom user meta
-	// delete_metadata('user', 0, 'menupilot_user_meta', '', true);
-	
+	delete_option( 'menupilot_backups' );
+
+	// Delete any transients.
+	delete_transient( 'menupilot_cache' );
+
+	// Delete any custom user meta.
+	// delete_metadata('user', 0, 'menupilot_user_meta', '', true).
+
 	/**
 	 * Fires during plugin uninstallation
 	 *
@@ -43,7 +43,7 @@ function menupilot_uninstall() {
 	 *
 	 * @since 1.0.0
 	 */
-	do_action('menupilot_uninstall');
+	do_action( 'menupilot_uninstall' );
 }
 
 menupilot_uninstall();

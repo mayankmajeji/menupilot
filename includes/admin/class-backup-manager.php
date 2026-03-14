@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 namespace MenuPilot\Admin;
 
-if ( ! defined('ABSPATH') ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
@@ -42,7 +42,7 @@ class Backup_Manager {
 	 * @return string
 	 */
 	public static function get_table(): string {
-		if ( self::$table === null ) {
+		if ( null === self::$table ) {
 			global $wpdb;
 			self::$table = $wpdb->prefix . 'menupilot_backups';
 		}
@@ -64,14 +64,14 @@ class Backup_Manager {
 		global $wpdb;
 		$table = self::get_table();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table ) {
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
 			self::maybe_migrate_from_options();
 			return;
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$charset = $wpdb->get_charset_collate();
-		$sql = "CREATE TABLE $table (
+		$sql     = "CREATE TABLE $table (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			backup_id varchar(50) NOT NULL,
 			menu_id bigint(20) unsigned NOT NULL,
@@ -84,7 +84,7 @@ class Backup_Manager {
 			KEY menu_id (menu_id),
 			KEY created_at (created_at)
 		) $charset;";
-		dbDelta($sql);
+		dbDelta( $sql );
 
 		self::maybe_migrate_from_options();
 	}
@@ -98,8 +98,8 @@ class Backup_Manager {
 	 * @return void
 	 */
 	private static function maybe_migrate_from_options(): void {
-		$old = get_option('menupilot_backups');
-		if ( ! is_array($old) || empty($old) ) {
+		$old = get_option( 'menupilot_backups' );
+		if ( ! is_array( $old ) || empty( $old ) ) {
 			return;
 		}
 
@@ -107,14 +107,14 @@ class Backup_Manager {
 		$table = self::get_table();
 
 		foreach ( $old as $menu_id => $backups ) {
-			if ( ! is_array($backups) ) {
+			if ( ! is_array( $backups ) ) {
 				continue;
 			}
 			foreach ( $backups as $b ) {
-				if ( ! isset($b['id']) ) {
+				if ( ! isset( $b['id'] ) ) {
 					continue;
 				}
-				$created_at = isset($b['created_at']) ? gmdate('Y-m-d H:i:s', strtotime($b['created_at'])) : current_time('mysql', true);
+				$created_at = isset( $b['created_at'] ) ? gmdate( 'Y-m-d H:i:s', strtotime( $b['created_at'] ) ) : current_time( 'mysql', true );
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom table; no WordPress API.
 				$wpdb->insert(
 					$table,
@@ -123,7 +123,7 @@ class Backup_Manager {
 						'menu_id'    => (int) $menu_id,
 						'menu_name'  => $b['menu_name'] ?? '',
 						'user_id'    => $b['user_id'] ?? 0,
-						'data'       => wp_json_encode($b['data'] ?? array()),
+						'data'       => wp_json_encode( $b['data'] ?? array() ),
 						'created_at' => $created_at,
 					),
 					array( '%s', '%d', '%s', '%d', '%s', '%s' )
@@ -131,7 +131,7 @@ class Backup_Manager {
 			}
 		}
 
-		delete_option('menupilot_backups');
+		delete_option( 'menupilot_backups' );
 	}
 
 	/**
@@ -141,27 +141,27 @@ class Backup_Manager {
 	 * @return array{id: string, created_at: string}|false Backup info or false on failure.
 	 */
 	public static function create_backup( int $menu_id ) {
-		$menu = wp_get_nav_menu_object($menu_id);
+		$menu = wp_get_nav_menu_object( $menu_id );
 		if ( ! $menu ) {
 			return false;
 		}
 
-		$exporter = new Menu_Exporter();
-		$export_data = $exporter->export($menu_id);
+		$exporter    = new Menu_Exporter();
+		$export_data = $exporter->export( $menu_id );
 		if ( ! $export_data ) {
 			return false;
 		}
 
 		self::maybe_create_table();
 
-		$backup_id = uniqid('backup_', true);
-		$created_at = current_time('c');
-		$created_at_mysql = current_time('mysql', true);
+		$backup_id        = uniqid( 'backup_', true );
+		$created_at       = current_time( 'c' );
+		$created_at_mysql = current_time( 'mysql', true );
 
 		$user_id = get_current_user_id();
 		if ( $user_id <= 0 ) {
 			$current_user = wp_get_current_user();
-			$user_id = $current_user && $current_user->ID ? (int) $current_user->ID : 0;
+			$user_id      = $current_user && $current_user->ID ? (int) $current_user->ID : 0;
 		}
 
 		global $wpdb;
@@ -175,22 +175,22 @@ class Backup_Manager {
 				'menu_id'    => $menu_id,
 				'menu_name'  => $menu->name,
 				'user_id'    => $user_id,
-				'data'       => wp_json_encode($export_data),
+				'data'       => wp_json_encode( $export_data ),
 				'created_at' => $created_at_mysql,
 			),
 			array( '%s', '%d', '%s', '%d', '%s', '%s' )
 		);
 
-		if ( $result === false ) {
+		if ( false === $result ) {
 			return false;
 		}
 
 		// Enforce backup limit per menu.
 		$settings = new Settings();
-		$limit = (int) $settings->get_option('backup_limit', 5);
-		$limit = max(1, min(20, $limit));
+		$limit    = (int) $settings->get_option( 'backup_limit', 5 );
+		$limit    = max( 1, min( 20, $limit ) );
 
-		self::enforce_backup_limit($menu_id, $limit);
+		self::enforce_backup_limit( $menu_id, $limit );
 
 		return array(
 			'id'         => $backup_id,
@@ -212,7 +212,7 @@ class Backup_Manager {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from get_table() uses $wpdb->prefix (trusted).
 		$count = (int) $wpdb->get_var(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $table from $wpdb->prefix (trusted); table names cannot be parameterized.
-			$wpdb->prepare("SELECT COUNT(*) FROM $table WHERE menu_id = %d", $menu_id)
+			$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE menu_id = %d", $menu_id )
 		);
 
 		if ( $count <= $limit ) {
@@ -241,18 +241,18 @@ class Backup_Manager {
 	 * @return bool True on success.
 	 */
 	public static function restore( int $menu_id, string $backup_id ): bool {
-		$backup = self::get_backup($menu_id, $backup_id);
+		$backup = self::get_backup( $menu_id, $backup_id );
 		if ( ! $backup ) {
 			return false;
 		}
 
 		$data = $backup['data'];
-		if ( ! isset($data['menu']) || ! is_array($data['menu']) ) {
+		if ( ! isset( $data['menu'] ) || ! is_array( $data['menu'] ) ) {
 			return false;
 		}
 
 		$importer = new Menu_Importer();
-		return $importer->restore($menu_id, $data);
+		return $importer->restore( $menu_id, $data );
 	}
 
 	/**
@@ -283,7 +283,7 @@ class Backup_Manager {
 			return null;
 		}
 
-		return self::format_backup_row($row);
+		return self::format_backup_row( $row );
 	}
 
 	/**
@@ -317,21 +317,27 @@ class Backup_Manager {
 			);
 		}
 
-		if ( ! is_array($rows) ) {
+		if ( ! is_array( $rows ) ) {
 			return array();
 		}
 
 		// Batch-fetch user data to avoid N+1 queries.
-		$user_ids = array_values( array_unique( array_filter(
-			array_column( $rows, 'user_id' ),
-			fn( $id ) => (int) $id > 0
-		) ) );
+		$user_ids = array_values(
+			array_unique(
+				array_filter(
+					array_column( $rows, 'user_id' ),
+					fn( $id ) => (int) $id > 0
+				)
+			)
+		);
 		$user_map = array();
 		if ( ! empty( $user_ids ) ) {
-			$users = get_users( array(
-				'include' => $user_ids,
-				'fields'  => array( 'ID', 'user_login' ),
-			) );
+			$users = get_users(
+				array(
+					'include' => $user_ids,
+					'fields'  => array( 'ID', 'user_login' ),
+				)
+			);
 			foreach ( $users as $u ) {
 				$user_map[ (int) $u->ID ] = $u->user_login;
 			}
@@ -378,7 +384,7 @@ class Backup_Manager {
 		}
 
 		return array(
-			'backup'  => self::format_backup_row($row),
+			'backup'  => self::format_backup_row( $row ),
 			'menu_id' => (int) $row['menu_id'],
 		);
 	}
@@ -402,7 +408,7 @@ class Backup_Manager {
 			array( '%s' )
 		);
 
-		return $deleted !== false && $deleted > 0;
+		return false !== $deleted && $deleted > 0;
 	}
 
 	/**
@@ -417,7 +423,7 @@ class Backup_Manager {
 		$table = self::get_table();
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom table; $table from $wpdb->prefix; TRUNCATE has no placeholders.
-		$wpdb->query("TRUNCATE TABLE {$table}");
+		$wpdb->query( "TRUNCATE TABLE {$table}" );
 		return true;
 	}
 
@@ -445,10 +451,13 @@ class Backup_Manager {
 		}
 
 		$settings = new Settings();
-		$limit = (int) $settings->get_option('backup_limit', 5);
-		$limit = max(1, min(20, $limit));
+		$limit    = (int) $settings->get_option( 'backup_limit', 5 );
+		$limit    = max( 1, min( 20, $limit ) );
 
-		return array( 'count' => $count, 'limit' => $limit );
+		return array(
+			'count' => $count,
+			'limit' => $limit,
+		);
 	}
 
 	/**
@@ -459,8 +468,8 @@ class Backup_Manager {
 	 * @return array<string,mixed>|null Backup export data or null.
 	 */
 	public static function export_backup( int $menu_id, string $backup_id ): ?array {
-		$backup = self::get_backup($menu_id, $backup_id);
-		if ( ! $backup || ! isset($backup['data']) ) {
+		$backup = self::get_backup( $menu_id, $backup_id );
+		if ( ! $backup || ! isset( $backup['data'] ) ) {
 			return null;
 		}
 		return $backup['data'];
@@ -473,8 +482,8 @@ class Backup_Manager {
 	 * @return array<string,mixed> Formatted backup.
 	 */
 	private static function format_backup_row( array $row ): array {
-		$data = isset($row['data']) ? json_decode($row['data'], true) : array();
-		if ( ! is_array($data) ) {
+		$data = isset( $row['data'] ) ? json_decode( $row['data'], true ) : array();
+		if ( ! is_array( $data ) ) {
 			$data = array();
 		}
 
@@ -495,7 +504,7 @@ class Backup_Manager {
 	 */
 	public static function register_meta_box(): void {
 		// Output in main content area (after Menu Settings), not in sidebar.
-		add_action('admin_footer-nav-menus.php', array( self::class, 'render_backup_section' ));
+		add_action( 'admin_footer-nav-menus.php', array( self::class, 'render_backup_section' ) );
 	}
 
 	/**
@@ -506,12 +515,12 @@ class Backup_Manager {
 	 */
 	public static function render_backup_section(): void {
 		global $pagenow;
-		if ( $pagenow !== 'nav-menus.php' ) {
+		if ( 'nav-menus.php' !== $pagenow ) {
 			return;
 		}
 		// Only on Edit Menus tab, not Manage Locations.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only
-		if ( isset($_GET['action']) && $_GET['action'] === 'locations' ) {
+		if ( isset( $_GET['action'] ) && 'locations' === $_GET['action'] ) {
 			return;
 		}
 		self::render_backup_content();
@@ -524,25 +533,25 @@ class Backup_Manager {
 	 */
 	private static function render_backup_content(): void {
 		global $nav_menu_selected_id;
-		$menu_id = isset($nav_menu_selected_id) && is_nav_menu($nav_menu_selected_id)
+		$menu_id      = isset( $nav_menu_selected_id ) && is_nav_menu( $nav_menu_selected_id )
 			? (int) $nav_menu_selected_id
 			: 0;
-		$backups = self::list_backups($menu_id);
-		$stats = self::get_backup_stats($menu_id);
-		$nonce = wp_create_nonce('menupilot_admin');
-		$settings_url = admin_url('admin.php?page=menupilot-settings&settings_tab=backup');
+		$backups      = self::list_backups( $menu_id );
+		$stats        = self::get_backup_stats( $menu_id );
+		$nonce        = wp_create_nonce( 'menupilot_admin' );
+		$settings_url = admin_url( 'admin.php?page=menupilot-settings&settings_tab=backup' );
 		?>
 		<div id="menupilot-backup-section" class="menupilot-backup-section" style="display:none;">
 			<div class="postbox">
-				<h2 class="hndle"><?php esc_html_e('Menu backup & restore', 'menupilot'); ?></h2>
+				<h2 class="hndle"><?php esc_html_e( 'Menu backup & restore', 'menupilot' ); ?></h2>
 				<div class="inside">
-		<div id="menupilot-backup-ui" data-menu-id="<?php echo esc_attr((string) $menu_id); ?>" data-nonce="<?php echo esc_attr($nonce); ?>">
+		<div id="menupilot-backup-ui" data-menu-id="<?php echo esc_attr( (string) $menu_id ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>">
 			<div class="menupilot-backup-tabs">
 				<button type="button" class="menupilot-backup-tab is-active" data-tab="backup-restore">
-					<?php esc_html_e('Backup & Restore', 'menupilot'); ?>
+					<?php esc_html_e( 'Backup & Restore', 'menupilot' ); ?>
 				</button>
 				<button type="button" class="menupilot-backup-tab" data-tab="import">
-					<?php esc_html_e('Import', 'menupilot'); ?>
+					<?php esc_html_e( 'Import', 'menupilot' ); ?>
 				</button>
 			</div>
 			<div class="menupilot-backup-tab-content" id="menupilot-backup-restore-panel">
@@ -551,18 +560,18 @@ class Backup_Manager {
 					if ( $menu_id > 0 ) {
 						printf(
 							/* translators: 1: backup count for this menu, 2: per-menu limit, 3: Settings link */
-							esc_html__('This menu has %1$s of %2$s allowed backups. Limit can be changed in %3$s.', 'menupilot'),
+							esc_html__( 'This menu has %1$s of %2$s allowed backups. Limit can be changed in %3$s.', 'menupilot' ),
 							'<strong>' . (int) $stats['count'] . '</strong>',
 							'<strong>' . (int) $stats['limit'] . '</strong>',
-							'<a href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'menupilot') . '</a>'
+							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'menupilot' ) . '</a>'
 						);
 					} else {
 						printf(
 							/* translators: 1: total backup count across all menus, 2: per-menu limit, 3: Settings link */
-							esc_html__('%1$s total backups across all menus (per-menu limit: %2$s). Manage in %3$s.', 'menupilot'),
+							esc_html__( '%1$s total backups across all menus (per-menu limit: %2$s). Manage in %3$s.', 'menupilot' ),
 							'<strong>' . (int) $stats['count'] . '</strong>',
 							'<strong>' . (int) $stats['limit'] . '</strong>',
-							'<a href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'menupilot') . '</a>'
+							'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'menupilot' ) . '</a>'
 						);
 					}
 					?>
@@ -570,92 +579,92 @@ class Backup_Manager {
 				<?php if ( $menu_id > 0 ) : ?>
 					<p>
 						<button type="button" class="button button-primary" id="menupilot-create-backup">
-							<?php esc_html_e('Create Backup', 'menupilot'); ?>
+							<?php esc_html_e( 'Create Backup', 'menupilot' ); ?>
 						</button>
 					</p>
 				<?php else : ?>
-					<p class="description"><?php esc_html_e('Select a menu above to create a backup.', 'menupilot'); ?></p>
+					<p class="description"><?php esc_html_e( 'Select a menu above to create a backup.', 'menupilot' ); ?></p>
 				<?php endif; ?>
-				<?php if ( ! empty($backups) ) : ?>
+				<?php if ( ! empty( $backups ) ) : ?>
 					<table class="widefat striped menupilot-backup-table">
 						<thead>
 							<tr>
-								<th><?php esc_html_e('Menu Name', 'menupilot'); ?></th>
-								<th><?php esc_html_e('Date', 'menupilot'); ?></th>
-								<th><?php esc_html_e('User', 'menupilot'); ?></th>
-								<th><?php esc_html_e('Actions', 'menupilot'); ?></th>
+								<th><?php esc_html_e( 'Menu Name', 'menupilot' ); ?></th>
+								<th><?php esc_html_e( 'Date', 'menupilot' ); ?></th>
+								<th><?php esc_html_e( 'User', 'menupilot' ); ?></th>
+								<th><?php esc_html_e( 'Actions', 'menupilot' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ( $backups as $b ) : ?>
 								<?php
-								$edit_url = admin_url('nav-menus.php?action=edit&menu=' . (int) $b['menu_id']);
+								$edit_url = admin_url( 'nav-menus.php?action=edit&menu=' . (int) $b['menu_id'] );
 								?>
-								<tr data-backup-id="<?php echo esc_attr($b['id']); ?>" data-menu-id="<?php echo esc_attr((string) $b['menu_id']); ?>">
+								<tr data-backup-id="<?php echo esc_attr( $b['id'] ); ?>" data-menu-id="<?php echo esc_attr( (string) $b['menu_id'] ); ?>">
 									<td>
-										<a href="<?php echo esc_url($edit_url); ?>"><?php echo esc_html($b['menu_name']); ?></a>
+										<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $b['menu_name'] ); ?></a>
 									</td>
-									<td><?php echo esc_html(gmdate('M j, Y g:i:s', strtotime($b['created_at']))); ?></td>
+									<td><?php echo esc_html( gmdate( 'M j, Y g:i:s', strtotime( $b['created_at'] ) ) ); ?></td>
 									<td>
 										<?php
-										$user_display = ! empty($b['user_login']) ? esc_html($b['user_login']) : esc_html__('—', 'menupilot');
-										if ( ! empty($b['user_id']) && ! empty($b['user_login']) ) :
+										$user_display = ! empty( $b['user_login'] ) ? esc_html( $b['user_login'] ) : esc_html__( '—', 'menupilot' );
+										if ( ! empty( $b['user_id'] ) && ! empty( $b['user_login'] ) ) :
 											?>
-											<a href="<?php echo esc_url(admin_url('user-edit.php?user_id=' . (int) $b['user_id'])); ?>"><?php echo esc_html($b['user_login']); ?></a>
+											<a href="<?php echo esc_url( admin_url( 'user-edit.php?user_id=' . (int) $b['user_id'] ) ); ?>"><?php echo esc_html( $b['user_login'] ); ?></a>
 										<?php else : ?>
 											<span aria-hidden="true"><?php echo $user_display; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above via esc_html() ?></span>
 										<?php endif; ?>
 									</td>
 									<td class="menupilot-backup-actions">
-										<button type="button" class="button button-small menupilot-restore-backup" title="<?php esc_attr_e('Restore', 'menupilot'); ?>"><?php esc_html_e('Restore', 'menupilot'); ?></button>
-										<button type="button" class="button button-small menupilot-export-backup" title="<?php esc_attr_e('Export', 'menupilot'); ?>"><?php esc_html_e('Export', 'menupilot'); ?></button>
-										<button type="button" class="button button-small button-link-delete menupilot-delete-backup" title="<?php esc_attr_e('Delete', 'menupilot'); ?>"><?php esc_html_e('Delete', 'menupilot'); ?></button>
+										<button type="button" class="button button-small menupilot-restore-backup" title="<?php esc_attr_e( 'Restore', 'menupilot' ); ?>"><?php esc_html_e( 'Restore', 'menupilot' ); ?></button>
+										<button type="button" class="button button-small menupilot-export-backup" title="<?php esc_attr_e( 'Export', 'menupilot' ); ?>"><?php esc_html_e( 'Export', 'menupilot' ); ?></button>
+										<button type="button" class="button button-small button-link-delete menupilot-delete-backup" title="<?php esc_attr_e( 'Delete', 'menupilot' ); ?>"><?php esc_html_e( 'Delete', 'menupilot' ); ?></button>
 									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
 				<?php else : ?>
-					<p class="description"><?php esc_html_e('No backups yet.', 'menupilot'); ?></p>
+					<p class="description"><?php esc_html_e( 'No backups yet.', 'menupilot' ); ?></p>
 				<?php endif; ?>
 			</div>
 			<div class="menupilot-backup-tab-content" id="menupilot-backup-import-panel" style="display:none;">
 				<?php if ( $menu_id > 0 ) : ?>
-					<p class="description"><?php esc_html_e('Import a JSON file to replace the current menu. You can preview and map items before importing.', 'menupilot'); ?></p>
+					<p class="description"><?php esc_html_e( 'Import a JSON file to replace the current menu. You can preview and map items before importing.', 'menupilot' ); ?></p>
 					<form id="mp-backup-import-form" class="mp-backup-import-form" method="post" enctype="multipart/form-data">
 						<div class="mp-upload-area mp-upload-area--compact">
 							<input type="file" name="menu_file" id="mp-backup-menu-file" accept=".json,application/json" />
 							<label for="mp-backup-menu-file" class="mp-upload-label">
 								<span class="dashicons dashicons-upload"></span>
 								<span class="mp-upload-text">
-									<strong><?php esc_html_e('Choose a JSON file', 'menupilot'); ?></strong>
+									<strong><?php esc_html_e( 'Choose a JSON file', 'menupilot' ); ?></strong>
 									<br>
-									<span class="description"><?php esc_html_e('or drag and drop here', 'menupilot'); ?></span>
+									<span class="description"><?php esc_html_e( 'or drag and drop here', 'menupilot' ); ?></span>
 								</span>
 							</label>
 							<div id="mp-backup-file-info" class="mp-file-info" style="display:none;margin-top:8px;">
-								<strong><?php esc_html_e('Selected:', 'menupilot'); ?></strong>
+								<strong><?php esc_html_e( 'Selected:', 'menupilot' ); ?></strong>
 								<span id="mp-backup-file-name"></span>
 							</div>
 						</div>
 						<p>
 							<button type="submit" class="button button-primary" id="mp-backup-import-btn" disabled>
-								<?php esc_html_e('Upload & Preview', 'menupilot'); ?>
+								<?php esc_html_e( 'Upload & Preview', 'menupilot' ); ?>
 							</button>
 							<span class="spinner" id="mp-backup-import-spinner" style="float:none;margin:0 8px;"></span>
 						</p>
 					</form>
 					<div id="mp-backup-import-result" style="margin-top:12px;"></div>
 				<?php else : ?>
-					<p class="description"><?php esc_html_e('Select a menu above to import into.', 'menupilot'); ?></p>
+					<p class="description"><?php esc_html_e( 'Select a menu above to import into.', 'menupilot' ); ?></p>
 				<?php endif; ?>
 			</div>
 				</div>
 				</div>
-			<?php if ( ! empty($backups) ) : ?>
+			<?php if ( ! empty( $backups ) ) : ?>
 				<p class="menupilot-backup-footer">
 					<button type="button" class="button button-link-delete" id="menupilot-delete-all-backups">
-						<?php esc_html_e('Delete All', 'menupilot'); ?>
+						<?php esc_html_e( 'Delete All', 'menupilot' ); ?>
 					</button>
 				</p>
 			<?php endif; ?>
@@ -695,19 +704,19 @@ class Backup_Manager {
 	public static function maybe_backup_before_nav_menu_save(): void {
 		// Only on nav-menus.php POST with action=update. Nonce is verified by WordPress core when processing the nav menu form.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Early hook; WordPress verifies update-nav_menu nonce later in the save flow.
-		if ( ! isset($_POST['action']) || sanitize_text_field(wp_unslash((string) $_POST['action'])) !== 'update' ) {
+		if ( ! isset( $_POST['action'] ) || sanitize_text_field( wp_unslash( (string) $_POST['action'] ) ) !== 'update' ) {
 			return;
 		}
-		if ( ! isset($_POST['menu']) ) {
+		if ( ! isset( $_POST['menu'] ) ) {
 			return;
 		}
 
-		$menu_id = absint($_POST['menu']);
+		$menu_id = absint( $_POST['menu'] );
 		if ( $menu_id <= 0 ) {
 			return;
 		}
 
-		$menu = wp_get_nav_menu_object($menu_id);
+		$menu = wp_get_nav_menu_object( $menu_id );
 		if ( ! $menu ) {
 			return;
 		}
@@ -717,12 +726,16 @@ class Backup_Manager {
 		// request, but BEFORE the backup section is rendered in admin_footer.
 		// WordPress does not redirect after a nav menu save — it renders the page
 		// in the same request — so wp_redirect never fires here.
-		add_action('admin_head', function () use ( $menu_id ): void {
-			$menu = wp_get_nav_menu_object($menu_id);
-			if ( $menu ) {
-				self::create_backup($menu_id);
-			}
-		}, 999);
+		add_action(
+			'admin_head',
+			function () use ( $menu_id ): void {
+				$menu = wp_get_nav_menu_object( $menu_id );
+				if ( $menu ) {
+					self::create_backup( $menu_id );
+				}
+			},
+			999
+		);
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }

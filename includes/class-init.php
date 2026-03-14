@@ -1,13 +1,13 @@
 <?php
-declare(strict_types=1);
-
-namespace MenuPilot;
-
 /**
- * Plugin initialization class
+ * Plugin initialization and bootstrap class.
  *
  * @package MenuPilot
  */
+
+declare(strict_types=1);
+
+namespace MenuPilot;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main plugin initialization and coordination class.
  * Implements singleton pattern for global access.
  */
-class Init
-{
+class Init {
+
 
 	/**
 	 * Plugin settings instance
@@ -78,9 +78,8 @@ class Init
 	 *
 	 * @return Init
 	 */
-	public static function get_instance(): Init
-	{
-		if (self::$instance === null) {
+	public static function get_instance(): Init {
+		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -91,39 +90,38 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function init(): void
-	{
-		// Prevent double initialization
-		if (defined('MENUPILOT_INIT_DONE')) {
+	public function init(): void {
+		// Prevent double initialization.
+		if ( defined( 'MENUPILOT_INIT_DONE' ) ) {
 			return;
 		}
-		define('MENUPILOT_INIT_DONE', true);
+		define( 'MENUPILOT_INIT_DONE', true );
 
-		// Load dependencies
+		// Load dependencies.
 		$this->load_dependencies();
 
-		// Initialize components
+		// Initialize components.
 		$this->settings = new Settings();
 
-		// Initialize Column Manager
+		// Initialize Column Manager.
 		Column_Manager::init_default_columns();
 
-		// Initialize AJAX handler (for settings export only)
-		if (is_admin()) {
+		// Initialize AJAX handler (for settings export only).
+		if ( is_admin() ) {
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-ajax-handler.php';
 			$this->ajax_handler = new \MenuPilot\Admin\Ajax_Handler();
 		}
 
-		// Initialize REST API controller
-		add_action('rest_api_init', array($this, 'init_rest_api'));
+		// Initialize REST API controller.
+		add_action( 'rest_api_init', array( $this, 'init_rest_api' ) );
 
-		// Initialize integrations
+		// Initialize integrations.
 		$this->init_integrations();
 
-		// Initialize History logging
+		// Initialize History logging.
 		History::init();
 
-		// Hook into WordPress
+		// Hook into WordPress.
 		$this->init_hooks();
 	}
 
@@ -132,9 +130,8 @@ class Init
 	 *
 	 * @return void
 	 */
-	private function load_dependencies(): void
-	{
-		// Load common functions
+	private function load_dependencies(): void {
+		// Load common functions.
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/functions-common.php';
 	}
 
@@ -143,26 +140,25 @@ class Init
 	 *
 	 * @return void
 	 */
-	private function init_hooks(): void
-	{
-		// Admin hooks
-		if (is_admin() && ! self::$admin_hooks_registered) {
+	private function init_hooks(): void {
+		// Admin hooks.
+		if ( is_admin() && ! self::$admin_hooks_registered ) {
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-backup-manager.php';
-			add_action('admin_menu', array($this, 'add_admin_menu'));
-			add_filter('plugin_action_links_' . MENUPILOT_PLUGIN_BASENAME, array($this, 'add_plugin_action_links'));
-			add_action('admin_init', array($this->settings, 'register_settings'));
-			add_action('admin_init', array(\MenuPilot\Admin\Backup_Manager::class, 'maybe_backup_before_nav_menu_save'), 1);
-			add_action('load-nav-menus.php', array(\MenuPilot\Admin\Backup_Manager::class, 'register_meta_box'));
+			add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+			add_filter( 'plugin_action_links_' . MENUPILOT_PLUGIN_BASENAME, array( $this, 'add_plugin_action_links' ) );
+			add_action( 'admin_init', array( $this->settings, 'register_settings' ) );
+			add_action( 'admin_init', array( \MenuPilot\Admin\Backup_Manager::class, 'maybe_backup_before_nav_menu_save' ), 1 );
+			add_action( 'load-nav-menus.php', array( \MenuPilot\Admin\Backup_Manager::class, 'register_meta_box' ) );
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-history-page.php';
-			add_action('admin_post_menupilot_download_history', array(\MenuPilot\Admin\History_Page::class, 'handle_download'));
-			add_action('admin_post_menupilot_clear_history', array(\MenuPilot\Admin\History_Page::class, 'handle_clear_history'));
-			add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
-			add_filter('admin_body_class', array($this, 'add_admin_body_class'));
-			
-			// Initialize Tools_Page early to register form processing hooks
+			add_action( 'admin_post_menupilot_download_history', array( \MenuPilot\Admin\History_Page::class, 'handle_download' ) );
+			add_action( 'admin_post_menupilot_clear_history', array( \MenuPilot\Admin\History_Page::class, 'handle_clear_history' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_admin_body_class' ) );
+
+			// Initialize Tools_Page early to register form processing hooks.
 			require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-tools-page.php';
 			new \MenuPilot\Admin\Tools_Page();
-			
+
 			self::$admin_hooks_registered = true;
 		}
 
@@ -175,7 +171,7 @@ class Init
 		 *
 		 * @param Init $this Plugin instance
 		 */
-		do_action('menupilot_init', $this);
+		do_action( 'menupilot_init', $this );
 	}
 
 	/**
@@ -183,10 +179,9 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function enqueue_admin_assets(): void
-	{
+	public function enqueue_admin_assets(): void {
 		$screen = get_current_screen();
-		if (! $screen || ! in_array($screen->id, self::PLUGIN_SCREEN_IDS, true)) {
+		if ( ! $screen || ! in_array( $screen->id, self::PLUGIN_SCREEN_IDS, true ) ) {
 			return;
 		}
 
@@ -194,60 +189,60 @@ class Init
 			'menupilot-admin',
 			MENUPILOT_PLUGIN_URL . 'assets/css/admin.css',
 			array(),
-			(file_exists(MENUPILOT_PLUGIN_DIR . 'assets/css/admin.css') ? filemtime(MENUPILOT_PLUGIN_DIR . 'assets/css/admin.css') : MENUPILOT_VERSION)
+			( file_exists( MENUPILOT_PLUGIN_DIR . 'assets/css/admin.css' ) ? filemtime( MENUPILOT_PLUGIN_DIR . 'assets/css/admin.css' ) : MENUPILOT_VERSION )
 		);
 
 		wp_enqueue_script(
 			'menupilot-admin',
 			MENUPILOT_PLUGIN_URL . 'assets/js/admin.js',
-			array('jquery'),
+			array( 'jquery' ),
 			MENUPILOT_VERSION,
 			true
 		);
 
-		// Enqueue admin pages script
+		// Enqueue admin pages script.
 		wp_enqueue_script(
 			'menupilot-admin-pages',
 			MENUPILOT_PLUGIN_URL . 'assets/js/admin-pages.js',
-			array('jquery', 'menupilot-admin'),
+			array( 'jquery', 'menupilot-admin' ),
 			MENUPILOT_VERSION,
 			true
 		);
 
 		$localize_data = array(
-			'ajaxurl' => admin_url('admin-ajax.php'),
-			'restUrl' => rest_url('menupilot/v1'),
-			'nonce' => wp_create_nonce('wp_rest'),
-			'adminNonce' => wp_create_nonce('menupilot_admin'),
-			'siteUrl' => get_site_url(),
-			'registeredLocations' => get_registered_nav_menus(),
-			'previewColumns' => Column_Manager::get_columns_for_js(),
-			'defaultMenuNamePattern' => $this->settings->get_option('default_menu_name_pattern', '{original_name}'),
-			'initFunctions' => array(),
+			'ajaxurl'                => admin_url( 'admin-ajax.php' ),
+			'restUrl'                => rest_url( 'menupilot/v1' ),
+			'nonce'                  => wp_create_nonce( 'wp_rest' ),
+			'adminNonce'             => wp_create_nonce( 'menupilot_admin' ),
+			'siteUrl'                => get_site_url(),
+			'registeredLocations'    => get_registered_nav_menus(),
+			'previewColumns'         => Column_Manager::get_columns_for_js(),
+			'defaultMenuNamePattern' => $this->settings->get_option( 'default_menu_name_pattern', '{original_name}' ),
+			'initFunctions'          => array(),
 		);
 
-		// Add initialization data based on current page
-		if ($screen->id === 'menupilot_page_menupilot-settings' || $screen->id === 'toplevel_page_menupilot-settings') {
-			// Settings page - add menu name pattern and export filename pattern init data
-			$localize_data['initFunctions']['menuNamePattern'] = array(
-				'fieldId' => 'default_menu_name_pattern',
+		// Add initialization data based on current page.
+		if ( 'menupilot_page_menupilot-settings' === $screen->id || 'toplevel_page_menupilot-settings' === $screen->id ) {
+			// Settings page - add menu name pattern and export filename pattern init data.
+			$localize_data['initFunctions']['menuNamePattern']       = array(
+				'fieldId'       => 'default_menu_name_pattern',
 				'customFieldId' => 'default_menu_name_pattern_custom',
 			);
 			$localize_data['initFunctions']['exportFilenamePattern'] = array(
-				'fieldId' => 'export_filename_pattern',
+				'fieldId'       => 'export_filename_pattern',
 				'customFieldId' => 'export_filename_pattern_custom',
 			);
 		}
 
-		if ($screen->id === 'menupilot_page_menupilot-help') {
-			// Help page - add FAQ accordion and copy system info init data
+		if ( 'menupilot_page_menupilot-help' === $screen->id ) {
+			// Help page - add FAQ accordion and copy system info init data.
 			$localize_data['initFunctions']['faqAccordion'] = true;
 			global $wp_version;
 			$localize_data['initFunctions']['copySystemInfo'] = array(
-				'pluginVer' => defined('MENUPILOT_VERSION') ? MENUPILOT_VERSION : '1.0.0',
-				'wpVersion' => $wp_version,
-				'phpVersion' => PHP_VERSION,
-				'memoryLimit' => (string) ini_get('memory_limit'),
+				'pluginVer'   => defined( 'MENUPILOT_VERSION' ) ? MENUPILOT_VERSION : '1.0.0',
+				'wpVersion'   => $wp_version,
+				'phpVersion'  => PHP_VERSION,
+				'memoryLimit' => (string) ini_get( 'memory_limit' ),
 			);
 		}
 
@@ -264,18 +259,17 @@ class Init
 	 * @param string $classes Existing admin body classes.
 	 * @return string
 	 */
-	public function add_admin_body_class(string $classes): string
-	{
-		if (! function_exists('get_current_screen')) {
+	public function add_admin_body_class( string $classes ): string {
+		if ( ! function_exists( 'get_current_screen' ) ) {
 			return $classes;
 		}
 		$screen = get_current_screen();
-		if (! $screen) {
+		if ( ! $screen ) {
 			return $classes;
 		}
 
-		if (in_array($screen->id, self::PLUGIN_SCREEN_IDS, true)) {
-			$classes .= ' menupilot-admin menupilot-screen-' . sanitize_html_class((string) $screen->id);
+		if ( in_array( $screen->id, self::PLUGIN_SCREEN_IDS, true ) ) {
+			$classes .= ' menupilot-admin menupilot-screen-' . sanitize_html_class( (string) $screen->id );
 		}
 		return $classes;
 	}
@@ -289,14 +283,13 @@ class Init
 	 * @param array<int|string,string> $links Existing action links.
 	 * @return array<int|string,string>
 	 */
-	public function add_plugin_action_links( array $links ): array
-	{
+	public function add_plugin_action_links( array $links ): array {
 		$action_links = array(
-			'menus'    => '<a href="' . esc_url(admin_url('nav-menus.php')) . '">' . esc_html__('Menus', 'menupilot') . '</a>',
-			'settings' => '<a href="' . esc_url(admin_url('admin.php?page=menupilot-settings')) . '">' . esc_html__('Settings', 'menupilot') . '</a>',
+			'menus'    => '<a href="' . esc_url( admin_url( 'nav-menus.php' ) ) . '">' . esc_html__( 'Menus', 'menupilot' ) . '</a>',
+			'settings' => '<a href="' . esc_url( admin_url( 'admin.php?page=menupilot-settings' ) ) . '">' . esc_html__( 'Settings', 'menupilot' ) . '</a>',
 		);
 
-		return array_merge($action_links, $links);
+		return array_merge( $action_links, $links );
 	}
 
 	/**
@@ -304,22 +297,21 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function activate(): void
-	{
-		// Initialize settings before using them
+	public function activate(): void {
+		// Initialize settings before using them.
 		$this->settings = new Settings();
 
-		// Add default options
+		// Add default options.
 		$this->settings->add_default_options();
 
-		// Create custom tables (use $wpdb->prefix—never hardcode wp_)
+		// Create custom tables (use $wpdb->prefix—never hardcode wp_).
 		global $wpdb;
 		$charset = $wpdb->get_charset_collate();
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		// History table.
 		$history_table = $wpdb->prefix . 'menupilot_history';
-		$history_sql = "CREATE TABLE $history_table (
+		$history_sql   = "CREATE TABLE $history_table (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			action_type varchar(20) NOT NULL,
 			menu_id bigint(20) unsigned DEFAULT NULL,
@@ -334,11 +326,11 @@ class Init
 			KEY user_id (user_id),
 			KEY created_at (created_at)
 		) $charset;";
-		dbDelta($history_sql);
+		dbDelta( $history_sql );
 
 		// Backups table.
 		$backups_table = $wpdb->prefix . 'menupilot_backups';
-		$backups_sql = "CREATE TABLE $backups_table (
+		$backups_sql   = "CREATE TABLE $backups_table (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			backup_id varchar(50) NOT NULL,
 			menu_id bigint(20) unsigned NOT NULL,
@@ -351,7 +343,7 @@ class Init
 			KEY menu_id (menu_id),
 			KEY created_at (created_at)
 		) $charset;";
-		dbDelta($backups_sql);
+		dbDelta( $backups_sql );
 
 		// Migrate any existing backups from wp_options to the new table.
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-backup-manager.php';
@@ -362,7 +354,7 @@ class Init
 		 *
 		 * @since 1.0.0
 		 */
-		do_action('menupilot_activate');
+		do_action( 'menupilot_activate' );
 	}
 
 	/**
@@ -370,14 +362,13 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function deactivate(): void
-	{
+	public function deactivate(): void {
 		/**
 		 * Fires on plugin deactivation
 		 *
 		 * @since 1.0.0
 		 */
-		do_action('menupilot_deactivate');
+		do_action( 'menupilot_deactivate' );
 	}
 
 	/**
@@ -385,79 +376,78 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function add_admin_menu(): void
-	{
-		// Main menu page (Settings)
-		// Use base64-encoded SVG favicon for menu icon
-		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents(MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg'));
+	public function add_admin_menu(): void {
+		// Main menu page (Settings).
+		// Use base64-encoded SVG favicon for menu icon.
+		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg' ) );
 		add_menu_page(
-			__('MenuPilot', 'menupilot'),
-			__('MenuPilot', 'menupilot'),
+			__( 'MenuPilot', 'menupilot' ),
+			__( 'MenuPilot', 'menupilot' ),
 			'manage_options',
 			'menupilot-settings',
-			array($this, 'render_settings_page'),
+			array( $this, 'render_settings_page' ),
 			$menu_icon,
 			65
 		);
 
-		// Settings submenu (1) - duplicate of main page for consistency
+		// Settings submenu (1) - duplicate of main page for consistency.
 		add_submenu_page(
 			'menupilot-settings',
-			__('Settings', 'menupilot'),
-			__('Settings', 'menupilot'),
+			__( 'Settings', 'menupilot' ),
+			__( 'Settings', 'menupilot' ),
 			'manage_options',
 			'menupilot-settings',
-			array($this, 'render_settings_page')
+			array( $this, 'render_settings_page' )
 		);
 
-		// Import Menu submenu (2)
+		// Import Menu submenu (2).
 		add_submenu_page(
 			'menupilot-settings',
-			__('Import Menu', 'menupilot'),
-			__('Import Menu', 'menupilot'),
+			__( 'Import Menu', 'menupilot' ),
+			__( 'Import Menu', 'menupilot' ),
 			'manage_options',
 			'menupilot-import',
-			array($this, 'render_import_page')
+			array( $this, 'render_import_page' )
 		);
 
-		// Export Menu submenu (3)
+		// Export Menu submenu (3).
 		add_submenu_page(
 			'menupilot-settings',
-			__('Export Menu', 'menupilot'),
-			__('Export Menu', 'menupilot'),
+			__( 'Export Menu', 'menupilot' ),
+			__( 'Export Menu', 'menupilot' ),
 			'manage_options',
 			'menupilot-export',
-			array($this, 'render_export_page')
+			array( $this, 'render_export_page' )
 		);
 
-		// History submenu (4)
+		// History submenu (4).
 		add_submenu_page(
 			'menupilot-settings',
-			__('History', 'menupilot'),
-			__('History', 'menupilot'),
+			__( 'History', 'menupilot' ),
+			__( 'History', 'menupilot' ),
 			'manage_options',
 			'menupilot-history',
-			array($this, 'render_history_page')
+			array( $this, 'render_history_page' )
 		);
 
-		// Tools submenu (5)
+		// Tools submenu (5).
 		add_submenu_page(
 			'menupilot-settings',
-			__('Tools', 'menupilot'),
-			__('Tools', 'menupilot'),
+			__( 'Tools', 'menupilot' ),
+			__( 'Tools', 'menupilot' ),
 			'manage_options',
 			'menupilot-tools',
-			array($this, 'render_tools_page')
+			array( $this, 'render_tools_page' )
 		);
 
-		// Help submenu (6)
+		// Help submenu (6).
 		add_submenu_page(
 			'menupilot-settings',
-			__('Help', 'menupilot'),
-			__('Help', 'menupilot'),
+			__( 'Help', 'menupilot' ),
+			__( 'Help', 'menupilot' ),
 			'manage_options',
 			'menupilot-help',
-			array($this, 'render_help_page')
+			array( $this, 'render_help_page' )
 		);
 	}
 
@@ -466,8 +456,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_settings_page(): void
-	{
+	public function render_settings_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-settings-page.php';
 		$settings_page = new \MenuPilot\Admin\Settings_Page();
 		$settings_page->render();
@@ -478,8 +467,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_export_page(): void
-	{
+	public function render_export_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-export-page.php';
 		$export_page = new \MenuPilot\Admin\Export_Page();
 		$export_page->render();
@@ -490,8 +478,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_import_page(): void
-	{
+	public function render_import_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-import-page.php';
 		$import_page = new \MenuPilot\Admin\Import_Page();
 		$import_page->render();
@@ -502,10 +489,9 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_tools_page(): void
-	{
+	public function render_tools_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-tools-page.php';
-		// Instantiate early to register hooks (form processing)
+		// Instantiate early to register hooks (form processing).
 		static $tools_page = null;
 		if ( null === $tools_page ) {
 			$tools_page = new \MenuPilot\Admin\Tools_Page();
@@ -518,8 +504,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_help_page(): void
-	{
+	public function render_help_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-help-page.php';
 		$help_page = new \MenuPilot\Admin\Help_Page();
 		$help_page->render();
@@ -530,8 +515,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function render_history_page(): void
-	{
+	public function render_history_page(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/admin/class-history-page.php';
 		$history_page = new \MenuPilot\Admin\History_Page();
 		$history_page->render();
@@ -542,8 +526,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	public function init_rest_api(): void
-	{
+	public function init_rest_api(): void {
 		require_once MENUPILOT_PLUGIN_DIR . 'includes/rest/class-rest-controller.php';
 		$this->rest_controller = new \MenuPilot\Rest\REST_Controller();
 		$this->rest_controller->register_routes();
@@ -556,8 +539,7 @@ class Init
 	 *
 	 * @return void
 	 */
-	private function init_integrations(): void
-	{
+	private function init_integrations(): void {
 		/**
 		 * Fires when integrations should be initialized
 		 *
@@ -572,6 +554,6 @@ class Init
 		 *
 		 * @since 1.0.0
 		 */
-		do_action('menupilot_init_integrations');
+		do_action( 'menupilot_init_integrations' );
 	}
 }

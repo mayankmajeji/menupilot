@@ -27,16 +27,16 @@ class Settings {
 	 * @var array<string, mixed>
 	 */
 	private array $defaults = array(
-		// Import Settings
-		'enable_url_normalization' => true,
-		'unmatched_items_behavior' => 'convert_to_custom_link',
-		'default_menu_name_pattern' => '{original_name}',
+		// Import Settings.
+		'enable_url_normalization'         => true,
+		'unmatched_items_behavior'         => 'convert_to_custom_link',
+		'default_menu_name_pattern'        => '{original_name}',
 		'default_menu_name_pattern_custom' => '',
-		// Export Settings
-		'export_filename_pattern' => 'menu-{slug}-{date}-{time}',
-		'export_filename_pattern_custom' => '',
-		// Backup
-		'backup_limit' => 5,
+		// Export Settings.
+		'export_filename_pattern'          => 'menu-{slug}-{date}-{time}',
+		'export_filename_pattern_custom'   => '',
+		// Backup.
+		'backup_limit'                     => 5,
 	);
 
 	/**
@@ -60,8 +60,8 @@ class Settings {
 	 * @return array<string, mixed>
 	 */
 	public function get_settings(): array {
-		$settings = get_option(self::OPTION_NAME, array());
-		return wp_parse_args($settings, $this->defaults);
+		$settings = get_option( self::OPTION_NAME, array() );
+		return wp_parse_args( $settings, $this->defaults );
 	}
 
 	/**
@@ -84,9 +84,9 @@ class Settings {
 	 * @return bool
 	 */
 	public function update_option( string $key, $value ): bool {
-		$settings = $this->get_settings();
+		$settings         = $this->get_settings();
 		$settings[ $key ] = $value;
-		return update_option(self::OPTION_NAME, $settings);
+		return update_option( self::OPTION_NAME, $settings );
 	}
 
 	/**
@@ -95,8 +95,8 @@ class Settings {
 	 * @return void
 	 */
 	public function add_default_options(): void {
-		if ( ! get_option(self::OPTION_NAME) ) {
-			add_option(self::OPTION_NAME, $this->defaults);
+		if ( ! get_option( self::OPTION_NAME ) ) {
+			add_option( self::OPTION_NAME, $this->defaults );
 		}
 	}
 
@@ -110,9 +110,9 @@ class Settings {
 			'menupilot_settings',
 			self::OPTION_NAME,
 			array(
-				'type' => 'array',
+				'type'              => 'array',
 				'sanitize_callback' => array( $this, 'sanitize_settings' ),
-				'show_in_rest' => false,
+				'show_in_rest'      => false,
 			)
 		);
 	}
@@ -124,105 +124,103 @@ class Settings {
 	 * @return array
 	 */
 	public function sanitize_settings( $input ): array {
-		if ( ! is_array($input) ) {
+		if ( ! is_array( $input ) ) {
 			$input = array();
 		}
 
-		// Handle custom menu name pattern
-		if ( isset($input['default_menu_name_pattern']) && $input['default_menu_name_pattern'] === 'custom' ) {
-			if ( isset($input['default_menu_name_pattern_custom']) && ! empty($input['default_menu_name_pattern_custom']) ) {
-				$input['default_menu_name_pattern'] = sanitize_text_field($input['default_menu_name_pattern_custom']);
+		// Handle custom menu name pattern.
+		if ( isset( $input['default_menu_name_pattern'] ) && 'custom' === $input['default_menu_name_pattern'] ) {
+			if ( isset( $input['default_menu_name_pattern_custom'] ) && ! empty( $input['default_menu_name_pattern_custom'] ) ) {
+				$input['default_menu_name_pattern'] = sanitize_text_field( $input['default_menu_name_pattern_custom'] );
 			} else {
-				// If custom is selected but no value, fall back to default
+				// If custom is selected but no value, fall back to default.
 				$input['default_menu_name_pattern'] = '{original_name}';
 			}
 		}
 
-		// Handle custom export filename pattern
-		if ( isset($input['export_filename_pattern']) && $input['export_filename_pattern'] === 'custom' ) {
-			if ( isset($input['export_filename_pattern_custom']) && ! empty($input['export_filename_pattern_custom']) ) {
-				$input['export_filename_pattern'] = sanitize_text_field($input['export_filename_pattern_custom']);
+		// Handle custom export filename pattern.
+		if ( isset( $input['export_filename_pattern'] ) && 'custom' === $input['export_filename_pattern'] ) {
+			if ( isset( $input['export_filename_pattern_custom'] ) && ! empty( $input['export_filename_pattern_custom'] ) ) {
+				$input['export_filename_pattern'] = sanitize_text_field( $input['export_filename_pattern_custom'] );
 			} else {
-				// If custom is selected but no value, fall back to default
+				// If custom is selected but no value, fall back to default.
 				$input['export_filename_pattern'] = 'menu-{slug}-{date}-{time}';
 			}
 		}
 
 		$sanitized = array();
-		
-		// Get existing settings to preserve values not in the form
+
+		// Get existing settings to preserve values not in the form.
 		$existing_settings = $this->get_settings();
-		
-		// Define known settings fields and their types
+
+		// Define known settings fields and their types.
 		$known_fields = array(
-			'enable_url_normalization' => 'checkbox',
-			'unmatched_items_behavior' => 'select',
-			'default_menu_name_pattern' => 'text',
+			'enable_url_normalization'         => 'checkbox',
+			'unmatched_items_behavior'         => 'select',
+			'default_menu_name_pattern'        => 'text',
 			'default_menu_name_pattern_custom' => 'text',
-			'export_filename_pattern' => 'text',
-			'export_filename_pattern_custom' => 'text',
-			'backup_limit' => 'number',
+			'export_filename_pattern'          => 'text',
+			'export_filename_pattern_custom'   => 'text',
+			'backup_limit'                     => 'number',
 		);
 
-		// Sanitize each known field
+		// Sanitize each known field.
 		foreach ( $known_fields as $field_id => $field_type ) {
-			if ( array_key_exists($field_id, $input) ) {
+			if ( array_key_exists( $field_id, $input ) ) {
 				$value = $input[ $field_id ];
 
-				// Default sanitization based on field type
+				// Default sanitization based on field type.
 				switch ( $field_type ) {
 					case 'text':
 					case 'select':
-						$sanitized[ $field_id ] = sanitize_text_field($value);
+						$sanitized[ $field_id ] = sanitize_text_field( $value );
 						break;
 					case 'multiselect':
-						$sanitized[ $field_id ] = array_map('sanitize_text_field', is_array($value) ? $value : array());
+						$sanitized[ $field_id ] = array_map( 'sanitize_text_field', is_array( $value ) ? $value : array() );
 						break;
 					case 'checkbox':
-						$sanitized[ $field_id ] = ( $value === '1' || $value === 1 || $value === true ) ? 1 : 0;
+						$sanitized[ $field_id ] = ( '1' === $value || 1 === $value || true === $value ) ? 1 : 0;
 						break;
 					case 'textarea':
-						$sanitized[ $field_id ] = sanitize_textarea_field($value);
+						$sanitized[ $field_id ] = sanitize_textarea_field( $value );
 						break;
 					case 'number':
-						$sanitized[ $field_id ] = intval($value);
-						if ( $field_id === 'backup_limit' ) {
-							$sanitized[ $field_id ] = max(1, min(20, $sanitized[ $field_id ]));
+						$sanitized[ $field_id ] = intval( $value );
+						if ( 'backup_limit' === $field_id ) {
+							$sanitized[ $field_id ] = max( 1, min( 20, $sanitized[ $field_id ] ) );
 						}
 						break;
 					case 'email':
-						$sanitized[ $field_id ] = sanitize_email($value);
+						$sanitized[ $field_id ] = sanitize_email( $value );
 						break;
 					case 'url':
-						$sanitized[ $field_id ] = esc_url_raw($value);
+						$sanitized[ $field_id ] = esc_url_raw( $value );
 						break;
 					default:
-						$sanitized[ $field_id ] = sanitize_text_field($value);
+						$sanitized[ $field_id ] = sanitize_text_field( $value );
 				}
-			} else {
-				// Preserve existing value if not in input
-				if ( array_key_exists($field_id, $existing_settings) ) {
-					$sanitized[ $field_id ] = $existing_settings[ $field_id ];
-				}
+			} elseif ( array_key_exists( $field_id, $existing_settings ) ) {
+				// Preserve existing value if not in input.
+				$sanitized[ $field_id ] = $existing_settings[ $field_id ];
 			}
 		}
 
-		// Also check for filter-based fields (for extensibility)
+		// Also check for filter-based fields (for extensibility).
 		$fields_structure = $this->get_fields_structure();
-		if ( ! empty($fields_structure) ) {
+		if ( ! empty( $fields_structure ) ) {
 			foreach ( $fields_structure as $tab_sections ) {
 				foreach ( $tab_sections as $section_fields ) {
 					foreach ( $section_fields as $field ) {
-						$id = $field['field_id'] ?? '';
+						$id   = $field['field_id'] ?? '';
 						$type = $field['type'] ?? 'text';
 
-						if ( ! $id || array_key_exists($id, $sanitized) ) {
-							continue; // Already handled or no ID
+						if ( ! $id || array_key_exists( $id, $sanitized ) ) {
+							continue; // Already handled or no ID.
 						}
 
-						if ( ! array_key_exists($id, $input) ) {
-							// Preserve existing value
-							if ( array_key_exists($id, $existing_settings) ) {
+						if ( ! array_key_exists( $id, $input ) ) {
+							// Preserve existing value.
+							if ( array_key_exists( $id, $existing_settings ) ) {
 								$sanitized[ $id ] = $existing_settings[ $id ];
 							}
 							continue;
@@ -230,51 +228,51 @@ class Settings {
 
 						$value = $input[ $id ];
 
-						// Use custom sanitize callback if provided
-						if ( ! empty($field['sanitize_callback']) && is_callable($field['sanitize_callback']) ) {
-							$sanitized[ $id ] = call_user_func($field['sanitize_callback'], $value);
+						// Use custom sanitize callback if provided.
+						if ( ! empty( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
+							$sanitized[ $id ] = call_user_func( $field['sanitize_callback'], $value );
 							continue;
 						}
 
-						// Default sanitization based on field type
+						// Default sanitization based on field type.
 						switch ( $type ) {
 							case 'text':
 							case 'select':
-								$sanitized[ $id ] = sanitize_text_field($value);
+								$sanitized[ $id ] = sanitize_text_field( $value );
 								break;
 							case 'multiselect':
-								$sanitized[ $id ] = array_map('sanitize_text_field', is_array($value) ? $value : array());
+								$sanitized[ $id ] = array_map( 'sanitize_text_field', is_array( $value ) ? $value : array() );
 								break;
 							case 'checkbox':
-								$sanitized[ $id ] = ( $value === '1' || $value === 1 || $value === true ) ? 1 : 0;
+								$sanitized[ $id ] = ( '1' === $value || 1 === $value || true === $value ) ? 1 : 0;
 								break;
 							case 'textarea':
-								$sanitized[ $id ] = sanitize_textarea_field($value);
+								$sanitized[ $id ] = sanitize_textarea_field( $value );
 								break;
 							case 'number':
-								$sanitized[ $id ] = intval($value);
+								$sanitized[ $id ] = intval( $value );
 								break;
 							case 'email':
-								$sanitized[ $id ] = sanitize_email($value);
+								$sanitized[ $id ] = sanitize_email( $value );
 								break;
 							case 'url':
-								$sanitized[ $id ] = esc_url_raw($value);
+								$sanitized[ $id ] = esc_url_raw( $value );
 								break;
 							default:
-								$sanitized[ $id ] = sanitize_text_field($value);
+								$sanitized[ $id ] = sanitize_text_field( $value );
 						}
 					}
 				}
 			}
 		}
 
-		// Merge with existing settings to preserve any other values
-		$sanitized = wp_parse_args($sanitized, $existing_settings);
+		// Merge with existing settings to preserve any other values.
+		$sanitized = wp_parse_args( $sanitized, $existing_settings );
 
 		add_settings_error(
 			'menupilot_settings',
 			'settings_updated',
-			__('Settings saved successfully.', 'menupilot'),
+			__( 'Settings saved successfully.', 'menupilot' ),
 			'updated'
 		);
 
@@ -288,8 +286,8 @@ class Settings {
 	 */
 	public function add_admin_menu(): void {
 		add_menu_page(
-			__('MenuPilot', 'menupilot'),
-			__('MenuPilot', 'menupilot'),
+			__( 'MenuPilot', 'menupilot' ),
+			__( 'MenuPilot', 'menupilot' ),
 			'manage_options',
 			'menupilot-settings',
 			array( $this, 'render_settings_page' ),
@@ -304,19 +302,19 @@ class Settings {
 	 * @return void
 	 */
 	public function render_settings_page(): void {
-		if ( ! current_user_can('manage_options') ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-			<?php settings_errors('menupilot_settings'); ?>
+			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+			<?php settings_errors( 'menupilot_settings' ); ?>
 			<form action="options.php" method="post">
 				<?php
-				settings_fields('menupilot_settings');
-				do_settings_sections('menupilot_settings');
-				submit_button(__('Save Settings', 'menupilot'));
+				settings_fields( 'menupilot_settings' );
+				do_settings_sections( 'menupilot_settings' );
+				submit_button( __( 'Save Settings', 'menupilot' ) );
 				?>
 			</form>
 		</div>
@@ -330,7 +328,7 @@ class Settings {
 	 */
 	public function register_centralized_fields(): void {
 		$fields = array();
-		
+
 		/**
 		 * Filter to add settings fields
 		 *
@@ -338,9 +336,9 @@ class Settings {
 		 *
 		 * @param array $fields Settings fields array
 		 */
-		$fields = apply_filters('menupilot_settings_fields', $fields);
-		
-		$this->fields = $this->organize_fields($fields);
+		$fields = apply_filters( 'menupilot_settings_fields', $fields );
+
+		$this->fields = $this->organize_fields( $fields );
 	}
 
 	/**
@@ -351,29 +349,29 @@ class Settings {
 	 */
 	private function organize_fields( array $fields ): array {
 		$organized = array();
-		
+
 		foreach ( $fields as $field ) {
-			$tab = $field['tab'] ?? 'general';
-			$section = $field['section'] ?? 'default';
+			$tab      = $field['tab'] ?? 'general';
+			$section  = $field['section'] ?? 'default';
 			$priority = $field['priority'] ?? 10;
 			$field_id = $field['field_id'] ?? '';
-			
+
 			if ( ! $field_id ) {
 				continue;
 			}
-			
+
 			$organized[ $tab ][ $section ][ $priority . '_' . $field_id ] = $field;
 		}
-		
-		// Sort by tab, section, then priority
+
+		// Sort by tab, section, then priority.
 		foreach ( $organized as $tab => &$sections ) {
 			foreach ( $sections as $section => &$fields ) {
-				ksort($fields, SORT_NATURAL);
+				ksort( $fields, SORT_NATURAL );
 			}
-			unset($fields);
+			unset( $fields );
 		}
-		unset($sections);
-		
+		unset( $sections );
+
 		return $organized;
 	}
 
