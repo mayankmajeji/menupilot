@@ -604,7 +604,8 @@ class Backup_Manager {
 									<td>
 										<a href="<?php echo esc_url( $edit_url ); ?>"><?php echo esc_html( $b['menu_name'] ); ?></a>
 									</td>
-									<td><?php echo esc_html( gmdate( 'M j, Y g:i:s', strtotime( $b['created_at'] ) ?: 0 ) ); ?></td>
+									<?php $ts = strtotime( $b['created_at'] ); ?>
+								<td><?php echo esc_html( gmdate( 'M j, Y g:i:s', false !== $ts ? $ts : 0 ) ); ?></td>
 									<td>
 										<?php
 										$user_display = ! empty( $b['user_login'] ) ? esc_html( $b['user_login'] ) : esc_html__( '—', 'menupilot' );

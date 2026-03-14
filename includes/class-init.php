@@ -380,7 +380,8 @@ class Init {
 	public function add_admin_menu(): void {
 		// Main menu page (Settings).
 		// Use base64-encoded SVG favicon for menu icon.
-		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg' ) ?: '' );
+		$svg_file  = file_get_contents( MENUPILOT_PLUGIN_DIR . 'assets/images/favicon.svg' );
+		$menu_icon = 'data:image/svg+xml;base64,' . base64_encode( false !== $svg_file ? $svg_file : '' );
 		add_menu_page(
 			__( 'MenuPilot', 'menupilot' ),
 			__( 'MenuPilot', 'menupilot' ),
