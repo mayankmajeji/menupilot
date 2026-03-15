@@ -1,6 +1,6 @@
 {
   "name": "menupilot",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Easily import, export, duplicate, backup, and restore WordPress navigation menus. MenuPilot helps you move menus between sites safely with clean imports and reliable structure handling.",
   "license": "GPL-2.0-or-later",
   "private": true,
@@ -31,7 +31,7 @@
     "build:admin": "sass --no-source-map assets/css/admin.scss assets/css/admin.css",
     "watch": "gulp watch",
     "watch:admin": "sass --watch --poll assets/css/admin.scss assets/css/admin.css",
-    "version": "1.0.18",
+    "version": "1.0.19",
     "gulp:styles": "gulp styles",
     "gulp:watch": "gulp watch",
     "lint:js": "eslint assets/js/**/*.js",
