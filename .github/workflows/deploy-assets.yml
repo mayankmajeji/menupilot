@@ -1,20 +1,23 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow
 
 name: Deploy Assets to WordPress.org
-run-name: "Assets — ${{ github.event.head_commit.message || 'Manual run' }}"
+run-name: "${{ inputs.version }} | Assets"
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - '.wordpress-org/**'
-            - 'readme.txt'
+    workflow_call:
+        inputs:
+            version:
+                type: string
+                required: true
     workflow_dispatch:
+        inputs:
+            version:
+                description: "Plugin version (e.g., 1.0.16)"
+                required: true
 
 jobs:
     trunk:
-        name: Deploy Assets
+        name: Assets
         runs-on: ubuntu-latest
         timeout-minutes: 10
 

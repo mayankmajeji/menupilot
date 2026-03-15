@@ -164,7 +164,18 @@ jobs:
                   retention-days: 30
 
     # ─────────────────────────────────────────────
-    # JOB 5: Slack Notification
+    # JOB 5: Deploy Assets (readme + banners)
+    # ─────────────────────────────────────────────
+    assets:
+        needs: deploy
+        if: needs.deploy.result == 'success'
+        uses: ./.github/workflows/deploy-assets.yml
+        with:
+            version: ${{ github.ref_name }}
+        secrets: inherit
+
+    # ─────────────────────────────────────────────
+    # JOB 6: Slack Notification
     # ─────────────────────────────────────────────
     notify:
         name: Slack Notification
