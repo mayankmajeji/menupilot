@@ -6,6 +6,10 @@ on:
     push:
         branches:
             - main
+        paths:
+            - '.wordpress-org/**'
+            - 'readme.txt'
+    workflow_dispatch:
 
 jobs:
     trunk:
