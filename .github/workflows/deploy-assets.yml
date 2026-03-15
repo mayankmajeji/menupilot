@@ -4,11 +4,6 @@ name: Deploy Assets to WordPress.org
 run-name: "${{ inputs.version }} | Assets"
 
 on:
-    workflow_call:
-        inputs:
-            version:
-                type: string
-                required: true
     workflow_dispatch:
         inputs:
             version:

@@ -167,12 +167,22 @@ jobs:
     # JOB 5: Deploy Assets (readme + banners)
     # ─────────────────────────────────────────────
     assets:
+        name: Assets
         needs: deploy
         if: needs.deploy.result == 'success'
-        uses: ./.github/workflows/deploy-assets.yml
-        with:
-            version: ${{ github.ref_name }}
-        secrets: inherit
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: WordPress.org plugin asset/readme update
+              uses: 10up/action-wordpress-plugin-asset-update@stable
+              env:
+                  SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+                  SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+                  ASSETS_DIR: .wordpress-org
+                  IGNORE_OTHER_FILES: true
 
     # ─────────────────────────────────────────────
     # JOB 6: Slack Notification
