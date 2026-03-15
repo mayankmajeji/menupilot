@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow
 
 name: Deploy to WordPress.org
-run-name: "Release ${{ github.ref_name }}"
+run-name: "${{ github.ref_name }}"
 
 on:
     release:
