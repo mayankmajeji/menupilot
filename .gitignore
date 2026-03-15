@@ -18,6 +18,7 @@ docs/
 
 # Documentation files
 .cursorrules
+SETUP.md
 
 # Tests
 /tests/_output/
