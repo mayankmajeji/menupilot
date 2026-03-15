@@ -1,6 +1,6 @@
 {
 	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
-	"landingPage": "/wp-admin/admin.php?page=menupilot",
+	"landingPage": "/wp-admin/admin.php?page=menupilot-settings",
 	"login": true,
 	"features": {
 		"networking": true
