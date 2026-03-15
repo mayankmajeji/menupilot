@@ -12,8 +12,6 @@ Safely import and export WordPress navigation menus with a preview-first workflo
 
 == Description ==
 
-**[Try MenuPilot live in your browser](https://playground.wordpress.net/?blueprint-url=https://wordpress.org/plugins/wp-json/plugins/v1/plugin/menupilot/blueprint.json)**
-
 MenuPilot is a focused menu import and export plugin designed to help you move **one menu at a time** between WordPress sites with confidence.
 
 Unlike basic import tools, MenuPilot shows you exactly what will happen **before anything is imported**. You can review the menu structure, see which items match existing content, resolve missing items, and proceed only when everything is clear.
