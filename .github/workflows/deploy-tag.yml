@@ -161,71 +161,58 @@ jobs:
               env:
                   CURRENT_TAG: ${{ github.ref_name }}
                   ACTOR: ${{ github.actor }}
+                  RAW_DATE: ${{ github.event.release.published_at }}
+                  RELEASE_URL: ${{ github.event.release.html_url }}
                   REPO: ${{ github.repository }}
                   DEPLOY_STATUS: ${{ needs.deploy.result }}
               run: |
+                  FORMATTED_DATE=$(echo "$RAW_DATE" | sed 's/T/ /' | sed 's/Z/ UTC/')
                   PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -1)
-                  RELEASE_URL="https://github.com/${REPO}/releases/tag/${CURRENT_TAG}"
-
                   if [ -z "$PREV_TAG" ]; then
                     COMPARE_URL="$RELEASE_URL"
                   else
                     COMPARE_URL="https://github.com/${REPO}/compare/${PREV_TAG}...${CURRENT_TAG}"
                   fi
-
                   if [ -z "$PREV_TAG" ]; then
                     RAW=$(git log --pretty=format:"%s|%h" -10)
                   else
                     RAW=$(git log --pretty=format:"%s|%h" "${PREV_TAG}..${CURRENT_TAG}")
                   fi
-
                   CHANGES=""
                   while IFS='|' read -r msg sha; do
                     [ -z "$msg" ] && continue
                     CHANGES="${CHANGES}• ${msg} (<https://github.com/${REPO}/commit/${sha}|${sha}>)"$'\n'
                   done <<< "$RAW"
                   CHANGES="${CHANGES%$'\n'}"
-
                   if [ "$DEPLOY_STATUS" = "success" ]; then
-                    HEADER="✅ MenuPilot ${CURRENT_TAG} — Deployed to WordPress.org"
+                    HEADER="MenuPilot ${CURRENT_TAG} — Deployed to WordPress.org"
                   elif [ "$DEPLOY_STATUS" = "skipped" ]; then
-                    HEADER="⚠️ MenuPilot ${CURRENT_TAG} — Deploy skipped (CI checks failed)"
+                    HEADER="MenuPilot ${CURRENT_TAG} — Deploy skipped (CI checks failed)"
                   else
-                    HEADER="❌ MenuPilot ${CURRENT_TAG} — Deployment failed"
+                    HEADER="MenuPilot ${CURRENT_TAG} — Deployment failed"
                   fi
-
                   jq -n \
-                    --arg header      "$HEADER" \
-                    --arg actor       "$ACTOR" \
-                    --arg changes     "$CHANGES" \
-                    --arg release_url "$RELEASE_URL" \
-                    --arg compare_url "$COMPARE_URL" \
-                    --arg wporg_url   "https://wordpress.org/plugins/menupilot/" \
+                    --arg tag          "$CURRENT_TAG" \
+                    --arg header       "$HEADER" \
+                    --arg actor        "$ACTOR" \
+                    --arg date         "$FORMATTED_DATE" \
+                    --arg changes      "$CHANGES" \
+                    --arg release_url  "$RELEASE_URL" \
+                    --arg compare_url  "$COMPARE_URL" \
+                    --arg wporg_url    "https://wordpress.org/plugins/menupilot/" \
                     '{
-                      text: $header,
                       blocks: [
-                        {
-                          type: "header",
-                          text: { type: "plain_text", text: $header, emoji: true }
-                        },
-                        {
-                          type: "section",
-                          fields: [
-                            { type: "mrkdwn", text: ("*Released by:* `" + $actor + "`") }
-                          ]
-                        },
-                        {
-                          type: "section",
-                          text: { type: "mrkdwn", text: ("*Changes:*\n" + $changes) }
-                        },
-                        {
-                          type: "actions",
-                          elements: [
-                            { type: "button", text: { type: "plain_text", text: "🔗 View Release", emoji: true }, url: $release_url },
-                            { type: "button", text: { type: "plain_text", text: "📋 View Changes", emoji: true }, url: $compare_url },
-                            { type: "button", text: { type: "plain_text", text: "🔌 WordPress.org", emoji: true }, url: $wporg_url }
-                          ]
-                        }
+                        { type: "header", text: { type: "plain_text", text: $header, emoji: true } },
+                        { type: "section", fields: [
+                            { type: "mrkdwn", text: ("*Released by:* `" + $actor + "`") },
+                            { type: "mrkdwn", text: ("*Date:* " + $date) }
+                        ] },
+                        { type: "section", text: { type: "mrkdwn", text: ("*Changes:*\n" + $changes) } },
+                        { type: "actions", elements: [
+                            { type: "button", text: { type: "plain_text", text: "View Release", emoji: true }, url: $release_url },
+                            { type: "button", text: { type: "plain_text", text: "View Changes", emoji: true }, url: $compare_url },
+                            { type: "button", text: { type: "plain_text", text: "WordPress.org", emoji: true }, url: $wporg_url }
+                        ] }
                       ]
                     }' > /tmp/slack-payload.json
 
