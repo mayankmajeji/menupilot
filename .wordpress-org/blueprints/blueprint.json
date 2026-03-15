@@ -1,27 +1,24 @@
 {
-    "landingPage": "/wp-admin/admin.php?page=menupilot",
-    "preferredVersions": {
-        "php": "7.4",
-        "wp": "6.7"
-    },
-    "phpExtensionBundles": [
-        "kitchen-sink"
-    ],
-    "steps": [
-        {
-            "step": "login",
-            "username": "admin",
-            "password": "password"
-        },
-        {
-            "step": "installPlugin",
-            "pluginZipFile": {
-                "resource": "wordpress.org/plugins",
-                "slug": "menupilot"
-            },
-            "options": {
-                "activate": true
-            }
-        }
-    ]
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/wp-admin/admin.php?page=menupilot",
+	"login": true,
+	"features": {
+		"networking": true
+	},
+	"preferredVersions": {
+		"php": "latest",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "installPlugin",
+			"pluginZipFile": {
+				"resource": "wordpress.org/plugins",
+				"slug": "menupilot"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	]
 }
