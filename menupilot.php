@@ -3,7 +3,7 @@
  * Plugin Name: MenuPilot – Preview-First Menu Import & Export
  * Plugin URI: https://github.com/mayankmajeji/menupilot
  * Description: Safely import and export WordPress navigation menus with a preview-first workflow. Review and map menus before importing.
- * Version: 1.0.13
+ * Version: 1.0.16
  * Author: Mayank Majeji
  * Author URI:
  * Requires at least: 5.8
@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Plugin version.
-define( 'MENUPILOT_VERSION', '1.0.13' );
+define( 'MENUPILOT_VERSION', '1.0.16' );
 define( 'MENUPILOT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MENUPILOT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'MENUPILOT_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
