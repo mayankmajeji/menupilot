@@ -176,7 +176,7 @@ jobs:
                   if [ -z "$PREV_TAG" ]; then
                     RAW=$(git log --pretty=format:"%s|%h" -10)
                   else
-                    RAW=$(git log --pretty=format:"%s|%h" "${PREV_TAG}..${CURRENT_TAG}")
+                    RAW=$(git log --pretty=format:"%s|%h" "${PREV_TAG}..${CURRENT_TAG}" | head -10)
                   fi
                   CHANGES=""
                   while IFS='|' read -r msg sha; do
@@ -184,6 +184,9 @@ jobs:
                     CHANGES="${CHANGES}• ${msg} (<https://github.com/${REPO}/commit/${sha}|${sha}>)"$'\n'
                   done <<< "$RAW"
                   CHANGES="${CHANGES%$'\n'}"
+                  if [ ${#CHANGES} -gt 2500 ]; then
+                    CHANGES="${CHANGES:0:2500}…"
+                  fi
                   if [ "$DEPLOY_STATUS" = "success" ]; then
                     HEADER="MenuPilot ${CURRENT_TAG} — Deployed to WordPress.org"
                   elif [ "$DEPLOY_STATUS" = "skipped" ]; then
